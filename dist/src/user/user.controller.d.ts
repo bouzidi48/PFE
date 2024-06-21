@@ -1,11 +1,11 @@
 import { HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import { UserVerifyDto } from './dto/verify-user.dto';
 import { UserPasswordOublierDto } from './dto/password-oublier.dto';
 import { UserLoginDto } from './dto/user-login.dto';
+import { UpdatePasswordDto } from './dto/modifier-password.dto';
+import { UserNameUpdateDto } from './dto/update-username.dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -33,9 +33,16 @@ export declare class UserController {
         message: string;
         statusCode: HttpStatus;
     }>;
-    create(createUserDto: CreateUserDto): string;
-    findAll(): string;
-    findOne(id: string): string;
-    update(id: string, updateUserDto: UpdateUserDto): string;
-    remove(id: string): string;
+    updatePassword(updatePasswordDto: UpdatePasswordDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    modifierPassword(passDto: UpdatePasswordDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    updateUsername(updateUsername: UserNameUpdateDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
 }

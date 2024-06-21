@@ -1,19 +1,18 @@
 import { HttpStatus } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { CustomSessionService } from 'src/session/service/customSession.service';
 import { UserVerifyDto } from './dto/verify-user.dto';
 import { UserPasswordOublierDto } from './dto/password-oublier.dto';
 import { UserRepository } from './user.repository';
 import { UserLoginDto } from './dto/user-login.dto';
+import { UserSessionService } from './session/service/userSession.service';
+import { UpdatePasswordDto } from './dto/modifier-password.dto';
+import { UserNameUpdateDto } from './dto/update-username.dto';
 export declare class UserService {
     private userRepository;
     private readonly mailerService;
     private readonly session;
-    constructor(userRepository: UserRepository, mailerService: MailerService, session: CustomSessionService);
-    create(createUserDto: CreateUserDto): string;
+    constructor(userRepository: UserRepository, mailerService: MailerService, session: UserSessionService);
     signup(userSignUpDto: UserSignUpDto): Promise<{
         message: string;
         statusCode: HttpStatus;
@@ -23,10 +22,6 @@ export declare class UserService {
         statusCode: HttpStatus;
     }>;
     verfierCode(codeDto: UserVerifyDto): Promise<boolean>;
-    verifierPasswordOublier(codeDto: UserVerifyDto): Promise<{
-        message: string;
-        statusCode: HttpStatus;
-    }>;
     verfierInscription(codeDto: UserVerifyDto): Promise<{
         message: string;
         statusCode: HttpStatus;
@@ -43,8 +38,20 @@ export declare class UserService {
         message: string;
         statusCode: HttpStatus;
     }>;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateUserDto: UpdateUserDto): string;
-    remove(id: number): string;
+    verifierPasswordOublier(codeDto: UserVerifyDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    modifierPassword(passDto: UpdatePasswordDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    updatePassword(updateDto: UpdatePasswordDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    updateUsername(updateUsername: UserNameUpdateDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
 }

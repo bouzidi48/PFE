@@ -15,12 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
-const create_user_dto_1 = require("./dto/create-user.dto");
-const update_user_dto_1 = require("./dto/update-user.dto");
 const user_signup_dto_1 = require("./dto/user-signup.dto");
 const verify_user_dto_1 = require("./dto/verify-user.dto");
 const password_oublier_dto_1 = require("./dto/password-oublier.dto");
 const user_login_dto_1 = require("./dto/user-login.dto");
+const modifier_password_dto_1 = require("./dto/modifier-password.dto");
+const update_username_dto_1 = require("./dto/update-username.dto");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -43,20 +43,14 @@ let UserController = class UserController {
     async verfierPasswordOublier(code) {
         return await this.userService.verifierPasswordOublier(code);
     }
-    create(createUserDto) {
-        return this.userService.create(createUserDto);
+    async updatePassword(updatePasswordDto) {
+        return await this.userService.updatePassword(updatePasswordDto);
     }
-    findAll() {
-        return this.userService.findAll();
+    async modifierPassword(passDto) {
+        return await this.userService.modifierPassword(passDto);
     }
-    findOne(id) {
-        return this.userService.findOne(+id);
-    }
-    update(id, updateUserDto) {
-        return this.userService.update(+id, updateUserDto);
-    }
-    remove(id) {
-        return this.userService.remove(+id);
+    async updateUsername(updateUsername) {
+        return await this.userService.updateUsername(updateUsername);
     }
 };
 exports.UserController = UserController;
@@ -102,40 +96,26 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "verfierPasswordOublier", null);
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Put)('updatePassword'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "create", null);
+    __metadata("design:paramtypes", [modifier_password_dto_1.UpdatePasswordDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updatePassword", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Put)('modifierPassword'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "findAll", null);
+    __metadata("design:paramtypes", [modifier_password_dto_1.UpdatePasswordDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "modifierPassword", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Put)('updateUsername'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "remove", null);
+    __metadata("design:paramtypes", [update_username_dto_1.UserNameUpdateDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateUsername", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

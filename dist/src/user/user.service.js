@@ -18,16 +18,13 @@ const user_entity_1 = require("./entities/user.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const mailer_1 = require("@nestjs-modules/mailer");
 const randomstring_1 = require("randomstring");
-const customSession_service_1 = require("../session/service/customSession.service");
 const user_repository_1 = require("./user.repository");
+const userSession_service_1 = require("./session/service/userSession.service");
 let UserService = class UserService {
     constructor(userRepository, mailerService, session) {
         this.userRepository = userRepository;
         this.mailerService = mailerService;
         this.session = session;
-    }
-    create(createUserDto) {
-        return 'This action adds a new user';
     }
     async signup(userSignUpDto) {
         const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
@@ -71,19 +68,6 @@ let UserService = class UserService {
             return await true;
         }
         return await false;
-    }
-    async verifierPasswordOublier(codeDto) {
-        if (this.verfierCode(codeDto)) {
-            this.session.session.delete('code');
-            return await {
-                message: 'Vous pouvez changer le mot de passe',
-                statusCode: common_1.HttpStatus.OK,
-            };
-        }
-        return await {
-            message: 'code incorrect',
-            statusCode: common_1.HttpStatus.BAD_REQUEST,
-        };
     }
     async verfierInscription(codeDto) {
         if (this.verfierCode(codeDto)) {
@@ -144,17 +128,70 @@ let UserService = class UserService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    findAll() {
-        return `This action returns all user`;
+    async verifierPasswordOublier(codeDto) {
+        if (this.verfierCode(codeDto)) {
+            this.session.session.delete('code');
+            return await {
+                message: 'Vous pouvez changer le mot de passe',
+                statusCode: common_1.HttpStatus.OK,
+            };
+        }
+        return await {
+            message: 'code incorrect',
+            statusCode: common_1.HttpStatus.BAD_REQUEST,
+        };
     }
-    findOne(id) {
-        return `This action returns a #${id} user`;
+    async modifierPassword(passDto) {
+        const confirmpassword = passDto.confirmpassword;
+        const password = passDto.password;
+        const user = this.session.session.get('user');
+        if (confirmpassword == password) {
+            user.password = password;
+            this.userRepository.save(user);
+            this.session.session.delete('user');
+            return await {
+                message: 'Vous pouvez changer le mot de passe',
+                statusCode: common_1.HttpStatus.OK,
+            };
+        }
+        return await {
+            message: 'Password != ConfirmPassword',
+            statusCode: common_1.HttpStatus.BAD_REQUEST,
+        };
     }
-    update(id, updateUserDto) {
-        return `This action updates a #${id} user`;
+    async updatePassword(updateDto) {
+        const confirmpassword = updateDto.confirmpassword;
+        const password = updateDto.password;
+        const id = this.session.session.get('idUser');
+        if (confirmpassword == password) {
+            const user = await this.userRepository.findOne({ where: { id: id } });
+            user.password = password;
+            this.userRepository.save(user);
+            this.session.session.delete('user');
+            return await {
+                message: 'le mot de passe modifier avec succés',
+                statusCode: common_1.HttpStatus.OK,
+            };
+        }
+        return await {
+            message: 'Password != ConfirmPassword',
+            statusCode: common_1.HttpStatus.BAD_REQUEST,
+        };
     }
-    remove(id) {
-        return `This action removes a #${id} user`;
+    async updateUsername(updateUsername) {
+        const user = await this.userRepository.findOne({ where: { username: updateUsername.username } });
+        if (!user) {
+            user.username = updateUsername.username;
+            this.userRepository.save(user);
+            return await {
+                message: 'Username modifier avec succés',
+                statusCode: common_1.HttpStatus.OK,
+            };
+        }
+        return await {
+            message: 'Username deja existe',
+            statusCode: common_1.HttpStatus.BAD_REQUEST,
+        };
     }
 };
 exports.UserService = UserService;
@@ -163,6 +200,6 @@ exports.UserService = UserService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [user_repository_1.UserRepository,
         mailer_1.MailerService,
-        customSession_service_1.CustomSessionService])
+        userSession_service_1.UserSessionService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

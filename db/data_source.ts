@@ -1,7 +1,7 @@
 import {DataSource,DataSourceOptions} from 'typeorm'
 import {config} from 'dotenv' 
 import { User } from 'src/user/entities/user.entity';
-import { Product } from 'src/product/entities/product.entity';
+
 config()
 export const dataSourceOptions:DataSourceOptions={
     type:'mysql',
@@ -10,7 +10,7 @@ export const dataSourceOptions:DataSourceOptions={
     username:process.env.DB_USERNAME,
     password:process.env.DB_PASSWORD,
     database:process.env.DB_DATABASE,
-    entities:[User,Product],
+    entities:[User],
     synchronize:true
 
 }

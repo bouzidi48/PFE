@@ -15,6 +15,7 @@ class UserVerifyDto {
 }
 exports.UserVerifyDto = UserVerifyDto;
 __decorate([
+    (0, class_validator_1.IsNotEmpty)({ message: 'code is Empty' }),
     (0, class_validator_1.IsString)({ message: 'code must be a string' }),
     __metadata("design:type", String)
 ], UserVerifyDto.prototype, "code", void 0);

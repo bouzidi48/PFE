@@ -14,7 +14,10 @@ const typeorm_1 = require("@nestjs/typeorm");
 const data_source_1 = require("../db/data_source");
 const user_module_1 = require("./user/user.module");
 const mailer_1 = require("@nestjs-modules/mailer");
-const customSession_service_1 = require("./session/service/customSession.service");
+const userSession_service_1 = require("./user/session/service/userSession.service");
+const categories_module_1 = require("./categories/categories.module");
+const card_module_1 = require("./card/card.module");
+const review_module_1 = require("./review/review.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,9 +37,12 @@ exports.AppModule = AppModule = __decorate([
                     },
                 },
             }),
+            categories_module_1.CategoriesModule,
+            card_module_1.CardModule,
+            review_module_1.ReviewModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService, customSession_service_1.CustomSessionService],
+        providers: [app_service_1.AppService, userSession_service_1.UserSessionService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

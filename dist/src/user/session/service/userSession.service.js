@@ -9,9 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CustomSessionService = void 0;
+exports.UserSessionService = void 0;
 const common_1 = require("@nestjs/common");
-let CustomSessionService = class CustomSessionService {
+let UserSessionService = class UserSessionService {
     constructor() {
         this.session = new Map();
         this.id = 'someUniqueId';
@@ -91,9 +91,9 @@ let CustomSessionService = class CustomSessionService {
         return this;
     }
 };
-exports.CustomSessionService = CustomSessionService;
-exports.CustomSessionService = CustomSessionService = __decorate([
+exports.UserSessionService = UserSessionService;
+exports.UserSessionService = UserSessionService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], CustomSessionService);
-//# sourceMappingURL=customSession.service.js.map
+], UserSessionService);
+//# sourceMappingURL=userSession.service.js.map

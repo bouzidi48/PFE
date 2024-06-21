@@ -1,6 +1,6 @@
 import { Cookie } from "express-session";
-import { CustomSession } from "src/session/interface/customSession.interface";
-export declare class CustomSessionService implements CustomSession {
+import { UserSession } from "../interface/userSession.interface";
+export declare class UserSessionService implements UserSession {
     session?: Map<string, any>;
     id: string;
     cookie: Cookie;
