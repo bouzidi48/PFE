@@ -11,6 +11,7 @@ import { ProductModule } from './product/product.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
 import { PaymentModule } from './payment/payment.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
