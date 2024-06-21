@@ -11,6 +11,7 @@ import { ProductModule } from './product/product.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
 import { PaymentModule } from './payment/payment.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PaymentModule } from './payment/payment.module';
     CategoriesModule,
     CardModule,
     PaymentModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService,UserSessionService],
