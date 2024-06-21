@@ -10,7 +10,6 @@ import { UserSessionService } from './user/session/service/userSession.service';
 import { ProductModule } from './product/product.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
-import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -30,7 +29,6 @@ import { PaymentModule } from './payment/payment.module';
     ProductModule,
     CategoriesModule,
     CardModule,
-    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService,UserSessionService],
