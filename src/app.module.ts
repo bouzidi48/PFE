@@ -10,6 +10,7 @@ import { UserSessionService } from './user/session/service/userSession.service';
 import { ProductModule } from './product/product.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CardModule } from './card/card.module';
     ProductModule,
     CategoriesModule,
     CardModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService,UserSessionService],
