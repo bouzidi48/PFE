@@ -7,7 +7,7 @@ import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import {config} from 'dotenv'
 import { UserSessionService } from './user/session/service/userSession.service';
-import { ProductModule } from './product/product.module';
+
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
 
@@ -28,7 +28,7 @@ import { ReviewModule } from './review/review.module';
         },
       },
     }),
-    ProductModule,
+    
     CategoriesModule,
     CardModule,
    
