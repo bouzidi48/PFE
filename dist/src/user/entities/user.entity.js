@@ -36,6 +36,10 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "createdate", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Date)
+], User.prototype, "updatedate", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: user_enum_1.Roles,

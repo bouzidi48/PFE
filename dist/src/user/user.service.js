@@ -181,8 +181,10 @@ let UserService = class UserService {
     async updateUsername(updateUsername) {
         const user = await this.userRepository.findOne({ where: { username: updateUsername.username } });
         if (!user) {
-            user.username = updateUsername.username;
-            this.userRepository.save(user);
+            const currentUser = await this.userRepository.findOne({ where: { id: this.session.session.get('idUser') } });
+            currentUser.username = updateUsername.username;
+            currentUser.updatedate = new Date();
+            this.userRepository.save(currentUser);
             return await {
                 message: 'Username modifier avec succés',
                 statusCode: common_1.HttpStatus.OK,

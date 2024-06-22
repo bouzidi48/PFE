@@ -1,5 +1,5 @@
 {
-  "name": "ecommerce",
+  "name": "PFE",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -18,11 +18,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "npm run build && npx typeorm -d dist/db/data-source.js",
-    "migration:generate": "npm run typeorm -- migration:generate",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration-revert": "npm run typeorm -- migration:revert",
-    "db:drop": "npm run typeorm -- schema:drop"
+    "typeorm":"npm run build && npx typeorm -d dist/db/data-source.js",
+    "migration:generate":"npm run typeorm -- migration:generate",
+    "migration:run":"npm run typeorm -- migration:run",
+    "migration-revert":"npm run typeorm -- migration:revert",
+    "db:drop":"npm run typeorm  schema:drop"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
