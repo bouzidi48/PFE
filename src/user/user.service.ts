@@ -196,15 +196,9 @@ export class UserService {
   }
   
 
-<<<<<<< HEAD
-    if(!user) {
-      user.username = updateUsername.username
-      
-      this.userRepository.save(user);
-=======
-async updateUsername(updateUsername:UserNameUpdateDto) {
+
+  async updateUsername(updateUsername:UserNameUpdateDto) {
       const user = await this.userRepository.findOne({ where : { username : updateUsername.username}});
-    
       if(!user) {
         const currentUser = await this.userRepository.findOne({ where : { id : this.session.session.get('idUser')}});
         currentUser.username = updateUsername.username;
@@ -215,7 +209,6 @@ async updateUsername(updateUsername:UserNameUpdateDto) {
           statusCode: HttpStatus.OK,
         };
       }
->>>>>>> 0e18ab38f528246ab87a5d08edc01351ac8f8488
       return await {
         message: 'Username deja existe',
         statusCode: HttpStatus.BAD_REQUEST,
