@@ -19,6 +19,9 @@ export class User {
     @Column()
     createdate: Date;
 
+    @Column()
+    updatedate: Date;
+
     @Column({
         type: 'enum',
         enum: Roles,

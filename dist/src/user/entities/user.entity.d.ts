@@ -5,5 +5,6 @@ export declare class User {
     password: string;
     email: string;
     createdate: Date;
+    updatedate: Date;
     role: Roles;
 }
