@@ -199,6 +199,7 @@ export class UserService {
 
     if(!user) {
       user.username = updateUsername.username
+      
       this.userRepository.save(user);
       return await {
         message: 'Username modifier avec succés',
