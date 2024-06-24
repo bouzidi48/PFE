@@ -21,9 +21,10 @@ let CategoriesService = class CategoriesService {
     constructor(categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
-    async create(createCategoryDto) {
+    async create(createCategoryDto, currentUser) {
         const category = await this.categoryRepository.create(createCategoryDto);
-        return 'This action adds a new category';
+        category.addedBy = currentUser;
+        return await this.categoryRepository.save(category);
     }
     findAll() {
         return `This action returns all categories`;

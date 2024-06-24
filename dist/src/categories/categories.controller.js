@@ -27,7 +27,7 @@ let CategoriesController = class CategoriesController {
         this.categoriesService = categoriesService;
     }
     async create(createCategoryDto, currentUser) {
-        return await this.categoriesService.create(createCategoryDto);
+        return await this.categoriesService.create(createCategoryDto, currentUser);
     }
     findAll() {
         return this.categoriesService.findAll();

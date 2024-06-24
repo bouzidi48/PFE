@@ -10,9 +10,10 @@ import { User } from 'src/user/entities/user.entity';
 export class CategoriesService {
   constructor(@InjectRepository(CategoryEntity)private readonly categoryRepository:Repository<CategoryEntity>){}
   
-   async create(createCategoryDto: CreateCategoryDto) {
+   async create(createCategoryDto: CreateCategoryDto,currentUser:User):Promise<CategoryEntity>{
     const category=await this.categoryRepository.create(createCategoryDto);
-    return 'This action adds a new category';
+    category.addedBy=currentUser;
+    return await this.categoryRepository.save(category);
   }
 
   findAll() {

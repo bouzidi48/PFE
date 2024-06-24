@@ -7,14 +7,17 @@ import { Roles } from 'src/enum/user_enum';
 import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
 import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
+import { CategoryEntity } from './entities/category.entity';
+import { Repository } from 'typeorm';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
  @UseGuards(AuthenticationGuard,AuthorizeGuard([Roles.ADMIN]))
   @Post()
- async create(@Body() createCategoryDto: CreateCategoryDto ,@CurrentUser() currentUser:User) {
-    return  await this.categoriesService.create(createCategoryDto);
+ async create(@Body() createCategoryDto: CreateCategoryDto ,@CurrentUser() currentUser:User):Promise<CategoryEntity> {
+    return  await this.categoriesService.create(createCategoryDto,currentUser);
+    //categoryRespository:Repository<CategoryEntity>{}
   }
 
   @Get()
