@@ -15,39 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
-const user_signup_dto_1 = require("./dto/user-signup.dto");
-const verify_user_dto_1 = require("./dto/verify-user.dto");
-const password_oublier_dto_1 = require("./dto/password-oublier.dto");
-const user_login_dto_1 = require("./dto/user-login.dto");
 const modifier_password_dto_1 = require("./dto/modifier-password.dto");
 const update_username_dto_1 = require("./dto/update-username.dto");
+const ancien_password_dto_1 = require("./dto/ancien-password.dto");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async signup(signupUserDto) {
-        return await this.userService.signup(signupUserDto);
-    }
-    async verfierInscription(code) {
-        return await this.userService.verfierInscription(code);
-    }
-    async login(userLoginDto) {
-        return await this.userService.login(userLoginDto);
-    }
-    async logout() {
-        return await this.userService.logout();
-    }
-    async forgotPassword(userPasswordOublierDto) {
-        return await this.userService.forgotPassword(userPasswordOublierDto);
-    }
-    async verfierPasswordOublier(code) {
-        return await this.userService.verifierPasswordOublier(code);
+    async ancienPassword(password) {
+        return await this.userService.ancienPassword(password);
     }
     async updatePassword(updatePasswordDto) {
         return await this.userService.updatePassword(updatePasswordDto);
-    }
-    async modifierPassword(passDto) {
-        return await this.userService.modifierPassword(passDto);
     }
     async updateUsername(updateUsername) {
         return await this.userService.updateUsername(updateUsername);
@@ -58,46 +37,12 @@ let UserController = class UserController {
 };
 exports.UserController = UserController;
 __decorate([
-    (0, common_1.Post)('signup'),
+    (0, common_1.Post)('ancienPassword'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_signup_dto_1.UserSignUpDto]),
+    __metadata("design:paramtypes", [ancien_password_dto_1.AncienPasswordDto]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "signup", null);
-__decorate([
-    (0, common_1.Post)('verifierInscription'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [verify_user_dto_1.UserVerifyDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "verfierInscription", null);
-__decorate([
-    (0, common_1.Post)('login'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_login_dto_1.UserLoginDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "login", null);
-__decorate([
-    (0, common_1.Post)('logout'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "logout", null);
-__decorate([
-    (0, common_1.Post)('forgotPassword'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [password_oublier_dto_1.UserPasswordOublierDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "forgotPassword", null);
-__decorate([
-    (0, common_1.Post)('verifierPasswordOublier'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [verify_user_dto_1.UserVerifyDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "verfierPasswordOublier", null);
+], UserController.prototype, "ancienPassword", null);
 __decorate([
     (0, common_1.Put)('updatePassword'),
     __param(0, (0, common_1.Body)()),
@@ -105,13 +50,6 @@ __decorate([
     __metadata("design:paramtypes", [modifier_password_dto_1.UpdatePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updatePassword", null);
-__decorate([
-    (0, common_1.Put)('modifierPassword'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [modifier_password_dto_1.UpdatePasswordDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "modifierPassword", null);
 __decorate([
     (0, common_1.Put)('updateUsername'),
     __param(0, (0, common_1.Body)()),

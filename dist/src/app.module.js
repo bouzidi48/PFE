@@ -18,6 +18,8 @@ const userSession_service_1 = require("./user/session/service/userSession.servic
 const categories_module_1 = require("./categories/categories.module");
 const card_module_1 = require("./card/card.module");
 const review_module_1 = require("./review/review.module");
+const inscription_module_1 = require("./inscription/inscription.module");
+const authentification_module_1 = require("./authentification/authentification.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,6 +42,8 @@ exports.AppModule = AppModule = __decorate([
             categories_module_1.CategoriesModule,
             card_module_1.CardModule,
             review_module_1.ReviewModule,
+            inscription_module_1.InscriptionModule,
+            authentification_module_1.AuthentificationModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, userSession_service_1.UserSessionService],

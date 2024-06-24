@@ -16,151 +16,27 @@ exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
 const user_entity_1 = require("./entities/user.entity");
 const typeorm_1 = require("@nestjs/typeorm");
-const mailer_1 = require("@nestjs-modules/mailer");
-const randomstring_1 = require("randomstring");
 const user_repository_1 = require("./user.repository");
 const userSession_service_1 = require("./session/service/userSession.service");
 const bcrypt = require("bcrypt");
 let UserService = class UserService {
-    constructor(userRepository, mailerService, session) {
+    constructor(userRepository, session) {
         this.userRepository = userRepository;
-        this.mailerService = mailerService;
         this.session = session;
     }
-    async signup(userSignUpDto) {
-        const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
-        const existingUser = await this.userRepository.findOne({ where: { username: userSignUpDto.username } });
-        if (existingEmail || existingUser) {
+    async ancienPassword(password) {
+        const id = this.session.session.get('idUser');
+        const user = await this.userRepository.findOne({ where: { id: id } });
+        const validPassword = await bcrypt.compare(password.password, user.password);
+        if (!validPassword) {
             return await {
-                message: 'Email ou username déjà existe',
+                message: 'ancien mot de passe incorrect',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(userSignUpDto.password, saltRounds);
-        const userWithHashedPassword = { ...userSignUpDto, password: hashedPassword };
-        const codeConfirmation = await (0, randomstring_1.generate)({
-            length: 6,
-            charset: 'numeric',
-        });
-        console.log(typeof (codeConfirmation));
-        console.log(userSignUpDto);
-        console.log(typeof (userSignUpDto));
-        this.session.session.set('code', codeConfirmation);
-        this.session.session.set('user', userWithHashedPassword);
-        console.log(this.session.session.get('code'), codeConfirmation);
-        console.log(this.session.session.get('user'));
-        return await this.sendEmail(codeConfirmation, userSignUpDto.email);
-    }
-    async sendEmail(code, email) {
-        await this.mailerService.sendMail({
-            to: email,
-            from: process.env.EMAIL_HOST_USER,
-            subject: 'code de confirmation',
-            text: 'le code de confirmation est ' + code,
-        });
         return await {
-            message: 'le code est envoyer avec succes',
+            message: 'ancien mot de passe correct',
             statusCode: common_1.HttpStatus.OK,
-        };
-    }
-    async verfierCode(codeDto) {
-        console.log(codeDto);
-        console.log(this.session.session.get('code'));
-        console.log(this.session.session.get('code'), codeDto.code);
-        if (this.session.session.get('code') === codeDto.code) {
-            return await true;
-        }
-        return await false;
-    }
-    async verfierInscription(codeDto) {
-        if (this.verfierCode(codeDto)) {
-            const userSignUpDto = this.session.session.get('user');
-            console.log(userSignUpDto);
-            const user = this.userRepository.create({ ...userSignUpDto, createdate: new Date() });
-            this.userRepository.save(user);
-            this.session.session.delete('code');
-            this.session.session.delete('user');
-            return await {
-                message: 'Bienvenue dans notre application',
-                statusCode: common_1.HttpStatus.OK,
-            };
-        }
-        return await {
-            message: 'code incorrect',
-            statusCode: common_1.HttpStatus.BAD_REQUEST,
-        };
-    }
-    async login(userLoginDto) {
-        const user = await this.userRepository.findOne({ where: { username: userLoginDto.username, password: userLoginDto.password } });
-        if (!user) {
-            return await {
-                message: 'username ou password incorrect',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
-        this.session.session.set('idUser', user.id);
-        return await {
-            message: 'Bienvenue dans notre application',
-            statusCode: common_1.HttpStatus.OK,
-        };
-    }
-    async logout() {
-        this.session.session.delete('idUser');
-        return await {
-            message: 'Vous avez bien été deconnecté',
-            statusCode: common_1.HttpStatus.OK,
-        };
-    }
-    async forgotPassword(userPasswordOublierDto) {
-        const user = await this.userRepository.findOne({ where: { email: userPasswordOublierDto.email } });
-        if (!user) {
-            return await {
-                message: 'Email introuvable',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
-        const codeConfirmation = await (0, randomstring_1.generate)({
-            length: 6,
-            charset: 'numeric',
-        });
-        this.session.session.set('code', codeConfirmation);
-        this.session.session.set('user', user);
-        await this.sendEmail(codeConfirmation, user.email);
-        return await {
-            message: 'le code est envoyer avec succes',
-            statusCode: common_1.HttpStatus.OK,
-        };
-    }
-    async verifierPasswordOublier(codeDto) {
-        if (this.verfierCode(codeDto)) {
-            this.session.session.delete('code');
-            return await {
-                message: 'Vous pouvez changer le mot de passe',
-                statusCode: common_1.HttpStatus.OK,
-            };
-        }
-        return await {
-            message: 'code incorrect',
-            statusCode: common_1.HttpStatus.BAD_REQUEST,
-        };
-    }
-    async modifierPassword(passDto) {
-        const confirmpassword = passDto.confirmpassword;
-        const password = passDto.password;
-        const user = this.session.session.get('user');
-        if (confirmpassword == password) {
-            user.password = password;
-            this.userRepository.save(user);
-            this.session.session.delete('user');
-            return await {
-                message: 'Vous pouvez changer le mot de passe',
-                statusCode: common_1.HttpStatus.OK,
-            };
-        }
-        return await {
-            message: 'Password != ConfirmPassword',
-            statusCode: common_1.HttpStatus.BAD_REQUEST,
         };
     }
     async updatePassword(updateDto) {
@@ -169,11 +45,15 @@ let UserService = class UserService {
         const id = this.session.session.get('idUser');
         if (confirmpassword == password) {
             const user = await this.userRepository.findOne({ where: { id: id } });
-            user.password = password;
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(updateDto.password, saltRounds);
+            user.password = hashedPassword;
+            user.updatedate = new Date();
             this.userRepository.save(user);
-            this.session.session.delete('user');
+            this.session.session.delete('idUser');
+            console.log(this.session.session.get('idUser'));
             return await {
-                message: 'le mot de passe modifier avec succés',
+                message: 'le mot de passe modifier avec succés,vous devez vous connecter avec votre nouveau mot de passe',
                 statusCode: common_1.HttpStatus.OK,
             };
         }
@@ -184,18 +64,30 @@ let UserService = class UserService {
     }
     async updateUsername(updateUsername) {
         const user = await this.userRepository.findOne({ where: { username: updateUsername.username } });
+        console.log(user);
+        console.log(this.session.session);
+        console.log(this.session.session.get('idUser'));
         if (!user) {
+            const id = await this.session.session.get('idUser');
+            if (!id) {
+                return await {
+                    message: 'user not found',
+                    statusCode: common_1.HttpStatus.BAD_REQUEST,
+                };
+            }
             const currentUser = await this.userRepository.findOne({ where: { id: this.session.session.get('idUser') } });
             currentUser.username = updateUsername.username;
             currentUser.updatedate = new Date();
+            console.log(currentUser);
             this.userRepository.save(currentUser);
+            this.session.session.delete('idUser');
             return await {
-                message: 'Username modifier avec succés',
+                message: 'Username modifier avec succés,vous devez vous connecter avec votre nouveau username',
                 statusCode: common_1.HttpStatus.OK,
             };
         }
         return await {
-            message: 'Username deja existe',
+            message: 'user deja existe',
             statusCode: common_1.HttpStatus.BAD_REQUEST,
         };
     }
@@ -211,7 +103,6 @@ exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [user_repository_1.UserRepository,
-        mailer_1.MailerService,
         userSession_service_1.UserSessionService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map
