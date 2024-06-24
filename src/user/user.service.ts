@@ -48,6 +48,7 @@ export class UserService {
       const user = await this.userRepository.findOne({ where: { id: id } });
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(updateDto.password, saltRounds);
+      console.log(typeof(user))
       user.password = hashedPassword;
       user.updatedate=new Date();
       this.userRepository.save(user);

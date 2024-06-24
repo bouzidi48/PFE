@@ -48,6 +48,7 @@ export class AuthentificationService {
  
   async login(userLoginDto: UserLoginDto) {
     const user = await this.userRepository.findOne({ where: { username: userLoginDto.username } });
+    console.log(typeof(user))
     if (!user) {
       return await {
         message: 'username incorrect',
