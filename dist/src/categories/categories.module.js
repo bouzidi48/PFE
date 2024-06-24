@@ -12,14 +12,19 @@ const categories_service_1 = require("./categories.service");
 const categories_controller_1 = require("./categories.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
+const category_repository_1 = require("./category.repository");
+const userSession_service_1 = require("../user/session/service/userSession.service");
+const user_entity_1 = require("../user/entities/user.entity");
+const user_repository_1 = require("../user/user.repository");
 let CategoriesModule = class CategoriesModule {
 };
 exports.CategoriesModule = CategoriesModule;
 exports.CategoriesModule = CategoriesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([category_entity_1.CategoryEntity])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_repository_1.UserRepository, category_entity_1.CategoryEntity, category_repository_1.CategoryRepository])],
         controllers: [categories_controller_1.CategoriesController],
-        providers: [categories_service_1.CategoriesService],
+        providers: [categories_service_1.CategoriesService, userSession_service_1.UserSessionService],
+        exports: [userSession_service_1.UserSessionService]
     })
 ], CategoriesModule);
 //# sourceMappingURL=categories.module.js.map
