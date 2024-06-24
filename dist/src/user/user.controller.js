@@ -52,6 +52,9 @@ let UserController = class UserController {
     async updateUsername(updateUsername) {
         return await this.userService.updateUsername(updateUsername);
     }
+    async findOne(id) {
+        return await this.userService.findOne(+id);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -116,6 +119,13 @@ __decorate([
     __metadata("design:paramtypes", [update_username_dto_1.UserNameUpdateDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUsername", null);
+__decorate([
+    (0, common_1.Get)('single/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "findOne", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

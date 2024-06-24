@@ -17,12 +17,17 @@ const common_1 = require("@nestjs/common");
 const categories_service_1 = require("./categories.service");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const update_category_dto_1 = require("./dto/update-category.dto");
+const user_entity_1 = require("../user/entities/user.entity");
+const user_enum_1 = require("../enum/user_enum");
+const authentication_guard_1 = require("../utility/guards/authentication.guard");
+const authorization_guard_1 = require("../utility/guards/authorization.guard");
+const current_user_decorator_1 = require("../utility/decorators/current-user.decorator");
 let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
     }
-    create(createCategoryDto) {
-        return this.categoriesService.create(createCategoryDto);
+    async create(createCategoryDto, currentUser) {
+        return await this.categoriesService.create(createCategoryDto);
     }
     findAll() {
         return this.categoriesService.findAll();
@@ -39,11 +44,13 @@ let CategoriesController = class CategoriesController {
 };
 exports.CategoriesController = CategoriesController;
 __decorate([
+    (0, common_1.UseGuards)(authentication_guard_1.AuthenticationGuard, (0, authorization_guard_1.AuthorizeGuard)([user_enum_1.Roles.ADMIN])),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto, user_entity_1.User]),
+    __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),

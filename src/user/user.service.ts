@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -15,7 +15,7 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UserSessionService } from './session/service/userSession.service';
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
-
+import * as bcrypt from 'bcrypt';
 
 
 @Injectable()
@@ -26,7 +26,7 @@ export class UserService {
     private readonly session: UserSessionService
   ) {}
 
-  async signup(userSignUpDto: UserSignUpDto) {
+ /*  async signup(userSignUpDto: UserSignUpDto) {
     const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
     const existingUser = await this.userRepository.findOne({ where: { username: userSignUpDto.username } });
     if (existingEmail || existingUser) {
@@ -50,6 +50,39 @@ export class UserService {
     return await this.sendEmail(codeConfirmation, userSignUpDto.email);
   }
   
+ */
+  async signup(userSignUpDto: UserSignUpDto) {
+    const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
+    const existingUser = await this.userRepository.findOne({ where: { username: userSignUpDto.username } });
+    if (existingEmail || existingUser) {
+      return await {
+        message: 'Email ou username déjà existe',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+    
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(userSignUpDto.password, saltRounds);
+    
+    // Replace the plain password with the hashed password
+    const userWithHashedPassword = { ...userSignUpDto, password: hashedPassword };
+  
+    const codeConfirmation = await generate({
+      length: 6,
+      charset: 'numeric',
+    });
+    console.log(typeof(codeConfirmation));
+    console.log(userSignUpDto);
+    console.log(typeof(userSignUpDto));
+    
+    this.session.session.set('code', codeConfirmation); // Utilisez req.session.code pour stocker le code de confirmation
+    this.session.session.set('user', userWithHashedPassword); // Utilisez req.session.user pour stocker les données de l'utilisateur
+    console.log(this.session.session.get('code'), codeConfirmation);
+    console.log(this.session.session.get('user'));
+    
+    return await this.sendEmail(codeConfirmation, userSignUpDto.email);
+  }
 
   async sendEmail(code:string,email:string) {
     await this.mailerService.sendMail({
@@ -216,5 +249,9 @@ export class UserService {
     }
   
 
-  
+    async findOne(id: number):Promise<User> {
+      const user=await this.userRepository.findOneBy({id});
+      if(!user) throw new NotFoundException('user not found ')
+      return user;
+    }
 }

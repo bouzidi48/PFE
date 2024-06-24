@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { User } from './entities/user.entity';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UserVerifyDto } from './dto/verify-user.dto';
@@ -54,4 +55,5 @@ export declare class UserService {
         message: string;
         statusCode: HttpStatus;
     }>;
+    findOne(id: number): Promise<User>;
 }

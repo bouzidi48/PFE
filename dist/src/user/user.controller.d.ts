@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserSignUpDto } from './dto/user-signup.dto';
+import { User } from './entities/user.entity';
 import { UserVerifyDto } from './dto/verify-user.dto';
 import { UserPasswordOublierDto } from './dto/password-oublier.dto';
 import { UserLoginDto } from './dto/user-login.dto';
@@ -45,4 +46,5 @@ export declare class UserController {
         message: string;
         statusCode: HttpStatus;
     }>;
+    findOne(id: string): Promise<User>;
 }

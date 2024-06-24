@@ -20,6 +20,7 @@ const mailer_1 = require("@nestjs-modules/mailer");
 const randomstring_1 = require("randomstring");
 const user_repository_1 = require("./user.repository");
 const userSession_service_1 = require("./session/service/userSession.service");
+const bcrypt = require("bcrypt");
 let UserService = class UserService {
     constructor(userRepository, mailerService, session) {
         this.userRepository = userRepository;
@@ -35,6 +36,9 @@ let UserService = class UserService {
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(userSignUpDto.password, saltRounds);
+        const userWithHashedPassword = { ...userSignUpDto, password: hashedPassword };
         const codeConfirmation = await (0, randomstring_1.generate)({
             length: 6,
             charset: 'numeric',
@@ -43,7 +47,7 @@ let UserService = class UserService {
         console.log(userSignUpDto);
         console.log(typeof (userSignUpDto));
         this.session.session.set('code', codeConfirmation);
-        this.session.session.set('user', userSignUpDto);
+        this.session.session.set('user', userWithHashedPassword);
         console.log(this.session.session.get('code'), codeConfirmation);
         console.log(this.session.session.get('user'));
         return await this.sendEmail(codeConfirmation, userSignUpDto.email);
@@ -194,6 +198,12 @@ let UserService = class UserService {
             message: 'Username deja existe',
             statusCode: common_1.HttpStatus.BAD_REQUEST,
         };
+    }
+    async findOne(id) {
+        const user = await this.userRepository.findOneBy({ id });
+        if (!user)
+            throw new common_1.NotFoundException('user not found ');
+        return user;
     }
 };
 exports.UserService = UserService;

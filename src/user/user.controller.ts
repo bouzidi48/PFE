@@ -57,5 +57,10 @@ export class UserController {
     return await this.userService.updateUsername(updateUsername)
   }
 
+  @Get('single/:id')
+  async findOne(@Param('id') id: string) :Promise<User> {
+    return  await this.userService.findOne(+id);
+  }
+
   
 }

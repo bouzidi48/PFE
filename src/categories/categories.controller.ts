@@ -1,15 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { User } from 'src/user/entities/user.entity';
+import { Roles } from 'src/enum/user_enum';
+import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
+import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
+import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
-
+ @UseGuards(AuthenticationGuard,AuthorizeGuard([Roles.ADMIN]))
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+ async create(@Body() createCategoryDto: CreateCategoryDto ,@CurrentUser() currentUser:User) {
+    return  await this.categoriesService.create(createCategoryDto);
   }
 
   @Get()
@@ -32,3 +37,8 @@ export class CategoriesController {
     return this.categoriesService.remove(+id);
   }
 }
+
+
+
+
+

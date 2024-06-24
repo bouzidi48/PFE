@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
+const category_entity_1 = require("../../categories/entities/category.entity");
 const user_enum_1 = require("../../enum/user_enum");
 const typeorm_1 = require("typeorm");
 let User = class User {
@@ -47,6 +48,10 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => category_entity_1.CategoryEntity, (cat) => cat.addedBy),
+    __metadata("design:type", Array)
+], User.prototype, "categories", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

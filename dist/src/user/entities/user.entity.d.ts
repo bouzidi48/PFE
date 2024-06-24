@@ -1,3 +1,4 @@
+import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/enum/user_enum";
 export declare class User {
     id: number;
@@ -7,4 +8,5 @@ export declare class User {
     createdate: Date;
     updatedate: Date;
     role: Roles;
+    categories: CategoryEntity[];
 }
