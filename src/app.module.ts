@@ -12,6 +12,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';
 
 import { ReviewModule } from './review/review.module';
+import { InscriptionModule } from './inscription/inscription.module';
+import { AuthentificationModule } from './authentification/authentification.module';
 
 @Module({
   imports: [
@@ -33,6 +35,10 @@ import { ReviewModule } from './review/review.module';
     CardModule,
    
     ReviewModule,
+   
+    InscriptionModule,
+   
+    AuthentificationModule,
   ],
   controllers: [AppController],
   providers: [AppService,UserSessionService],
