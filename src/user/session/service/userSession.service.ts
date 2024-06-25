@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Cookie } from "express-session";
 
 import { UserSession } from "../interface/userSession.interface";
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserSessionService implements UserSession {
@@ -9,7 +10,8 @@ export class UserSessionService implements UserSession {
   id: string;
   cookie: Cookie;
   constructor() {
-    this.id = 'someUniqueId';
+    
+    this.id = uuidv4();
     this.cookie = {
       path: '/',
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
@@ -22,7 +24,7 @@ export class UserSessionService implements UserSession {
   regenerate(callback: (err: any) => void): this {
     try {
       this.session = new Map<string, any>();
-      this.id = 'newUniqueId'; // Generate a new unique id
+      this.id = uuidv4(); // Generate a new unique id
       callback(null);
     } catch (err) {
       callback(err);

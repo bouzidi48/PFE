@@ -22,14 +22,14 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async ancienPassword(password) {
-        return await this.userService.ancienPassword(password);
+    async ancienPassword(request, password) {
+        return await this.userService.ancienPassword(request, password);
     }
-    async updatePassword(updatePasswordDto) {
-        return await this.userService.updatePassword(updatePasswordDto);
+    async updatePassword(request, updatePasswordDto) {
+        return await this.userService.updatePassword(request, updatePasswordDto);
     }
-    async updateUsername(updateUsername) {
-        return await this.userService.updateUsername(updateUsername);
+    async updateUsername(request, updateUsername) {
+        return await this.userService.updateUsername(request, updateUsername);
     }
     async findOne(id) {
         return await this.userService.findOne(+id);
@@ -38,23 +38,26 @@ let UserController = class UserController {
 exports.UserController = UserController;
 __decorate([
     (0, common_1.Post)('ancienPassword'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [ancien_password_dto_1.AncienPasswordDto]),
+    __metadata("design:paramtypes", [Object, ancien_password_dto_1.AncienPasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "ancienPassword", null);
 __decorate([
     (0, common_1.Put)('updatePassword'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [modifier_password_dto_1.UpdatePasswordDto]),
+    __metadata("design:paramtypes", [Object, modifier_password_dto_1.UpdatePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updatePassword", null);
 __decorate([
     (0, common_1.Put)('updateUsername'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_username_dto_1.UserNameUpdateDto]),
+    __metadata("design:paramtypes", [Object, update_username_dto_1.UserNameUpdateDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUsername", null);
 __decorate([

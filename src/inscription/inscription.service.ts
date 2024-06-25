@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Session } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
@@ -14,10 +14,9 @@ export class InscriptionService {
   constructor(
     @InjectRepository(User) private userRepository:UserRepository,
     private readonly mailerService:MailerService,
-    private readonly session: UserSessionService
   ) {}
 
-  async signup(userSignUpDto: UserSignUpDto) {
+  async signup(@Session() request:Record<string, any>,userSignUpDto: UserSignUpDto) {
     const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
     const existingUser = await this.userRepository.findOne({ where: { username: userSignUpDto.username } });
     if (existingEmail || existingUser) {
@@ -42,10 +41,10 @@ export class InscriptionService {
     console.log(userSignUpDto);
     console.log(typeof(userSignUpDto));
     
-    this.session.session.set('code', codeConfirmation); // Utilisez req.session.code pour stocker le code de confirmation
-    this.session.session.set('user', userWithHashedPassword); // Utilisez req.session.user pour stocker les données de l'utilisateur
-    console.log(this.session.session.get('code'), codeConfirmation);
-    console.log(this.session.session.get('user'));
+    request.code = codeConfirmation; // Utilisez req.session.code pour stocker le code de confirmation
+    request.user = userWithHashedPassword; // Utilisez req.session.user pour stocker les données de l'utilisateur
+    console.log(request.code, codeConfirmation);
+    console.log(request.user);
     
     return await this.sendEmail(codeConfirmation, userSignUpDto.email);
   }
@@ -63,11 +62,11 @@ export class InscriptionService {
     };
   }
 
-  async verfierCode(codeDto:UserVerifyDto) {
+  async verfierCode(@Session() request:Record<string, any>,codeDto:UserVerifyDto) {
     console.log(codeDto)
-    console.log(this.session.session.get('code'))
-    console.log(this.session.session.get('code'),codeDto.code)
-    if (this.session.session.get('code') === codeDto.code) {
+    console.log(request.code)
+    console.log(request.code,codeDto.code)
+    if (request.code === codeDto.code) {
       return await true;
     }
     return await false;
@@ -75,15 +74,13 @@ export class InscriptionService {
 
 
 
-  async verfierInscription(codeDto:UserVerifyDto) {
+  async verfierInscription(@Session() request:Record<string, any>,codeDto:UserVerifyDto) {
     
-    if (this.verfierCode(codeDto)) {
-      const userSignUpDto = this.session.session.get('user')
+    if (this.verfierCode(request,codeDto)) {
+      const userSignUpDto = request.user
       console.log(userSignUpDto)
       const user = this.userRepository.create({ ...userSignUpDto, createdate: new Date() });
       this.userRepository.save(user);
-      this.session.session.delete('code')
-      this.session.session.delete('user')
       return await {
         message: 'Bienvenue dans notre application',
         statusCode: HttpStatus.OK,
