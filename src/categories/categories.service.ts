@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Session } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,7 @@ import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
-import { UserSessionService } from 'src/user/session/service/userSession.service';
+
 import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 
@@ -15,11 +15,11 @@ export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity)private readonly categoryRepository:CategoryRepository,
     @InjectRepository(User) private userRepository:UserRepository,
-    private readonly session: UserSessionService
+    
   ){}
   
-   async create(createCategoryDto: CreateCategoryDto){
-    const idAdmin=await this.session.session.get('idUser')
+   async create(@Session() request:Record<string, any>,createCategoryDto: CreateCategoryDto){
+    const idAdmin=request.idUser
     console.log(idAdmin)
     if(!idAdmin){
       return await {
@@ -37,9 +37,10 @@ export class CategoriesService {
     }
     const category=await this.categoryRepository.create(createCategoryDto);
     category.addedBy=admin;
+    category.createdAt=new Date();
     this.categoryRepository.save(category)
     return await {
-      message:'ajout avec succés',
+      message:category,
       statusCode:HttpStatus.OK,
     
     }

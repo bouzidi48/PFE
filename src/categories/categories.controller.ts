@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -14,8 +14,8 @@ import { Repository } from 'typeorm';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
   @Post('creat')
- async create(@Body() createCategoryDto: CreateCategoryDto ) {
-    return  await this.categoriesService.create(createCategoryDto);
+ async create(@Session() request:Record<string, any>,@Body() createCategoryDto: CreateCategoryDto ) {
+    return  await this.categoriesService.create(request,createCategoryDto);
     
   }
 

@@ -6,7 +6,7 @@ import { dataSourceOptions } from 'db/data_source';
 import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import {config} from 'dotenv'
-import { UserSessionService } from './user/session/service/userSession.service';
+
 
 import { CategoriesModule } from './categories/categories.module';
 import { CardModule } from './card/card.module';

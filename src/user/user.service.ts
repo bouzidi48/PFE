@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './user.repository';
 
-import { UserSessionService } from './session/service/userSession.service';
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import * as bcrypt from 'bcrypt';

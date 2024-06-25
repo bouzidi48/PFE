@@ -7,7 +7,7 @@ import { User } from './entities/user.entity';
 import { Cookie } from 'express-session';
 
 import { UserRepository } from './user.repository';
-import { UserSessionService } from './session/service/userSession.service';
+
 
 @Module({
   imports:[TypeOrmModule.forFeature([User,UserRepository])],

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UserSessionService } from 'src/user/session/service/userSession.service';
+
 import * as bcrypt from 'bcrypt';
 import { generate } from 'randomstring';
 import { UserSignUpDto } from './dto/user-signup.dto';
