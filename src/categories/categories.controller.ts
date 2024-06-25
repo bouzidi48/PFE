@@ -13,11 +13,10 @@ import { Repository } from 'typeorm';
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
- @UseGuards(AuthenticationGuard,AuthorizeGuard([Roles.ADMIN]))
-  @Post()
- async create(@Body() createCategoryDto: CreateCategoryDto ,@CurrentUser() currentUser:User):Promise<CategoryEntity> {
-    return  await this.categoriesService.create(createCategoryDto,currentUser);
-    //categoryRespository:Repository<CategoryEntity>{}
+  @Post('creat')
+ async create(@Body() createCategoryDto: CreateCategoryDto ) {
+    return  await this.categoriesService.create(createCategoryDto);
+    
   }
 
   @Get()
