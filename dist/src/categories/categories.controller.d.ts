@@ -1,11 +1,10 @@
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { User } from 'src/user/entities/user.entity';
 export declare class CategoriesController {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
-    create(createCategoryDto: CreateCategoryDto, currentUser: User): Promise<{
+    create(createCategoryDto: CreateCategoryDto): Promise<{
         message: string;
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
