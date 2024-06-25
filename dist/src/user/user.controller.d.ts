@@ -7,15 +7,15 @@ import { AncienPasswordDto } from './dto/ancien-password.dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    ancienPassword(password: AncienPasswordDto): Promise<{
+    ancienPassword(request: Record<string, any>, password: AncienPasswordDto): Promise<{
         message: string;
         statusCode: HttpStatus;
     }>;
-    updatePassword(updatePasswordDto: UpdatePasswordDto): Promise<{
+    updatePassword(request: Record<string, any>, updatePasswordDto: UpdatePasswordDto): Promise<{
         message: string;
         statusCode: HttpStatus;
     }>;
-    updateUsername(updateUsername: UserNameUpdateDto): Promise<{
+    updateUsername(request: Record<string, any>, updateUsername: UserNameUpdateDto): Promise<{
         message: string;
         statusCode: HttpStatus;
     }>;

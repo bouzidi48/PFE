@@ -12,7 +12,6 @@ import { UserSessionService } from './session/service/userSession.service';
 @Module({
   imports:[TypeOrmModule.forFeature([User,UserRepository])],
   controllers: [UserController],
-  providers: [UserService,UserSessionService],
-  exports:[UserSessionService]
+  providers: [UserService]
 })
 export class UserModule {}

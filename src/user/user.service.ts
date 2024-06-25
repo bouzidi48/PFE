@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
 
 import { User } from './entities/user.entity';
 
@@ -21,11 +21,10 @@ import { AncienPasswordDto } from './dto/ancien-password.dto';
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository:UserRepository,
-    private readonly session: UserSessionService
   ) {}
 
-  async ancienPassword(password:AncienPasswordDto) {
-    const id = this.session.session.get('idUser')
+  async ancienPassword(@Session() request:Record<string, any>,password:AncienPasswordDto) {
+    const id = request.idUser
     const user = await this.userRepository.findOne({ where: { id: id } });
     const validPassword = await bcrypt.compare(password.password, user.password);
     if (!validPassword) {
@@ -40,10 +39,10 @@ export class UserService {
     };
   }
 
-  async updatePassword(updateDto:UpdatePasswordDto) {
+  async updatePassword(@Session() request:Record<string, any>,updateDto:UpdatePasswordDto) {
     const confirmpassword = updateDto.confirmpassword
     const password = updateDto.password
-    const id = this.session.session.get('idUser')
+    const id = request.idUser
     if(confirmpassword == password) {
       const user = await this.userRepository.findOne({ where: { id: id } });
       const saltRounds = 10;
@@ -52,8 +51,6 @@ export class UserService {
       user.password = hashedPassword;
       user.updatedate=new Date();
       this.userRepository.save(user);
-      this.session.session.delete('idUser')
-      console.log(this.session.session.get('idUser'))
       return await {
         message: 'le mot de passe modifier avec succés,vous devez vous connecter avec votre nouveau mot de passe',
         statusCode: HttpStatus.OK,
@@ -67,25 +64,25 @@ export class UserService {
   
 
 
-  async updateUsername(updateUsername:UserNameUpdateDto) {
+  async updateUsername(@Session() request:Record<string, any>,updateUsername:UserNameUpdateDto) {
       const user = await this.userRepository.findOne({ where : { username : updateUsername.username}});
       console.log(user)
-      console.log(this.session.session)
-      console.log(this.session.session.get('idUser'))
+      console.log(request.idUser)
+      
+      
       if(!user) {
-        const id = await this.session.session.get('idUser')
+        const id = request.idUser
         if(!id) {
           return await {
             message: 'user not found',
             statusCode: HttpStatus.BAD_REQUEST,
           };
         }
-        const currentUser = await this.userRepository.findOne({ where : { id : this.session.session.get('idUser')}});
+        const currentUser = await this.userRepository.findOne({ where : { id : id}});
         currentUser.username = updateUsername.username;
         currentUser.updatedate=new Date();
         console.log(currentUser)
         this.userRepository.save(currentUser);
-        this.session.session.delete('idUser')
         return await {
           message: 'Username modifier avec succés,vous devez vous connecter avec votre nouveau username',
           statusCode: HttpStatus.OK,

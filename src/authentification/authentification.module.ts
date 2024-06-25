@@ -9,7 +9,6 @@ import { UserSessionService } from 'src/user/session/service/userSession.service
 @Module({
   imports:[TypeOrmModule.forFeature([User,UserRepository])],
   controllers: [AuthentificationController],
-  providers: [AuthentificationService,UserSessionService],
-  exports:[UserSessionService]
+  providers: [AuthentificationService],
 })
 export class AuthentificationModule {}

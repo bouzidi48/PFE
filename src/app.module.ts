@@ -41,6 +41,6 @@ import { AuthentificationModule } from './authentification/authentification.modu
     AuthentificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService,UserSessionService],
+  providers: [AppService]
 })
 export class AppModule {}

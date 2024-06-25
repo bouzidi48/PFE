@@ -11,10 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserSessionService = void 0;
 const common_1 = require("@nestjs/common");
+const uuid_1 = require("uuid");
 let UserSessionService = class UserSessionService {
     constructor() {
         this.session = new Map();
-        this.id = 'someUniqueId';
+        this.id = (0, uuid_1.v4)();
         this.cookie = {
             path: '/',
             maxAge: 24 * 60 * 60 * 1000,
@@ -26,7 +27,7 @@ let UserSessionService = class UserSessionService {
     regenerate(callback) {
         try {
             this.session = new Map();
-            this.id = 'newUniqueId';
+            this.id = (0, uuid_1.v4)();
             callback(null);
         }
         catch (err) {

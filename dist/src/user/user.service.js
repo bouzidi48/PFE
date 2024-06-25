@@ -17,15 +17,16 @@ const common_1 = require("@nestjs/common");
 const user_entity_1 = require("./entities/user.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_repository_1 = require("./user.repository");
-const userSession_service_1 = require("./session/service/userSession.service");
+const modifier_password_dto_1 = require("./dto/modifier-password.dto");
+const update_username_dto_1 = require("./dto/update-username.dto");
 const bcrypt = require("bcrypt");
+const ancien_password_dto_1 = require("./dto/ancien-password.dto");
 let UserService = class UserService {
-    constructor(userRepository, session) {
+    constructor(userRepository) {
         this.userRepository = userRepository;
-        this.session = session;
     }
-    async ancienPassword(password) {
-        const id = this.session.session.get('idUser');
+    async ancienPassword(request, password) {
+        const id = request.idUser;
         const user = await this.userRepository.findOne({ where: { id: id } });
         const validPassword = await bcrypt.compare(password.password, user.password);
         if (!validPassword) {
@@ -39,10 +40,10 @@ let UserService = class UserService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    async updatePassword(updateDto) {
+    async updatePassword(request, updateDto) {
         const confirmpassword = updateDto.confirmpassword;
         const password = updateDto.password;
-        const id = this.session.session.get('idUser');
+        const id = request.idUser;
         if (confirmpassword == password) {
             const user = await this.userRepository.findOne({ where: { id: id } });
             const saltRounds = 10;
@@ -51,8 +52,6 @@ let UserService = class UserService {
             user.password = hashedPassword;
             user.updatedate = new Date();
             this.userRepository.save(user);
-            this.session.session.delete('idUser');
-            console.log(this.session.session.get('idUser'));
             return await {
                 message: 'le mot de passe modifier avec succés,vous devez vous connecter avec votre nouveau mot de passe',
                 statusCode: common_1.HttpStatus.OK,
@@ -63,25 +62,23 @@ let UserService = class UserService {
             statusCode: common_1.HttpStatus.BAD_REQUEST,
         };
     }
-    async updateUsername(updateUsername) {
+    async updateUsername(request, updateUsername) {
         const user = await this.userRepository.findOne({ where: { username: updateUsername.username } });
         console.log(user);
-        console.log(this.session.session);
-        console.log(this.session.session.get('idUser'));
+        console.log(request.idUser);
         if (!user) {
-            const id = await this.session.session.get('idUser');
+            const id = request.idUser;
             if (!id) {
                 return await {
                     message: 'user not found',
                     statusCode: common_1.HttpStatus.BAD_REQUEST,
                 };
             }
-            const currentUser = await this.userRepository.findOne({ where: { id: this.session.session.get('idUser') } });
+            const currentUser = await this.userRepository.findOne({ where: { id: id } });
             currentUser.username = updateUsername.username;
             currentUser.updatedate = new Date();
             console.log(currentUser);
             this.userRepository.save(currentUser);
-            this.session.session.delete('idUser');
             return await {
                 message: 'Username modifier avec succés,vous devez vous connecter avec votre nouveau username',
                 statusCode: common_1.HttpStatus.OK,
@@ -100,10 +97,27 @@ let UserService = class UserService {
     }
 };
 exports.UserService = UserService;
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, ancien_password_dto_1.AncienPasswordDto]),
+    __metadata("design:returntype", Promise)
+], UserService.prototype, "ancienPassword", null);
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, modifier_password_dto_1.UpdatePasswordDto]),
+    __metadata("design:returntype", Promise)
+], UserService.prototype, "updatePassword", null);
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_username_dto_1.UserNameUpdateDto]),
+    __metadata("design:returntype", Promise)
+], UserService.prototype, "updateUsername", null);
 exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [user_repository_1.UserRepository,
-        userSession_service_1.UserSessionService])
+    __metadata("design:paramtypes", [user_repository_1.UserRepository])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Put, Session } from '@nestjs/common';
 import { UserService } from './user.service';
 
 
@@ -15,19 +15,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('ancienPassword')
-  async ancienPassword(@Body() password:AncienPasswordDto) {
-    return await this.userService.ancienPassword(password)
+  async ancienPassword(@Session() request:Record<string, any>,@Body() password:AncienPasswordDto) {
+    return await this.userService.ancienPassword(request,password)
   } 
 
   @Put('updatePassword')
-  async updatePassword(@Body() updatePasswordDto:UpdatePasswordDto) {
-    return await this.userService.updatePassword(updatePasswordDto)
+  async updatePassword(@Session() request:Record<string, any>,@Body() updatePasswordDto:UpdatePasswordDto) {
+    return await this.userService.updatePassword(request,updatePasswordDto)
   }
 
 
   @Put('updateUsername')
-  async updateUsername(@Body() updateUsername:UserNameUpdateDto) {
-    return await this.userService.updateUsername(updateUsername)
+  async updateUsername(@Session() request:Record<string, any>, @Body() updateUsername:UserNameUpdateDto) {
+    return await this.userService.updateUsername(request,updateUsername)
   }
 
   @Get('single/:id')
