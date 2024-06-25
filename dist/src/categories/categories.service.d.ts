@@ -1,18 +1,11 @@
-import { HttpStatus } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { UserRepository } from 'src/user/user.repository';
-import { UserSessionService } from 'src/user/session/service/userSession.service';
-import { CategoryRepository } from './category.repository';
+import { CategoryEntity } from './entities/category.entity';
+import { Repository } from 'typeorm';
 export declare class CategoriesService {
     private readonly categoryRepository;
-    private userRepository;
-    private readonly session;
-    constructor(categoryRepository: CategoryRepository, userRepository: UserRepository, session: UserSessionService);
-    create(createCategoryDto: CreateCategoryDto): Promise<{
-        message: string;
-        statusCode: HttpStatus;
-    }>;
+    constructor(categoryRepository: Repository<CategoryEntity>);
+    create(createCategoryDto: CreateCategoryDto): Promise<string>;
     findAll(): string;
     findOne(id: number): string;
     update(id: number, updateCategoryDto: UpdateCategoryDto): string;
