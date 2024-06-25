@@ -138,4 +138,14 @@ export class AuthentificationService {
       statusCode: HttpStatus.BAD_REQUEST,
     };
   }
+  async accessToken(user:User):Promise<string>{
+    const jwt = require('jsonwebtoken');
+  
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.ACCESS_TOKEN_SECRET_KEY,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRE_TIME }
+  );
+  
+  }
 }
