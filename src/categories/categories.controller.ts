@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -11,10 +11,10 @@ import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
- @UseGuards(AuthenticationGuard,AuthorizeGuard([Roles.ADMIN]))
-  @Post()
- async create(@Body() createCategoryDto: CreateCategoryDto ,@CurrentUser() currentUser:User) {
+  @Post('creat')
+ async create(@Body() createCategoryDto: CreateCategoryDto ) {
     return  await this.categoriesService.create(createCategoryDto);
+    
   }
 
   @Get()

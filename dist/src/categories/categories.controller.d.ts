@@ -5,7 +5,10 @@ import { User } from 'src/user/entities/user.entity';
 export declare class CategoriesController {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
-    create(createCategoryDto: CreateCategoryDto, currentUser: User): Promise<string>;
+    create(createCategoryDto: CreateCategoryDto, currentUser: User): Promise<{
+        message: string;
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
     findAll(): string;
     findOne(id: string): string;
     update(id: string, updateCategoryDto: UpdateCategoryDto): string;
