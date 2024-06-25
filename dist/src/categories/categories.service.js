@@ -19,7 +19,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
 const user_entity_1 = require("../user/entities/user.entity");
 const user_repository_1 = require("../user/user.repository");
-const userSession_service_1 = require("src/user/session/service/userSession.service");
 const category_repository_1 = require("./category.repository");
 const user_enum_1 = require("../enum/user_enum");
 let CategoriesService = class CategoriesService {
@@ -71,7 +70,7 @@ exports.CategoriesService = CategoriesService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.CategoryEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [category_repository_1.CategoryRepository,
-        user_repository_1.UserRepository, typeof (_a = typeof userSession_service_1.UserSessionService !== "undefined" && userSession_service_1.UserSessionService) === "function" ? _a : Object])
+        user_repository_1.UserRepository, typeof (_a = typeof UserSessionService !== "undefined" && UserSessionService) === "function" ? _a : Object])
 ], CategoriesService);
 function CurrentUser() {
     throw new Error('Function not implemented.');
