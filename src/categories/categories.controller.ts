@@ -12,8 +12,8 @@ import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
   @Post('creat')
- async create(@Body() createCategoryDto: CreateCategoryDto ) {
-    return  await this.categoriesService.create(createCategoryDto);
+ async create(@Session() request:Record<string, any>,@Body() createCategoryDto: CreateCategoryDto ) {
+    return  await this.categoriesService.create(request,createCategoryDto);
     
   }
 

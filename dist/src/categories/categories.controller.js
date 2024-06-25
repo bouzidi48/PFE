@@ -21,8 +21,8 @@ let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
     }
-    async create(createCategoryDto) {
-        return await this.categoriesService.create(createCategoryDto);
+    async create(request, createCategoryDto) {
+        return await this.categoriesService.create(request, createCategoryDto);
     }
     findAll() {
         return this.categoriesService.findAll();
@@ -40,9 +40,10 @@ let CategoriesController = class CategoriesController {
 exports.CategoriesController = CategoriesController;
 __decorate([
     (0, common_1.Post)('creat'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto]),
+    __metadata("design:paramtypes", [Object, create_category_dto_1.CreateCategoryDto]),
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "create", null);
 __decorate([
