@@ -11,6 +11,7 @@ import { ProductRepository } from './product.repository';
 import { Roles } from 'src/enum/user_enum';
 import { FindByNameProductDto } from './dto/find-by-name-product.dto';
 import { FindByCategorieDto } from './dto/find-by-categorie.dto';
+import { RemoveProductDto } from './dto/remove-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -34,6 +35,13 @@ export class ProductService {
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
       
+      }
+    }
+    const pro = await this.productRepository.findOne({where : {nameProduct:createProductDto.nameProduct}});
+    if(pro) {
+      return await{
+        message:'ce produit existe deja',
+        statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     const category=await this.categoryRepository.findOne({where : {nameCategory:createProductDto.nomCategory,addedBy:idAdmin}});
@@ -108,13 +116,16 @@ export class ProductService {
       }
     }
     const categorie = await this.categoryRepository.findOne({where : {nameCategory:nameCategory.nameCategory}});
+    console.log(categorie)
     if(!categorie) {
       return await{
         message:'la categorie que vous avez saisi n\'existe pas',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const products = await this.productRepository.find({where :{category:categorie}});
+    
+    const products = await this.productRepository.find( { where: { category: { id: categorie.id } }});
+    console.log(products)
     if(!products) {
       return await{
         message:'aucun produit dans cette categorie',
@@ -127,16 +138,87 @@ export class ProductService {
     
     }
   }
+    
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+
+  async update(@Session() request:Record<string, any>, updateProductDto: UpdateProductDto) {
+    const idAdmin = request.idUser
+    if(!idAdmin){  
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin = await this.userRepository.findOne({where : {id:idAdmin}})
+    if(!admin || admin.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const product = await this.productRepository.findOne({where : {nameProduct:updateProductDto.ancienProduct,addedBy:idAdmin}});
+    if(!product) {
+      return await{
+        message:'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    const category = await this.categoryRepository.findOne({where : {nameCategory:updateProductDto.nomCategory}});
+    if(!category) {
+      return await{
+        message:'la categorie que vous avez saisi n\'existe pas',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    if(updateProductDto.nameProduct) {
+      const pro = await this.productRepository.findOne({where : {nameProduct:updateProductDto.nameProduct}});
+      if(pro) {
+        return await{
+          message:'ce produit existe deja',
+          statusCode:HttpStatus.BAD_REQUEST,
+        }
+      }
+    }
+    product.nameProduct = updateProductDto.nameProduct;
+    product.description = updateProductDto.description;
+    product.price = updateProductDto.price;
+    product.stockQuantity = updateProductDto.stockQuantity;
+    product.category = category;
+    product.updatedate = new Date();
+    this.productRepository.save(product)
+    return await {
+      message:product,
+      statusCode:HttpStatus.OK,
+    }
   }
-
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(@Session() request:Record<string, any>, removeProductDto: RemoveProductDto) {
+    const idAdmin = request.idUser
+    if(!idAdmin){  
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin = await this.userRepository.findOne({where : {id:idAdmin}})
+    if(!admin || admin.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const product = await this.productRepository.findOne({where : {nameProduct:removeProductDto.nameProduct,addedBy:idAdmin}});
+    if(!product) {
+      return await{
+        message:'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    await this.productRepository.remove(product)
+    return await {
+      message:'le produit a bien ete supprimer',
+      statusCode:HttpStatus.OK,
+    }
   }
 }
