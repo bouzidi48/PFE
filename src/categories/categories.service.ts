@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,7 @@ import { UserRepository } from 'src/user/user.repository';
 
 import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
+import { DeleteCategoryDto } from './dto/delete-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -47,20 +48,47 @@ export class CategoriesService {
     }
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll() {
+    return await this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  /* async findByName(nameCategory:String){
+   return await this.categoryRepository.find({select:{nameCategory:true}})
+ }  */
+ async  findOne(id: number):Promise<CategoryEntity> {
+    return  await this.categoryRepository.findOne(
+      {
+        where:{id:id}, 
+        relations:{addedBy:true},
+        select:{
+          addedBy:{
+            id:true,
+            username:true,
+            email:true,
+            
+
+          }
+        }
+        
+    });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(@Session() request:Record<string, any>,id: number, fields:Partial< UpdateCategoryDto> ) {
+    const category=await this.findOne(id);
+    if(!category) throw new NotFoundException('Catgory not found.');
+    Object.assign(category,fields);
+    category.updatedAt=new Date();
+    return await  this.categoryRepository.save(category);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(@Session() request:Record<string, any>,id: number, fields:Partial< DeleteCategoryDto>) {
+    const category=await this.findOne(id);
+    if(!category) throw new NotFoundException('Catgory not found.');
+    Object.assign(category,fields);
+
+    return await this.categoryRepository.delete(id);
+
+    
   }
 }
 function CurrentUser(): (target: CategoriesService, propertyKey: "create", parameterIndex: 1) => void {

@@ -7,6 +7,7 @@ import { Roles } from 'src/enum/user_enum';
 import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
 import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
+import { DeleteCategoryDto } from './dto/delete-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -18,9 +19,14 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  async findAll() {
+    return await this.categoriesService.findAll();
   }
+
+  /* @Get(':nameCategory')
+  findByName(@Param('nameCategory')nameCategory:String){
+    return this.categoriesService.findByName(nameCategory)
+  }  */
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -28,13 +34,13 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(+id, updateCategoryDto);
+  async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return await this.categoriesService.update(request,+id,updateCategoryDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoriesService.remove(+id);
+ async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
+    return await this.categoriesService.remove(request,+id,deleteCategoryDto);
   }
 }
 

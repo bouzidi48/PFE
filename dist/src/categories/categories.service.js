@@ -51,17 +51,36 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    findAll() {
-        return `This action returns all categories`;
+    async findAll() {
+        return await this.categoryRepository.find();
     }
-    findOne(id) {
-        return `This action returns a #${id} category`;
+    async findOne(id) {
+        return await this.categoryRepository.findOne({
+            where: { id: id },
+            relations: { addedBy: true },
+            select: {
+                addedBy: {
+                    id: true,
+                    username: true,
+                    email: true,
+                }
+            }
+        });
     }
-    update(id, updateCategoryDto) {
-        return `This action updates a #${id} category`;
+    async update(request, id, fields) {
+        const category = await this.findOne(id);
+        if (!category)
+            throw new common_1.NotFoundException('Catgory not found.');
+        Object.assign(category, fields);
+        category.updatedAt = new Date();
+        return await this.categoryRepository.save(category);
     }
-    remove(id) {
-        return `This action removes a #${id} category`;
+    async remove(request, id, fields) {
+        const category = await this.findOne(id);
+        if (!category)
+            throw new common_1.NotFoundException('Catgory not found.');
+        Object.assign(category, fields);
+        return await this.categoryRepository.delete(id);
     }
 };
 exports.CategoriesService = CategoriesService;
@@ -71,6 +90,18 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_category_dto_1.CreateCategoryDto]),
     __metadata("design:returntype", Promise)
 ], CategoriesService.prototype, "create", null);
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Object]),
+    __metadata("design:returntype", Promise)
+], CategoriesService.prototype, "update", null);
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Object]),
+    __metadata("design:returntype", Promise)
+], CategoriesService.prototype, "remove", null);
 exports.CategoriesService = CategoriesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.CategoryEntity)),
