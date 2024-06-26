@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { CategoryRepository } from './category.repository';
+import { DeleteCategoryDto } from './dto/delete-category.dto';
 export declare class CategoriesService {
     private readonly categoryRepository;
     private userRepository;
@@ -15,8 +16,8 @@ export declare class CategoriesService {
         message: CategoryEntity;
         statusCode: HttpStatus;
     }>;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateCategoryDto: UpdateCategoryDto): string;
-    remove(id: number): string;
+    findAll(): Promise<CategoryEntity[]>;
+    findOne(id: number): Promise<CategoryEntity>;
+    update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity>;
+    remove(request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>): Promise<import("typeorm").DeleteResult>;
 }
