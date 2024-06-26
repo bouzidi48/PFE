@@ -19,6 +19,7 @@ const card_module_1 = require("./card/card.module");
 const review_module_1 = require("./review/review.module");
 const inscription_module_1 = require("./inscription/inscription.module");
 const authentification_module_1 = require("./authentification/authentification.module");
+const product_module_1 = require("./product/product.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,6 +44,7 @@ exports.AppModule = AppModule = __decorate([
             review_module_1.ReviewModule,
             inscription_module_1.InscriptionModule,
             authentification_module_1.AuthentificationModule,
+            product_module_1.ProductModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

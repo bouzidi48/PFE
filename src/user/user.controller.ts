@@ -8,6 +8,7 @@ import { User } from './entities/user.entity';
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
+import { AncienUsernameDto } from './dto/ancien-username.dto';
 
 
 @Controller('users')
@@ -24,6 +25,10 @@ export class UserController {
     return await this.userService.updatePassword(request,updatePasswordDto)
   }
 
+  @Post('ancienPassword')
+  async ancienUsername(@Session() request:Record<string, any>,@Body() username:AncienUsernameDto) {
+    return await this.userService.ancienUsername(request,username)
+  }
 
   @Put('updateUsername')
   async updateUsername(@Session() request:Record<string, any>, @Body() updateUsername:UserNameUpdateDto) {

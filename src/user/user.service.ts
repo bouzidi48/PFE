@@ -13,6 +13,7 @@ import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import * as bcrypt from 'bcrypt';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
+import { AncienUsernameDto } from './dto/ancien-username.dto';
 
 
 
@@ -61,7 +62,21 @@ export class UserService {
     };
   }
   
-
+  async ancienUsername(@Session() request:Record<string, any>,username:AncienUsernameDto) {
+    const id = request.idUser
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    const validUsername = await (user.username === username.username);
+    if (!validUsername) {
+      return await {
+        message: 'ancien username incorrect',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+    return await {
+      message: 'ancien username correct',
+      statusCode: HttpStatus.OK,
+    };
+  }
 
   async updateUsername(@Session() request:Record<string, any>,updateUsername:UserNameUpdateDto) {
       const user = await this.userRepository.findOne({ where : { username : updateUsername.username}});

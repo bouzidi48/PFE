@@ -14,6 +14,7 @@ import { CardModule } from './card/card.module';
 import { ReviewModule } from './review/review.module';
 import { InscriptionModule } from './inscription/inscription.module';
 import { AuthentificationModule } from './authentification/authentification.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { AuthentificationModule } from './authentification/authentification.modu
     InscriptionModule,
    
     AuthentificationModule,
+   
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -11,6 +11,9 @@ async function bootstrap() {
         secret: 'my-secret',
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            maxAge: 24 * 60 * 60 * 1000
+        }
     }));
     app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true }));
     await app.listen(3000);

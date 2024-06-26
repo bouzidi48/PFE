@@ -18,6 +18,7 @@ const user_service_1 = require("./user.service");
 const modifier_password_dto_1 = require("./dto/modifier-password.dto");
 const update_username_dto_1 = require("./dto/update-username.dto");
 const ancien_password_dto_1 = require("./dto/ancien-password.dto");
+const ancien_username_dto_1 = require("./dto/ancien-username.dto");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -27,6 +28,9 @@ let UserController = class UserController {
     }
     async updatePassword(request, updatePasswordDto) {
         return await this.userService.updatePassword(request, updatePasswordDto);
+    }
+    async ancienUsername(request, username) {
+        return await this.userService.ancienUsername(request, username);
     }
     async updateUsername(request, updateUsername) {
         return await this.userService.updateUsername(request, updateUsername);
@@ -52,6 +56,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, modifier_password_dto_1.UpdatePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updatePassword", null);
+__decorate([
+    (0, common_1.Post)('ancienPassword'),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, ancien_username_dto_1.AncienUsernameDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "ancienUsername", null);
 __decorate([
     (0, common_1.Put)('updateUsername'),
     __param(0, (0, common_1.Session)()),

@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryEntity = void 0;
+const product_entity_1 = require("../../product/entities/product.entity");
 const user_entity_1 = require("../../user/entities/user.entity");
 const typeorm_1 = require("typeorm");
 let CategoryEntity = class CategoryEntity {
@@ -47,6 +48,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.categories),
     __metadata("design:type", user_entity_1.User)
 ], CategoryEntity.prototype, "addedBy", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => product_entity_1.Product, (product) => product.category),
+    __metadata("design:type", Array)
+], CategoryEntity.prototype, "products", void 0);
 exports.CategoryEntity = CategoryEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'categories' })
 ], CategoryEntity);

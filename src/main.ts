@@ -11,6 +11,9 @@ async function bootstrap() {
       secret: 'my-secret',
       resave: false,
       saveUninitialized: false,
+      cookie: { 
+        maxAge: 24 * 60 * 60 * 1000 // Durée de vie du cookie en millisecondes (1 jour ici)
+      }
     }),
   );
   app.useGlobalPipes(new ValidationPipe({whitelist:true}));

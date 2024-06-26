@@ -21,6 +21,7 @@ const modifier_password_dto_1 = require("./dto/modifier-password.dto");
 const update_username_dto_1 = require("./dto/update-username.dto");
 const bcrypt = require("bcrypt");
 const ancien_password_dto_1 = require("./dto/ancien-password.dto");
+const ancien_username_dto_1 = require("./dto/ancien-username.dto");
 let UserService = class UserService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -60,6 +61,21 @@ let UserService = class UserService {
         return await {
             message: 'Password != ConfirmPassword',
             statusCode: common_1.HttpStatus.BAD_REQUEST,
+        };
+    }
+    async ancienUsername(request, username) {
+        const id = request.idUser;
+        const user = await this.userRepository.findOne({ where: { id: id } });
+        const validUsername = await (user.username === username.username);
+        if (!validUsername) {
+            return await {
+                message: 'ancien username incorrect',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        return await {
+            message: 'ancien username correct',
+            statusCode: common_1.HttpStatus.OK,
         };
     }
     async updateUsername(request, updateUsername) {
@@ -109,6 +125,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, modifier_password_dto_1.UpdatePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UserService.prototype, "updatePassword", null);
+__decorate([
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, ancien_username_dto_1.AncienUsernameDto]),
+    __metadata("design:returntype", Promise)
+], UserService.prototype, "ancienUsername", null);
 __decorate([
     __param(0, (0, common_1.Session)()),
     __metadata("design:type", Function),

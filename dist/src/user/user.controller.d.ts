@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
+import { AncienUsernameDto } from './dto/ancien-username.dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -12,6 +13,10 @@ export declare class UserController {
         statusCode: HttpStatus;
     }>;
     updatePassword(request: Record<string, any>, updatePasswordDto: UpdatePasswordDto): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    ancienUsername(request: Record<string, any>, username: AncienUsernameDto): Promise<{
         message: string;
         statusCode: HttpStatus;
     }>;
