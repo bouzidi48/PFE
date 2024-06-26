@@ -8,6 +8,8 @@ import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
 import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
+import { FindByNameCategoryDto } from './dto/find-ByName.dto';
+import { CategoryEntity } from './entities/category.entity';
 
 @Controller('categories')
 export class CategoriesController {
@@ -23,16 +25,20 @@ export class CategoriesController {
     return await this.categoriesService.findAll();
   }
 
-  /* @Get(':nameCategory')
-  findByName(@Param('nameCategory')nameCategory:String){
+   @Get('nameCategory')
+  findByName(@Body()nameCategory:FindByNameCategoryDto){
     return this.categoriesService.findByName(nameCategory)
-  }  */
+  }  
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(+id);
   }
 
+  /* @Get(':id/subcategories')
+  async getSubcategories(@Param('id') id: string): Promise<CategoryEntity[]> {
+    return this.categoriesService.findSubcategories(parentCategoryId(id));
+  }  */
   @Patch(':id')
   async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(request,+id,updateCategoryDto);
@@ -47,4 +53,8 @@ export class CategoriesController {
 
 
 
+
+function parentCategoryId(id: string): import("./dto/find-BySousCategory.dto").FindBySousCategoryDto {
+  throw new Error('Function not implemented.');
+}
 

@@ -43,9 +43,24 @@ let CategoriesService = class CategoriesService {
             };
         }
         const category = await this.categoryRepository.create(createCategoryDto);
-        category.addedBy = admin;
-        category.createdAt = new Date();
-        this.categoryRepository.save(category);
+        if (!createCategoryDto.NameparentCategory) {
+            category.addedBy = admin;
+            category.createdAt = new Date();
+            this.categoryRepository.save(category);
+        }
+        else {
+            const parent = await this.categoryRepository.findOne({ where: { nameCategory: createCategoryDto.NameparentCategory } });
+            if (!parent) {
+                return await {
+                    message: 'la categorie parente n\'existe pas',
+                    statusCode: common_1.HttpStatus.BAD_REQUEST,
+                };
+            }
+            category.addedBy = admin;
+            category.createdAt = new Date();
+            category.parentCategory = parent;
+            this.categoryRepository.save(category);
+        }
         return await {
             message: category,
             statusCode: common_1.HttpStatus.OK,
@@ -53,6 +68,9 @@ let CategoriesService = class CategoriesService {
     }
     async findAll() {
         return await this.categoryRepository.find();
+    }
+    async findByName(nameCategory) {
+        return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
     }
     async findOne(id) {
         return await this.categoryRepository.findOne({

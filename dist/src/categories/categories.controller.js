@@ -18,6 +18,7 @@ const categories_service_1 = require("./categories.service");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const update_category_dto_1 = require("./dto/update-category.dto");
 const delete_category_dto_1 = require("./dto/delete-category.dto");
+const find_ByName_dto_1 = require("./dto/find-ByName.dto");
 let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
@@ -27,6 +28,9 @@ let CategoriesController = class CategoriesController {
     }
     async findAll() {
         return await this.categoriesService.findAll();
+    }
+    findByName(nameCategory) {
+        return this.categoriesService.findByName(nameCategory);
     }
     findOne(id) {
         return this.categoriesService.findOne(+id);
@@ -53,6 +57,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('nameCategory'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [find_ByName_dto_1.FindByNameCategoryDto]),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "findByName", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -82,4 +93,7 @@ exports.CategoriesController = CategoriesController = __decorate([
     (0, common_1.Controller)('categories'),
     __metadata("design:paramtypes", [categories_service_1.CategoriesService])
 ], CategoriesController);
+function parentCategoryId(id) {
+    throw new Error('Function not implemented.');
+}
 //# sourceMappingURL=categories.controller.js.map

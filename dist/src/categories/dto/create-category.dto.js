@@ -25,7 +25,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "description", void 0);
 __decorate([
+    (0, class_validator_1.IsNotEmpty)({ message: 'description can not be empty' }),
+    (0, class_validator_1.IsString)({ message: 'description should be string ' }),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], CreateCategoryDto.prototype, "parentCategoryId", void 0);
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "NameparentCategory", void 0);
 //# sourceMappingURL=create-category.dto.js.map

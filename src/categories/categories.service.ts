@@ -10,6 +10,8 @@ import { UserRepository } from 'src/user/user.repository';
 import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
+import { FindByNameCategoryDto } from './dto/find-ByName.dto';
+import { FindBySousCategoryDto } from './dto/find-BySousCategory.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -38,23 +40,47 @@ export class CategoriesService {
       }
     }
     const category=await this.categoryRepository.create(createCategoryDto);
-    category.addedBy=admin;
-    category.createdAt=new Date();
-    this.categoryRepository.save(category)
+    if(!createCategoryDto.NameparentCategory) {
+      
+      category.addedBy=admin;
+      category.createdAt=new Date();
+      this.categoryRepository.save(category)
+    }
+    else {
+      const parent = await this.categoryRepository.findOne({where : {nameCategory:createCategoryDto.NameparentCategory}})
+      if(!parent) {
+        return await {
+          message: 'la categorie parente n\'existe pas',
+          statusCode:HttpStatus.BAD_REQUEST,
+
+        }
+      }
+      category.addedBy=admin;
+      category.createdAt=new Date();
+      category.parentCategory=parent
+      this.categoryRepository.save(category)
+    }
+    
     return await {
       message:category,
       statusCode:HttpStatus.OK,
     
     }
   }
+  
+  /*  async findSubcategories(parentCategoryId:FindBySousCategoryDto): Promise<CategoryEntity[]> {
+    return this.categoryRepository.find({
+      where: { id:  },
+      relations: ['subcategories'],
+    });
+  }  */
 
   async findAll() {
     return await this.categoryRepository.find();
   }
-
-  /* async findByName(nameCategory:String){
-   return await this.categoryRepository.find({select:{nameCategory:true}})
- }  */
+  async findByName(nameCategory:FindByNameCategoryDto ) {
+    return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+  }
  async  findOne(id: number):Promise<CategoryEntity> {
     return  await this.categoryRepository.findOne(
       {
