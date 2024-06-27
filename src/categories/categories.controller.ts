@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session, ParseIntPipe } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -35,10 +35,10 @@ export class CategoriesController {
     return this.categoriesService.findOne(+id);
   }
 
-  /* @Get(':id/subcategories')
-  async getSubcategories(@Param('id') id: string): Promise<CategoryEntity[]> {
-    return this.categoriesService.findSubcategories(parentCategoryId(id));
-  }  */
+  @Get(':id/subcategories')
+  async findSubcategories(@Param('id', ParseIntPipe) parentCategoryId: number) {
+    return this.categoriesService.findSubcategories(parentCategoryId);
+  } 
   @Patch(':id')
   async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(request,+id,updateCategoryDto);

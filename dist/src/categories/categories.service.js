@@ -66,6 +66,14 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
+    async findSubcategories(parentCategoryId) {
+        const parentCategory = await this.categoryRepository.findOne({
+            where: { id: parentCategoryId },
+            relations: ['subcategories'],
+        });
+        console.log(parentCategory);
+        return parentCategory.subcategories;
+    }
     async findAll() {
         return await this.categoryRepository.find();
     }

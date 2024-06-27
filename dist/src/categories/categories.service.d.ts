@@ -17,6 +17,7 @@ export declare class CategoriesService {
         message: CategoryEntity;
         statusCode: HttpStatus;
     }>;
+    findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]>;
     findAll(): Promise<CategoryEntity[]>;
     findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
     findOne(id: number): Promise<CategoryEntity>;

@@ -68,13 +68,25 @@ export class CategoriesService {
     }
   }
   
-  /*  async findSubcategories(parentCategoryId:FindBySousCategoryDto): Promise<CategoryEntity[]> {
+  /* async findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]> {
     return this.categoryRepository.find({
-      where: { id:  },
+      where: { parentCategory: { id: parentCategoryId } },
+      relations: ['subcategories', 'subcategories.subcategories'],
+    });
+  } 
+ */
+
+  async findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]> {
+    const parentCategory = await this.categoryRepository.findOne({
+      where: { id: parentCategoryId },
       relations: ['subcategories'],
     });
-  }  */
-
+  
+    console.log(parentCategory);
+  
+    return parentCategory.subcategories;
+  }
+  
   async findAll() {
     return await this.categoryRepository.find();
   }
