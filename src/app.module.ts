@@ -15,6 +15,8 @@ import { ReviewModule } from './review/review.module';
 import { InscriptionModule } from './inscription/inscription.module';
 import { AuthentificationModule } from './authentification/authentification.module';
 import { ProductModule } from './product/product.module';
+import { CouleurModule } from './couleur/couleur.module';
+import { SizeModule } from './size/size.module';
 
 @Module({
   imports: [
@@ -42,6 +44,10 @@ import { ProductModule } from './product/product.module';
     AuthentificationModule,
    
     ProductModule,
+   
+    CouleurModule,
+   
+    SizeModule,
   ],
   controllers: [AppController],
   providers: [AppService]

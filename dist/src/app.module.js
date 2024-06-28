@@ -20,6 +20,8 @@ const review_module_1 = require("./review/review.module");
 const inscription_module_1 = require("./inscription/inscription.module");
 const authentification_module_1 = require("./authentification/authentification.module");
 const product_module_1 = require("./product/product.module");
+const couleur_module_1 = require("./couleur/couleur.module");
+const size_module_1 = require("./size/size.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +47,8 @@ exports.AppModule = AppModule = __decorate([
             inscription_module_1.InscriptionModule,
             authentification_module_1.AuthentificationModule,
             product_module_1.ProductModule,
+            couleur_module_1.CouleurModule,
+            size_module_1.SizeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

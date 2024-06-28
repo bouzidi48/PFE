@@ -13,10 +13,12 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UserPasswordOublierDto } from './dto/password-oublier.dto';
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { request } from 'http';
+import { UserService } from 'src/user/user.service';
+import { UserUpdateDto } from 'src/user/dto/update-user.dto';
 @Injectable()
 export class AuthentificationService {
   constructor(
-    @InjectRepository(User) private userRepository:UserRepository,
+    private readonly userService: UserService,
     private readonly mailerService:MailerService,
   ) {}
 
@@ -48,7 +50,7 @@ export class AuthentificationService {
 
  
   async login(@Session() request:Record<string, any>, userLoginDto: UserLoginDto) {
-    const user = await this.userRepository.findOne({ where: { username: userLoginDto.username } });
+    const user = await this.userService.findByUserName({username:userLoginDto.username});
     console.log(typeof(user))
     if (!user) {
       return await {
@@ -81,7 +83,7 @@ export class AuthentificationService {
   }
 
   async forgotPassword(@Session() request:Record<string, any>,userPasswordOublierDto: UserPasswordOublierDto) {
-    const user = await this.userRepository.findOne({ where: { email: userPasswordOublierDto.email } });
+    const user = await this.userService.findByEmail({email:userPasswordOublierDto.email});
     if (!user) {
       return await {
         message: 'Email introuvable',
@@ -123,10 +125,8 @@ export class AuthentificationService {
       console.log("1")
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(passDto.password, saltRounds);
-      user.password = hashedPassword;
-      user.updatedate = new Date();
-      console.log(user)
-      this.userRepository.save(user);
+      const updateUser = { ...user, password: hashedPassword };
+      await this.userService.update(user,updateUser)
       console.log(user)
       return await {
         message: 'vous avez bien changer votre mot de passe',

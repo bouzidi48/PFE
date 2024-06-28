@@ -32,11 +32,8 @@ let CategoriesController = class CategoriesController {
     findByName(nameCategory) {
         return this.categoriesService.findByName(nameCategory);
     }
-    findOne(id) {
-        return this.categoriesService.findOne(+id);
-    }
-    async findSubcategories(parentCategoryId) {
-        return this.categoriesService.findSubcategories(parentCategoryId);
+    async findSubCategories(createCategoryDto) {
+        return await this.categoriesService.findSubcategories(createCategoryDto);
     }
     async update(request, id, updateCategoryDto) {
         return await this.categoriesService.update(request, +id, updateCategoryDto);
@@ -55,7 +52,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -68,19 +65,12 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findByName", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)('SubCategories'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CategoriesController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Get)(':id/subcategories'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [find_ByName_dto_1.FindByNameCategoryDto]),
     __metadata("design:returntype", Promise)
-], CategoriesController.prototype, "findSubcategories", null);
+], CategoriesController.prototype, "findSubCategories", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Session)()),
@@ -103,7 +93,4 @@ exports.CategoriesController = CategoriesController = __decorate([
     (0, common_1.Controller)('categories'),
     __metadata("design:paramtypes", [categories_service_1.CategoriesService])
 ], CategoriesController);
-function parentCategoryId(id) {
-    throw new Error('Function not implemented.');
-}
 //# sourceMappingURL=categories.controller.js.map

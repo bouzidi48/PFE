@@ -16,16 +16,16 @@ export class ProductController {
   }
 
   @Get('all')
-  findAll(@Session() request:Record<string, any>) {
-    return this.productService.findAll(request);
+  findAll() {
+    return this.productService.findAll();
   }
   @Get('findbyCategory')
-  findByCategory(@Session() request:Record<string, any>,@Body() findByCategory: FindByCategorieDto) {
-    return this.productService.findByCategory(request,findByCategory);
+  findByCategory(@Body() findByCategory: FindByCategorieDto) {
+    return this.productService.findByCategory(findByCategory);
   }
   @Get('findbyNameProduct')
-  findByNameProduct(@Session() request:Record<string, any>,@Body() nameProduct: FindByNameProductDto) {
-    return this.productService.findByNameProduct(request,nameProduct);
+  findByNameProduct(@Body() nameProduct: FindByNameProductDto) {
+    return this.productService.findByNameProduct(nameProduct);
   }
 
   @Put('update')

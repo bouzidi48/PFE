@@ -14,6 +14,11 @@ import { UserNameUpdateDto } from './dto/update-username.dto';
 import * as bcrypt from 'bcrypt';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
 import { AncienUsernameDto } from './dto/ancien-username.dto';
+import { UserCreateDto } from './dto/create-user.dto';
+import { FindById } from './dto/find-id.dto';
+import { FindByEmail } from './dto/find-email.dto';
+import { FindByUsername } from './dto/find-username.dto';
+import { UserUpdateDto } from './dto/update-user.dto';
 
 
 
@@ -113,5 +118,29 @@ export class UserService {
       const user=await this.userRepository.findOneBy({id});
       if(!user) throw new NotFoundException('user not found ')
       return user;
+    }
+
+    async create(createUserDto:UserCreateDto) {
+      const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
+      this.userRepository.save(user);
+    }
+    async findById(find:FindById) {
+      const user = await this.userRepository.findOne({ where: { id:find.id } });
+      return user;
+    }
+    async findByEmail(find:FindByEmail) {
+      const user = await this.userRepository.findOne({ where: { email:find.email } });
+      return user;
+    }
+    async findByUserName(find:FindByUsername) {
+      const user = await this.userRepository.findOne({ where: { username:find.username } });
+      return user;
+    }
+
+    async update(user:User, updateUserDto: UserUpdateDto) {
+      user.password = updateUserDto.password;
+      user.username = updateUserDto.username;
+      user.updatedate = new Date();
+      this.userRepository.save(user);
     }
 }

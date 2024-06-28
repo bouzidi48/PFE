@@ -111,6 +111,28 @@ let UserService = class UserService {
             throw new common_1.NotFoundException('user not found ');
         return user;
     }
+    async create(createUserDto) {
+        const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
+        this.userRepository.save(user);
+    }
+    async findById(find) {
+        const user = await this.userRepository.findOne({ where: { id: find.id } });
+        return user;
+    }
+    async findByEmail(find) {
+        const user = await this.userRepository.findOne({ where: { email: find.email } });
+        return user;
+    }
+    async findByUserName(find) {
+        const user = await this.userRepository.findOne({ where: { username: find.username } });
+        return user;
+    }
+    async update(user, updateUserDto) {
+        user.password = updateUserDto.password;
+        user.username = updateUserDto.username;
+        user.updatedate = new Date();
+        this.userRepository.save(user);
+    }
 };
 exports.UserService = UserService;
 __decorate([

@@ -17,14 +17,13 @@ const common_1 = require("@nestjs/common");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
-const user_entity_1 = require("../user/entities/user.entity");
-const user_repository_1 = require("../user/user.repository");
 const category_repository_1 = require("./category.repository");
 const user_enum_1 = require("../enum/user_enum");
+const user_service_1 = require("../user/user.service");
 let CategoriesService = class CategoriesService {
-    constructor(categoryRepository, userRepository) {
+    constructor(categoryRepository, userService) {
         this.categoryRepository = categoryRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
     async create(request, createCategoryDto) {
         const idAdmin = request.idUser;
@@ -35,10 +34,17 @@ let CategoriesService = class CategoriesService {
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
-        const admin = await this.userRepository.findOne({ where: { id: idAdmin } });
+        const admin = await this.userService.findById(idAdmin);
         if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        const category1 = await this.categoryRepository.findOne({ where: { nameCategory: createCategoryDto.nameCategory } });
+        if (category1) {
+            return await {
+                message: 'ce category existe deja',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
@@ -66,16 +72,32 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    async findSubcategories(parentCategoryId) {
-        const parentCategory = await this.categoryRepository.findOne({
-            where: { id: parentCategoryId },
-            relations: ['subcategories'],
-        });
-        console.log(parentCategory);
-        return parentCategory.subcategories;
+    async findSubcategories(parentCategoryName) {
+        const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory } });
+        if (!category) {
+            return {
+                message: 'la categorie parente n\'existe pas',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } } });
+        return {
+            message: subcategories,
+            statusCode: common_1.HttpStatus.OK,
+        };
     }
     async findAll() {
-        return await this.categoryRepository.find();
+        const categories = await this.categoryRepository.find();
+        if (!categories) {
+            return await {
+                message: 'aucun produit n\'existe',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        return await {
+            message: categories,
+            statusCode: common_1.HttpStatus.OK,
+        };
     }
     async findByName(nameCategory) {
         return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
@@ -131,11 +153,7 @@ __decorate([
 exports.CategoriesService = CategoriesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.CategoryEntity)),
-    __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [category_repository_1.CategoryRepository,
-        user_repository_1.UserRepository])
+        user_service_1.UserService])
 ], CategoriesService);
-function CurrentUser() {
-    throw new Error('Function not implemented.');
-}
 //# sourceMappingURL=categories.service.js.map
