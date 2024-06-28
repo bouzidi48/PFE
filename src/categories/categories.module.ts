@@ -13,6 +13,7 @@ import { UserModule } from 'src/user/user.module';
   imports: [TypeOrmModule.forFeature([CategoryEntity,CategoryRepository]),UserModule],
   controllers: [CategoriesController],
   providers: [CategoriesService],
+  exports:[CategoriesService]
   
   
 })

@@ -23,6 +23,9 @@ export class Couleur {
     @Column()
     updatedate: Date;
 
+    @ManyToOne(()=>User,(user)=>user.couleurs)
+    addedBy:User;
+
     @OneToMany(()=>Size,(siz)=>siz.couleur)
     sizes:Size[];
 

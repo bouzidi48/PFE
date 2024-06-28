@@ -6,6 +6,7 @@ import { UserService } from 'src/user/user.service';
 import { CategoryRepository } from './category.repository';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
+import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 export declare class CategoriesService {
     private readonly categoryRepository;
     private readonly userService;
@@ -31,7 +32,7 @@ export declare class CategoriesService {
         message: CategoryEntity[];
         statusCode: HttpStatus;
     }>;
-    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
+    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity>;
     findOne(id: number): Promise<CategoryEntity>;
     update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity | {
         message: string;
@@ -41,4 +42,5 @@ export declare class CategoriesService {
         message: string;
         statusCode: HttpStatus;
     }>;
+    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<CategoryEntity>;
 }

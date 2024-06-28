@@ -100,7 +100,8 @@ let CategoriesService = class CategoriesService {
         };
     }
     async findByName(nameCategory) {
-        return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+        const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+        return categorie;
     }
     async findOne(id) {
         return await this.categoryRepository.findOne({
@@ -157,6 +158,10 @@ let CategoriesService = class CategoriesService {
         }
         Object.assign(category, fields);
         return await this.categoryRepository.delete(id);
+    }
+    async findByIdAndName(createCategoryDto) {
+        const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id, nameCategory: createCategoryDto.nameCategory }, select: {} });
+        return categorie;
     }
 };
 exports.CategoriesService = CategoriesService;

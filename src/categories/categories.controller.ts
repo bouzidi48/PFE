@@ -10,6 +10,7 @@ import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { CategoryEntity } from './entities/category.entity';
+import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 
 
 
@@ -31,12 +32,12 @@ export class CategoriesController {
   findByName(@Body()nameCategory:FindByNameCategoryDto){
     return this.categoriesService.findByName(nameCategory)
   }  
-/*
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(+id);
   }
-*/
+
   @Get('SubCategories')
   async findSubCategories(@Body() createCategoryDto: FindByNameCategoryDto ) {
     return  await this.categoriesService.findSubcategories(createCategoryDto);
@@ -48,8 +49,12 @@ export class CategoriesController {
   }
 
   @Delete(':id')
- async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
+  async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
     return await this.categoriesService.remove(request,+id,deleteCategoryDto);
+  }
+  @Get('findByIdAndName')
+  async findByIdAndName(@Body() createCategoryDto: FindByIdAndNameDto ) {
+    return  await this.categoriesService.findByIdAndName(createCategoryDto);
   }
 }
 

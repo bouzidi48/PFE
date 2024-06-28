@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { CategoryEntity } from './entities/category.entity';
+import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 export declare class CategoriesController {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
@@ -21,7 +22,8 @@ export declare class CategoriesController {
         message: CategoryEntity[];
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
-    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
+    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity>;
+    findOne(id: string): Promise<CategoryEntity>;
     findSubCategories(createCategoryDto: FindByNameCategoryDto): Promise<{
         message: string;
         statusCode: import("@nestjs/common").HttpStatus;
@@ -37,4 +39,5 @@ export declare class CategoriesController {
         message: string;
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
+    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<CategoryEntity>;
 }

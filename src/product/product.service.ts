@@ -12,12 +12,14 @@ import { Roles } from 'src/enum/user_enum';
 import { FindByNameProductDto } from './dto/find-by-name-product.dto';
 import { FindByCategorieDto } from './dto/find-by-categorie.dto';
 import { RemoveProductDto } from './dto/remove-product.dto';
+import { CategoriesService } from 'src/categories/categories.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(CategoryEntity)private readonly categoryRepository:CategoryRepository,
-    @InjectRepository(User) private userRepository:UserRepository,
+    private readonly categoryService:CategoriesService,
+    private readonly userService:UserService,
     @InjectRepository(Product) private readonly productRepository:ProductRepository  
   ){}
   async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
@@ -29,7 +31,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+    const admin= await this.userService.findById(idAdmin)
     if(!admin || admin.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
@@ -44,7 +46,7 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const category=await this.categoryRepository.findOne({where : {nameCategory:createProductDto.nomCategory,addedBy:idAdmin}});
+    const category=await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:createProductDto.nomCategory})
     if(!category) {
       return await{
         message:'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
@@ -94,7 +96,7 @@ export class ProductService {
     }
   }
   async findByCategory(nameCategory:FindByCategorieDto) {
-    const categorie = await this.categoryRepository.findOne({where : {nameCategory:nameCategory.nameCategory}});
+    const categorie = await this.categoryService.findByName({nameCategory:nameCategory.nameCategory})
     console.log(categorie)
     if(!categorie) {
       return await{
@@ -128,7 +130,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin = await this.userRepository.findOne({where : {id:idAdmin}})
+    const admin = await this.userService.findById(idAdmin)
     if(!admin || admin.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
@@ -143,7 +145,7 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const category = await this.categoryRepository.findOne({where : {nameCategory:updateProductDto.nomCategory}});
+    const category = await this.categoryService.findByName({nameCategory:updateProductDto.nomCategory})
     if(!category) {
       return await{
         message:'la categorie que vous avez saisi n\'existe pas',
@@ -162,7 +164,6 @@ export class ProductService {
     product.nameProduct = updateProductDto.nameProduct;
     product.description = updateProductDto.description;
     product.price = updateProductDto.price;
-    //product.stockQuantity = updateProductDto.stockQuantity;
     product.category = category;
     product.updatedate = new Date();
     this.productRepository.save(product)
@@ -179,7 +180,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin = await this.userRepository.findOne({where : {id:idAdmin}})
+    const admin = await this.userService.findById(idAdmin)
     if(!admin || admin.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',

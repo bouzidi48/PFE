@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const category_entity_1 = require("../../categories/entities/category.entity");
+const couleur_entity_1 = require("../../couleur/entities/couleur.entity");
 const user_enum_1 = require("../../enum/user_enum");
 const product_entity_1 = require("../../product/entities/product.entity");
 const review_entity_1 = require("../../review/entities/review.entity");
@@ -54,6 +55,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => category_entity_1.CategoryEntity, (cat) => cat.addedBy),
     __metadata("design:type", Array)
 ], User.prototype, "categories", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => couleur_entity_1.Couleur, (coul) => coul.addedBy),
+    __metadata("design:type", Array)
+], User.prototype, "couleurs", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => product_entity_1.Product, (product) => product.addedBy),
     __metadata("design:type", Array)

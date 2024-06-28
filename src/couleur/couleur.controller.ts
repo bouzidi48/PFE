@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session } from '@nestjs/common';
 import { CouleurService } from './couleur.service';
 import { CreateCouleurDto } from './dto/create-couleur.dto';
 import { UpdateCouleurDto } from './dto/update-couleur.dto';
@@ -7,9 +7,10 @@ import { UpdateCouleurDto } from './dto/update-couleur.dto';
 export class CouleurController {
   constructor(private readonly couleurService: CouleurService) {}
 
-  @Post()
-  create(@Body() createCouleurDto: CreateCouleurDto) {
-    return this.couleurService.create(createCouleurDto);
+  @Post('create')
+  create(@Session() request:Record<string, any>,@Body() createCouleurDto: CreateCouleurDto) {
+    const idAdmin = request.idUser;
+    
   }
 
   @Get()

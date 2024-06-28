@@ -19,6 +19,7 @@ const create_category_dto_1 = require("./dto/create-category.dto");
 const update_category_dto_1 = require("./dto/update-category.dto");
 const delete_category_dto_1 = require("./dto/delete-category.dto");
 const find_ByName_dto_1 = require("./dto/find-ByName.dto");
+const find_ById_Name_dto_1 = require("./dto/find-ById-Name.dto");
 let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
@@ -32,6 +33,9 @@ let CategoriesController = class CategoriesController {
     findByName(nameCategory) {
         return this.categoriesService.findByName(nameCategory);
     }
+    findOne(id) {
+        return this.categoriesService.findOne(+id);
+    }
     async findSubCategories(createCategoryDto) {
         return await this.categoriesService.findSubcategories(createCategoryDto);
     }
@@ -40,6 +44,9 @@ let CategoriesController = class CategoriesController {
     }
     async remove(request, id, deleteCategoryDto) {
         return await this.categoriesService.remove(request, +id, deleteCategoryDto);
+    }
+    async findByIdAndName(createCategoryDto) {
+        return await this.categoriesService.findByIdAndName(createCategoryDto);
     }
 };
 exports.CategoriesController = CategoriesController;
@@ -65,6 +72,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findByName", null);
 __decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "findOne", null);
+__decorate([
     (0, common_1.Get)('SubCategories'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -89,6 +103,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, delete_category_dto_1.DeleteCategoryDto]),
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)('findByIdAndName'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [find_ById_Name_dto_1.FindByIdAndNameDto]),
+    __metadata("design:returntype", Promise)
+], CategoriesController.prototype, "findByIdAndName", null);
 exports.CategoriesController = CategoriesController = __decorate([
     (0, common_1.Controller)('categories'),
     __metadata("design:paramtypes", [categories_service_1.CategoriesService])

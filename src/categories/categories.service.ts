@@ -12,6 +12,8 @@ import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
+import { UserController } from 'src/user/user.controller';
+import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 
 
 
@@ -108,8 +110,9 @@ export class CategoriesService {
       statusCode:HttpStatus.OK,
     }
   }
-  async findByName(nameCategory:FindByNameCategoryDto ) {
-    return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+  async findByName(nameCategory:FindByNameCategoryDto ):Promise<CategoryEntity> {
+    const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+    return categorie;
   }
  async  findOne(id: number):Promise<CategoryEntity> {
     return  await this.categoryRepository.findOne(
@@ -183,7 +186,10 @@ export class CategoriesService {
 
     return await this.categoryRepository.delete(id);
 
-    
+  }
+  async findByIdAndName(createCategoryDto: FindByIdAndNameDto ):Promise<CategoryEntity> {
+    const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
+    return categorie;
   }
 }
 

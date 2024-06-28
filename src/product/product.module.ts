@@ -8,10 +8,13 @@ import { CategoryEntity } from 'src/categories/entities/category.entity';
 import { CategoryRepository } from 'src/categories/category.repository';
 import { ProductRepository } from './product.repository';
 import { Product } from './entities/product.entity';
+import { UserModule } from 'src/user/user.module';
+import { CategoriesModule } from 'src/categories/categories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,UserRepository,CategoryEntity,CategoryRepository,Product,ProductRepository])],
+  imports: [TypeOrmModule.forFeature([Product,ProductRepository]),UserModule,CategoriesModule],
   controllers: [ProductController],
   providers: [ProductService],
+  exports:[ProductService]
 })
 export class ProductModule {}

@@ -8,9 +8,11 @@ import { Couleur } from './entities/couleur.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { ProductRepository } from 'src/product/product.repository';
 import { CouleurRepository } from './couleur.repository';
+import { ProductModule } from 'src/product/product.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,UserRepository,Product,ProductRepository,Couleur,CouleurRepository])],
+  imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule],
   controllers: [CouleurController],
   providers: [CouleurService],
 })

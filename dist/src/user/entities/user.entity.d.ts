@@ -11,6 +11,7 @@ export declare class User {
     updatedate: Date;
     role: Roles;
     categories: CategoryEntity[];
+    couleurs: CategoryEntity[];
     products: Product[];
     review: ReviewEntity[];
 }

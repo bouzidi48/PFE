@@ -1,4 +1,5 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
+import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
 import { Product } from "src/product/entities/product.entity";
 import { ReviewEntity } from "src/review/entities/review.entity";
@@ -35,6 +36,9 @@ export class User {
 
     @OneToMany(()=>CategoryEntity,(cat)=>cat.addedBy)
     categories:CategoryEntity[];
+
+    @OneToMany(()=>Couleur,(coul)=>coul.addedBy)
+    couleurs:CategoryEntity[];
 
     @OneToMany(()=>Product,(product)=>product.addedBy)
     products:Product[];
