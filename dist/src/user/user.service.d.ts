@@ -5,6 +5,11 @@ import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
 import { AncienUsernameDto } from './dto/ancien-username.dto';
+import { UserCreateDto } from './dto/create-user.dto';
+import { FindById } from './dto/find-id.dto';
+import { FindByEmail } from './dto/find-email.dto';
+import { FindByUsername } from './dto/find-username.dto';
+import { UserUpdateDto } from './dto/update-user.dto';
 export declare class UserService {
     private userRepository;
     constructor(userRepository: UserRepository);
@@ -25,4 +30,9 @@ export declare class UserService {
         statusCode: HttpStatus;
     }>;
     findOne(id: number): Promise<User>;
+    create(createUserDto: UserCreateDto): Promise<void>;
+    findById(find: FindById): Promise<User>;
+    findByEmail(find: FindByEmail): Promise<User>;
+    findByUserName(find: FindByUsername): Promise<User>;
+    update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

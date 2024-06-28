@@ -11,6 +11,8 @@ import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { CategoryEntity } from './entities/category.entity';
 
+
+
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -20,7 +22,7 @@ export class CategoriesController {
     
   }
 
-  @Get()
+  @Get('all')
   async findAll() {
     return await this.categoriesService.findAll();
   }
@@ -29,16 +31,17 @@ export class CategoriesController {
   findByName(@Body()nameCategory:FindByNameCategoryDto){
     return this.categoriesService.findByName(nameCategory)
   }  
-
+/*
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(+id);
   }
-
-  @Get(':id/subcategories')
-  async findSubcategories(@Param('id', ParseIntPipe) parentCategoryId: number) {
-    return this.categoriesService.findSubcategories(parentCategoryId);
-  } 
+*/
+  @Get('SubCategories')
+  async findSubCategories(@Body() createCategoryDto: FindByNameCategoryDto ) {
+    return  await this.categoriesService.findSubcategories(createCategoryDto);
+    
+  }
   @Patch(':id')
   async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(request,+id,updateCategoryDto);
@@ -54,7 +57,4 @@ export class CategoriesController {
 
 
 
-function parentCategoryId(id: string): import("./dto/find-BySousCategory.dto").FindBySousCategoryDto {
-  throw new Error('Function not implemented.');
-}
 

@@ -14,7 +14,6 @@ import { CardModule } from './card/card.module';
 import { InscriptionModule } from './inscription/inscription.module';
 import { AuthentificationModule } from './authentification/authentification.module';
 import { ProductModule } from './product/product.module';
-import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -42,8 +41,6 @@ import { ReviewModule } from './review/review.module';
     AuthentificationModule,
    
     ProductModule,
-   
-    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService]

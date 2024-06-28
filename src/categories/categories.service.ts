@@ -3,7 +3,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { UserService } from 'src/user/user.service';
@@ -12,13 +12,15 @@ import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
-import { FindBySousCategoryDto } from './dto/find-BySousCategory.dto';
+import { UserService } from 'src/user/user.service';
+
+
 
 @Injectable()
 export class CategoriesService {
   constructor(
-    @InjectRepository(CategoryEntity)private readonly categoryRepository:CategoryRepository,
-    @InjectRepository(User) private userRepository:UserRepository,
+    @InjectRepository(CategoryEntity) private readonly categoryRepository:CategoryRepository,
+    private readonly userService:UserService,
  
   ){}
   
@@ -32,12 +34,19 @@ export class CategoriesService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+    const admin= await this.userService.findById(idAdmin)
     if(!admin || admin.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
       
+      }
+    }
+    const category1=await this.categoryRepository.findOne({where : {nameCategory:createCategoryDto.nameCategory}});
+    if(category1) {
+      return await{
+        message:'ce category existe deja',
+        statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     const category=await this.categoryRepository.create(createCategoryDto);
@@ -69,27 +78,35 @@ export class CategoriesService {
     }
   }
   
-  /* async findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]> {
-    return this.categoryRepository.find({
-      where: { parentCategory: { id: parentCategoryId } },
-      relations: ['subcategories', 'subcategories.subcategories'],
-    });
-  } 
- */
 
-  async findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]> {
-    const parentCategory = await this.categoryRepository.findOne({
-      where: { id: parentCategoryId },
-      relations: ['subcategories'],
-    });
-  
-    console.log(parentCategory);
-  
-    return parentCategory.subcategories;
+  async findSubcategories(parentCategoryName: FindByNameCategoryDto){
+    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
+    if(!category) {
+      return {
+        message: 'la categorie parente n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+    
+    const subcategories = await this.categoryRepository.find({ where: { parentCategory : { id: (await category).id } }});
+    return {
+      message: subcategories,
+      statusCode: HttpStatus.OK,
+    };
   }
   
   async findAll() {
-    return await this.categoryRepository.find();
+    const categories = await this.categoryRepository.find();
+    if(!categories) {
+      return await{
+        message:'aucun produit n\'existe',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:categories,
+      statusCode:HttpStatus.OK,
+    }
   }
   async findByName(nameCategory:FindByNameCategoryDto ) {
     return await this.categoryRepository.find({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
@@ -168,8 +185,5 @@ export class CategoriesService {
 
     
   }
-}
-function CurrentUser(): (target: CategoriesService, propertyKey: "create", parameterIndex: 1) => void {
-  throw new Error('Function not implemented.');
 }
 

@@ -5,6 +5,10 @@ import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
 import { AncienUsernameDto } from './dto/ancien-username.dto';
+import { UserCreateDto } from './dto/create-user.dto';
+import { FindById } from './dto/find-id.dto';
+import { FindByEmail } from './dto/find-email.dto';
+import { FindByUsername } from './dto/find-username.dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -24,5 +28,9 @@ export declare class UserController {
         message: string;
         statusCode: HttpStatus;
     }>;
+    create(createUserDto: UserCreateDto): Promise<void>;
     findOne(id: string): Promise<User>;
+    findById(id: FindById): Promise<User>;
+    findByEmail(email: FindByEmail): Promise<User>;
+    findByUserName(username: FindByUsername): Promise<User>;
 }

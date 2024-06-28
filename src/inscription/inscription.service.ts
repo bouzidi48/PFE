@@ -8,17 +8,18 @@ import * as bcrypt from 'bcrypt';
 import { generate } from 'randomstring';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import { UserVerifyDto } from './dto/verify-user.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class InscriptionService {
   constructor(
-    @InjectRepository(User) private userRepository:UserRepository,
+    private readonly userService: UserService,
     private readonly mailerService:MailerService,
   ) {}
 
   async signup(@Session() request:Record<string, any>,userSignUpDto: UserSignUpDto) {
-    const existingEmail = await this.userRepository.findOne({ where: { email: userSignUpDto.email } });
-    const existingUser = await this.userRepository.findOne({ where: { username: userSignUpDto.username } });
+    const existingEmail = await this.userService.findByEmail({email:userSignUpDto.email});
+    const existingUser = await this.userService.findByUserName({username:userSignUpDto.username});
     if (existingEmail || existingUser) {
       return await {
         message: 'Email ou username déjà existe',
@@ -79,8 +80,7 @@ export class InscriptionService {
     if (this.verfierCode(request,codeDto)) {
       const userSignUpDto = request.user
       console.log(userSignUpDto)
-      const user = this.userRepository.create({ ...userSignUpDto, createdate: new Date() });
-      this.userRepository.save(user);
+      this.userService.create(userSignUpDto);
       return await {
         message: 'Bienvenue dans notre application',
         statusCode: HttpStatus.OK,

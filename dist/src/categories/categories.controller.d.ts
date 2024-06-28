@@ -14,10 +14,21 @@ export declare class CategoriesController {
         message: CategoryEntity;
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
-    findAll(): Promise<CategoryEntity[]>;
+    findAll(): Promise<{
+        message: string;
+        statusCode: import("@nestjs/common").HttpStatus;
+    } | {
+        message: CategoryEntity[];
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
     findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
-    findOne(id: string): Promise<CategoryEntity>;
-    findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]>;
+    findSubCategories(createCategoryDto: FindByNameCategoryDto): Promise<{
+        message: string;
+        statusCode: import("@nestjs/common").HttpStatus;
+    } | {
+        message: CategoryEntity[];
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
     update(request: Record<string, any>, id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity | {
         message: string;
         statusCode: import("@nestjs/common").HttpStatus;

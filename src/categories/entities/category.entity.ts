@@ -5,8 +5,10 @@ import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "type
 export class CategoryEntity {
     @PrimaryGeneratedColumn()
     id:number;
+    
     @Column()
     nameCategory:string;
+    
     @Column()
     description:string;
 

@@ -58,7 +58,7 @@ export class ProductService {
     product.createdate=new Date();
     this.productRepository.save(product)
     return await {
-      message:product,
+      message:'produit ajoute avec succes',
       statusCode:HttpStatus.OK,
     
     }
@@ -66,14 +66,7 @@ export class ProductService {
   
 
 
-  async findAll(@Session() request:Record<string, any>) {
-    const idUser = request.idUser
-    if(!idUser){
-      return await {
-        message: 'vous devez vous connecter',
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
+  async findAll() {
     const products = await this.productRepository.find();
     if(!products) {
       return await{
@@ -86,14 +79,7 @@ export class ProductService {
       statusCode:HttpStatus.OK,
     }
   }
-  async findByNameProduct(@Session() request:Record<string, any>,nameProduct:FindByNameProductDto) {
-    const idUser = request.idUser
-    if(!idUser){
-      return await {
-        message: 'vous devez vous connecter',
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
+  async findByNameProduct(nameProduct:FindByNameProductDto) {
     const products = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
     if(!products) {
       return await{
@@ -107,14 +93,7 @@ export class ProductService {
     
     }
   }
-  async findByCategory(@Session() request:Record<string, any>,nameCategory:FindByCategorieDto) {
-    const idUser = request.idUser
-    if(!idUser){
-      return await {
-        message: 'vous devez vous connecter',
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
+  async findByCategory(nameCategory:FindByCategorieDto) {
     const categorie = await this.categoryRepository.findOne({where : {nameCategory:nameCategory.nameCategory}});
     console.log(categorie)
     if(!categorie) {
@@ -183,7 +162,7 @@ export class ProductService {
     product.nameProduct = updateProductDto.nameProduct;
     product.description = updateProductDto.description;
     product.price = updateProductDto.price;
-    product.stockQuantity = updateProductDto.stockQuantity;
+    //product.stockQuantity = updateProductDto.stockQuantity;
     product.category = category;
     product.updatedate = new Date();
     this.productRepository.save(product)
