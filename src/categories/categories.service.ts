@@ -12,7 +12,7 @@ import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
-import { UserService } from 'src/user/user.service';
+
 
 
 
