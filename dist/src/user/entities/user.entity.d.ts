@@ -1,6 +1,7 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/enum/user_enum";
 import { Product } from "src/product/entities/product.entity";
+import { ReviewEntity } from "src/review/entities/review.entity";
 export declare class User {
     id: number;
     username: string;
@@ -11,4 +12,5 @@ export declare class User {
     role: Roles;
     categories: CategoryEntity[];
     products: Product[];
+    review: ReviewEntity[];
 }

@@ -1,5 +1,7 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/enum/user_enum";
+import { ReviewEntity } from "src/review/entities/review.entity";
+
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -33,4 +35,9 @@ export class Product {
 
     @ManyToOne(()=>CategoryEntity,(cat)=>cat.products)
     category:CategoryEntity;
+
+    @OneToMany(()=>ReviewEntity,(rev)=>rev.product)
+    review:ReviewEntity[];
+
+     
 }

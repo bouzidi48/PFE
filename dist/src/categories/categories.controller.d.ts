@@ -18,6 +18,12 @@ export declare class CategoriesController {
     findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
     findOne(id: string): Promise<CategoryEntity>;
     findSubcategories(parentCategoryId: number): Promise<CategoryEntity[]>;
-    update(request: Record<string, any>, id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity>;
-    remove(request: Record<string, any>, id: string, deleteCategoryDto: DeleteCategoryDto): Promise<import("typeorm").DeleteResult>;
+    update(request: Record<string, any>, id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity | {
+        message: string;
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
+    remove(request: Record<string, any>, id: string, deleteCategoryDto: DeleteCategoryDto): Promise<import("typeorm").DeleteResult | {
+        message: string;
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
 }

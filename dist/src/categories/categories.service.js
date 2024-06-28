@@ -96,7 +96,21 @@ let CategoriesService = class CategoriesService {
     async update(request, id, fields) {
         const category = await this.findOne(id);
         if (!category)
-            throw new common_1.NotFoundException('Catgory not found.');
+            throw new common_1.NotFoundException('Category not found.');
+        const idAdmin = request.idUser;
+        if (!idAdmin) {
+            return await {
+                message: 'vous devez vous connecter pour Modifier une categorie',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        const admin = await this.userRepository.findOne({ where: { id: idAdmin } });
+        if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
+            return await {
+                message: 'vous devez etre un admin',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         Object.assign(category, fields);
         category.updatedAt = new Date();
         return await this.categoryRepository.save(category);
@@ -104,7 +118,21 @@ let CategoriesService = class CategoriesService {
     async remove(request, id, fields) {
         const category = await this.findOne(id);
         if (!category)
-            throw new common_1.NotFoundException('Catgory not found.');
+            throw new common_1.NotFoundException('Category not found.');
+        const idAdmin = request.idUser;
+        if (!idAdmin) {
+            return await {
+                message: 'vous devez vous connecter pour Modifier une categorie',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        const admin = await this.userRepository.findOne({ where: { id: idAdmin } });
+        if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
+            return await {
+                message: 'vous devez etre un admin',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         Object.assign(category, fields);
         return await this.categoryRepository.delete(id);
     }

@@ -52,7 +52,7 @@ export class UserService {
       user.updatedate=new Date();
       this.userRepository.save(user);
       return await {
-        message: 'le mot de passe modifier avec succés,vous devez vous connecter avec votre nouveau mot de passe',
+        message: 'le mot de passe modifier avec succes ,vous devez vous connecter avec votre nouveau mot de passe',
         statusCode: HttpStatus.OK,
       };
     }

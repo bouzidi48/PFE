@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
+import { UserService } from 'src/user/user.service';
 
 import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
@@ -111,17 +112,56 @@ export class CategoriesService {
     });
   }
 
-  async update(@Session() request:Record<string, any>,id: number, fields:Partial< UpdateCategoryDto> ) {
+  /* async update(@Session() request:Record<string, any>,id: number, fields:Partial< UpdateCategoryDto> ) {
     const category=await this.findOne(id);
     if(!category) throw new NotFoundException('Catgory not found.');
     Object.assign(category,fields);
     category.updatedAt=new Date();
     return await  this.categoryRepository.save(category);
-  }
+  } */
+
+    async update(@Session() request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>) {
+      const category = await this.findOne(id);
+      if (!category) throw new NotFoundException('Category not found.');
+      const idAdmin=request.idUser
+      if(!idAdmin) {
+        return await {
+          message: 'vous devez vous connecter pour Modifier une categorie',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+    if(!admin || admin.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    
+      Object.assign(category, fields);
+      category.updatedAt = new Date();
+      return await this.categoryRepository.save(category);
+    }
 
   async remove(@Session() request:Record<string, any>,id: number, fields:Partial< DeleteCategoryDto>) {
-    const category=await this.findOne(id);
-    if(!category) throw new NotFoundException('Catgory not found.');
+    const category = await this.findOne(id);
+    if (!category) throw new NotFoundException('Category not found.');
+    const idAdmin=request.idUser
+    if(!idAdmin) {
+      return await {
+        message: 'vous devez vous connecter pour Modifier une categorie',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+  if(!admin || admin.role!=Roles.ADMIN) {
+    return await{
+      message:'vous devez etre un admin',
+      statusCode:HttpStatus.BAD_REQUEST,
+    
+    }
+  }
     Object.assign(category,fields);
 
     return await this.categoryRepository.delete(id);

@@ -21,6 +21,12 @@ export declare class CategoriesService {
     findAll(): Promise<CategoryEntity[]>;
     findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity[]>;
     findOne(id: number): Promise<CategoryEntity>;
-    update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity>;
-    remove(request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>): Promise<import("typeorm").DeleteResult>;
+    update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity | {
+        message: string;
+        statusCode: HttpStatus;
+    }>;
+    remove(request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>): Promise<import("typeorm").DeleteResult | {
+        message: string;
+        statusCode: HttpStatus;
+    }>;
 }
