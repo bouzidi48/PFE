@@ -2,10 +2,10 @@ import { HttpStatus } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
+import { UserService } from 'src/user/user.service';
 import { CategoryRepository } from './category.repository';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
-import { UserService } from 'src/user/user.service';
 export declare class CategoriesService {
     private readonly categoryRepository;
     private readonly userService;

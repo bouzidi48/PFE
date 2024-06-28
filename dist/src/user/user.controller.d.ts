@@ -9,6 +9,7 @@ import { UserCreateDto } from './dto/create-user.dto';
 import { FindById } from './dto/find-id.dto';
 import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
+import { UserUpdateDto } from './dto/update-user.dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -33,4 +34,5 @@ export declare class UserController {
     findById(id: FindById): Promise<User>;
     findByEmail(email: FindByEmail): Promise<User>;
     findByUserName(username: FindByUsername): Promise<User>;
+    update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
+const user_entity_1 = require("./entities/user.entity");
 const modifier_password_dto_1 = require("./dto/modifier-password.dto");
 const update_username_dto_1 = require("./dto/update-username.dto");
 const ancien_password_dto_1 = require("./dto/ancien-password.dto");
@@ -23,6 +24,7 @@ const create_user_dto_1 = require("./dto/create-user.dto");
 const find_id_dto_1 = require("./dto/find-id.dto");
 const find_email_dto_1 = require("./dto/find-email.dto");
 const find_username_dto_1 = require("./dto/find-username.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -53,6 +55,9 @@ let UserController = class UserController {
     }
     async findByUserName(username) {
         return await this.userService.findByUserName(username);
+    }
+    async update(user, updateUserDto) {
+        return await this.userService.update(user, updateUserDto);
     }
 };
 exports.UserController = UserController;
@@ -123,6 +128,13 @@ __decorate([
     __metadata("design:paramtypes", [find_username_dto_1.FindByUsername]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "findByUserName", null);
+__decorate([
+    (0, common_1.Put)('update'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User, update_user_dto_1.UserUpdateDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "update", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

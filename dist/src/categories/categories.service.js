@@ -17,9 +17,9 @@ const common_1 = require("@nestjs/common");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
+const user_service_1 = require("../user/user.service");
 const category_repository_1 = require("./category.repository");
 const user_enum_1 = require("../enum/user_enum");
-const user_service_1 = require("../user/user.service");
 let CategoriesService = class CategoriesService {
     constructor(categoryRepository, userService) {
         this.categoryRepository = categoryRepository;
