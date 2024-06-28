@@ -10,7 +10,7 @@ import { UserRepository } from 'src/user/user.repository';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity,CategoryRepository,User,UserRepository])],
+  imports: [TypeOrmModule.forFeature([CategoryEntity,CategoryRepository]),UserModule],
   controllers: [CategoriesController],
   providers: [CategoriesService],
   

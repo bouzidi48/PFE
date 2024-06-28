@@ -12,7 +12,7 @@ import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
-import { UserService } from 'src/user/user.service';
+
 
 
 
@@ -147,7 +147,7 @@ export class CategoriesService {
           statusCode: HttpStatus.BAD_REQUEST,
         }
       }
-      const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+      const admin= await this.userService.findById(idAdmin)
     if(!admin || admin.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
@@ -171,7 +171,7 @@ export class CategoriesService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userRepository.findOne({where : {id:idAdmin}})
+    const admin= await this.userService.findById(idAdmin)
   if(!admin || admin.role!=Roles.ADMIN) {
     return await{
       message:'vous devez etre un admin',

@@ -126,7 +126,7 @@ let CategoriesService = class CategoriesService {
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
-        const admin = await this.userRepository.findOne({ where: { id: idAdmin } });
+        const admin = await this.userService.findById(idAdmin);
         if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
@@ -148,7 +148,7 @@ let CategoriesService = class CategoriesService {
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
             };
         }
-        const admin = await this.userRepository.findOne({ where: { id: idAdmin } });
+        const admin = await this.userService.findById(idAdmin);
         if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
