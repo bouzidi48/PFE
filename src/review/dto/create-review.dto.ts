@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateReviewDto {
    @IsNotEmpty({message:'Product should be empty'})
    @IsNumber({},{message:'Product Id should be number'})
-
+   @IsOptional()
     productId:number;
 
     @IsNotEmpty({message:'title can not be empty'})

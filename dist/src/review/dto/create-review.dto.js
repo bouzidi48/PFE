@@ -17,6 +17,7 @@ exports.CreateReviewDto = CreateReviewDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'Product should be empty' }),
     (0, class_validator_1.IsNumber)({}, { message: 'Product Id should be number' }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateReviewDto.prototype, "productId", void 0);
 __decorate([

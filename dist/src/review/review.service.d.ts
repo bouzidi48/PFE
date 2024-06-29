@@ -18,5 +18,5 @@ export declare class ReviewService {
     findOne(id: number): string;
     update(id: number, updateReviewDto: UpdateReviewDto): string;
     remove(id: number): string;
-    findOneByUserAndProduct(userId: number, productId: number): Promise<ReviewEntity>;
+    findOneByUserAndProduct(userId: number): Promise<ReviewEntity>;
 }

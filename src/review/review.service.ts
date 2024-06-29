@@ -43,16 +43,16 @@ export class ReviewService {
       }
     }
 
-    let review = await this.findOneByUserAndProduct(idAdmin,createReviewDto.productId);
-    if(review){
+    let review = await this.findOneByUserAndProduct(idAdmin);
+    if(!review){
       return await{
-        message:'ce review existe deja',
+        message:'user no found',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
       review=this.reviewRepository.create(createReviewDto);
       review.user=admin.data;
-      //review.product=product;
+      review.product=product.data;
       review.createdate=new Date();
       this.reviewRepository.save(review)
       return await {
@@ -77,15 +77,13 @@ export class ReviewService {
     return `This action removes a #${id} review`;
   }
 
-  async findOneByUserAndProduct(userId:number,productId:number){
+  async findOneByUserAndProduct(userId:number){
     return await this.reviewRepository.findOne({
       where : {
         user : {
           id : userId
         },
-        product : {
-          id : productId
-        }
+       
       },
       relations:{
         user:true,
