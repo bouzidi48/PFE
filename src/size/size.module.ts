@@ -8,9 +8,11 @@ import { Product } from 'src/product/entities/product.entity';
 import { ProductRepository } from 'src/product/product.repository';
 import { Size } from './entities/size.entity';
 import { SizeRepository } from './size.repository';
+import { UserModule } from 'src/user/user.module';
+import { CouleurModule } from 'src/couleur/couleur.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,UserRepository,Product,ProductRepository,Size,SizeRepository])],
+  imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,CouleurModule],
   controllers: [SizeController],
   providers: [SizeService],
 })

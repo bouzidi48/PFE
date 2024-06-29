@@ -107,8 +107,12 @@ let UserService = class UserService {
     }
     async findOne(id) {
         const user = await this.userRepository.findOneBy({ id });
-        if (!user)
-            throw new common_1.NotFoundException('user not found ');
+        if (!user) {
+            return await {
+                data: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         return await {
             data: user,
             statusCode: common_1.HttpStatus.OK
@@ -120,8 +124,12 @@ let UserService = class UserService {
     }
     async findById(find) {
         const user = await this.userRepository.findOne({ where: { id: find.id } });
-        if (!user)
-            throw new common_1.NotFoundException('user not found ');
+        if (!user) {
+            return await {
+                data: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         return await {
             data: user,
             statusCode: common_1.HttpStatus.OK
@@ -129,8 +137,12 @@ let UserService = class UserService {
     }
     async findByEmail(find) {
         const user = await this.userRepository.findOne({ where: { email: find.email } });
-        if (!user)
-            throw new common_1.NotFoundException('user not found ');
+        if (!user) {
+            return await {
+                data: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         return await {
             data: user,
             statusCode: common_1.HttpStatus.OK
@@ -138,8 +150,12 @@ let UserService = class UserService {
     }
     async findByUserName(find) {
         const user = await this.userRepository.findOne({ where: { username: find.username } });
-        if (!user)
-            throw new common_1.NotFoundException('user not found ');
+        if (!user) {
+            return await {
+                message: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         return await {
             data: user,
             statusCode: common_1.HttpStatus.OK

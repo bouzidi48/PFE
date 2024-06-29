@@ -43,8 +43,13 @@ export declare class UserController {
         statusCode: HttpStatus;
     }>;
     findByUserName(username: FindByUsername): Promise<{
+        message: any;
+        statusCode: HttpStatus;
+        data?: undefined;
+    } | {
         data: User;
         statusCode: HttpStatus;
+        message?: undefined;
     }>;
     update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

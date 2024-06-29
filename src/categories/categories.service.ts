@@ -84,10 +84,21 @@ export class CategoriesService {
   
   async findSubcategories(parentCategoryName: FindByNameCategoryDto){
     const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
-    if(!category) throw new NotFoundException('parent category not found ')
+    if(!category){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+      
     
     const subcategories = await this.categoryRepository.find({ where: { parentCategory : { id: (await category).id } }});
-    if(!subcategories) throw new NotFoundException('subcategories not found ')
+    if(!subcategories){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data: subcategories,
         statusCode: HttpStatus.OK
@@ -96,7 +107,12 @@ export class CategoriesService {
   
   async findAll() {
     const categories = await this.categoryRepository.find();
-    if(!categories) throw new NotFoundException('subcategories not found ')
+    if(!categories){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data: categories,
         statusCode: HttpStatus.OK
@@ -104,7 +120,12 @@ export class CategoriesService {
   }
   async findByName(nameCategory:FindByNameCategoryDto ) {
     const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-    if(!categorie) throw new NotFoundException('subcategories not found ')
+    if(!categorie){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data: categorie,
         statusCode: HttpStatus.OK
@@ -187,7 +208,12 @@ export class CategoriesService {
   }
   async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
     const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
-    if(!categorie) throw new NotFoundException('subcategories not found ')
+    if(!categorie){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data: categorie,
         statusCode: HttpStatus.OK

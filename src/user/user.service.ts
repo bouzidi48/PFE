@@ -116,11 +116,16 @@ export class UserService {
 
     async findOne(id: number){
       const user=await this.userRepository.findOneBy({id});
-      if(!user) throw new NotFoundException('user not found ')
-      return await {
-        data: user,
-        statusCode: HttpStatus.OK
-      };
+      if(!user){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
     }
 
     async create(createUserDto:UserCreateDto) {
@@ -129,7 +134,12 @@ export class UserService {
     }
     async findById(find:FindById) {
       const user = await this.userRepository.findOne({ where: { id:find.id } });
-      if(!user) throw new NotFoundException('user not found ')
+      if(!user){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
         return await {
           data: user,
           statusCode: HttpStatus.OK
@@ -137,7 +147,12 @@ export class UserService {
     }
     async findByEmail(find:FindByEmail) {
       const user = await this.userRepository.findOne({ where: { email:find.email } });
-      if(!user) throw new NotFoundException('user not found ')
+      if(!user){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
         return await {
           data: user,
           statusCode: HttpStatus.OK
@@ -145,7 +160,12 @@ export class UserService {
     }
     async findByUserName(find:FindByUsername) {
       const user = await this.userRepository.findOne({ where: { username:find.username } });
-      if(!user) throw new NotFoundException('user not found ')
+      if(!user){
+        return await {
+          message: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
         return await {
           data: user,
           statusCode: HttpStatus.OK

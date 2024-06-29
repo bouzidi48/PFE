@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session } from '@nestjs/common';
 import { SizeService } from './size.service';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
@@ -8,8 +8,8 @@ export class SizeController {
   constructor(private readonly sizeService: SizeService) {}
 
   @Post()
-  create(@Body() createSizeDto: CreateSizeDto) {
-    return this.sizeService.create(createSizeDto);
+  create(@Session() request:Record<string, any>,@Body() createSizeDto: CreateSizeDto) {
+    return this.sizeService.create(request,createSizeDto);
   }
 
   @Get()
