@@ -114,10 +114,13 @@ export class UserService {
     }
   
 
-    async findOne(id: number):Promise<User> {
+    async findOne(id: number){
       const user=await this.userRepository.findOneBy({id});
       if(!user) throw new NotFoundException('user not found ')
-      return user;
+      return await {
+        data: user,
+        statusCode: HttpStatus.OK
+      };
     }
 
     async create(createUserDto:UserCreateDto) {
@@ -126,15 +129,27 @@ export class UserService {
     }
     async findById(find:FindById) {
       const user = await this.userRepository.findOne({ where: { id:find.id } });
-      return user;
+      if(!user) throw new NotFoundException('user not found ')
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
     }
     async findByEmail(find:FindByEmail) {
       const user = await this.userRepository.findOne({ where: { email:find.email } });
-      return user;
+      if(!user) throw new NotFoundException('user not found ')
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
     }
     async findByUserName(find:FindByUsername) {
       const user = await this.userRepository.findOne({ where: { username:find.username } });
-      return user;
+      if(!user) throw new NotFoundException('user not found ')
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
     }
 
     async update(user:User, updateUserDto: UserUpdateDto) {

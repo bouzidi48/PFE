@@ -10,9 +10,10 @@ import { ProductRepository } from 'src/product/product.repository';
 import { CouleurRepository } from './couleur.repository';
 import { ProductModule } from 'src/product/product.module';
 import { UserModule } from 'src/user/user.module';
+import { CategoriesModule } from 'src/categories/categories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule],
+  imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule,CategoriesModule],
   controllers: [CouleurController],
   providers: [CouleurService],
 })

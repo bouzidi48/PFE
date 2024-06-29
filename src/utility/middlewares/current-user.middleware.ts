@@ -73,7 +73,7 @@ import { UserService } from 'src/user/user.service';
             try {
                 const { id } = <JwtPayload>verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
                 const currentUser = await this.userService.findOne(+id);
-                req.currentUser = currentUser;
+                req.currentUser = currentUser.data;
                 console.log(currentUser);
             } catch (err) {
                 if (err instanceof JsonWebTokenError) {

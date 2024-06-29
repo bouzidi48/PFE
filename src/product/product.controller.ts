@@ -5,6 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FindByNameProductDto } from './dto/find-by-name-product.dto';
 import { FindByCategorieDto } from './dto/find-by-categorie.dto';
 import { RemoveProductDto } from './dto/remove-product.dto';
+import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
 
 @Controller('product')
 export class ProductController {
@@ -26,6 +27,11 @@ export class ProductController {
   @Get('findbyNameProduct')
   findByNameProduct(@Body() nameProduct: FindByNameProductDto) {
     return this.productService.findByNameProduct(nameProduct);
+  }
+
+  @Get('findbyNameAndIdProduct')
+  findByNameAndIdProduct(@Body() nameAndIdProduct: FindByNameAndIdProductDto) {
+    return this.productService.findByIdAndNameProduct(nameAndIdProduct);
   }
 
   @Put('update')

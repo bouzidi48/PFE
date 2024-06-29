@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,7 @@ import { FindByCategorieDto } from './dto/find-by-categorie.dto';
 import { RemoveProductDto } from './dto/remove-product.dto';
 import { CategoriesService } from 'src/categories/categories.service';
 import { UserService } from 'src/user/user.service';
+import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -32,7 +33,7 @@ export class ProductService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
-    if(!admin || admin.role!=Roles.ADMIN) {
+    if(!admin || admin.data.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -55,8 +56,8 @@ export class ProductService {
     }
 
     const product=await this.productRepository.create(createProductDto);
-    product.addedBy=admin;
-    product.category=category;
+    product.addedBy=admin.data;
+    product.category=category.data;
     product.createdate=new Date();
     this.productRepository.save(product)
     return await {
@@ -70,54 +71,35 @@ export class ProductService {
 
   async findAll() {
     const products = await this.productRepository.find();
-    if(!products) {
-      return await{
-        message:'aucun produit n\'existe',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      message:products,
-      statusCode:HttpStatus.OK,
+    if(!products) throw new NotFoundException('products not found ')
+      return await {
+        data:products,
+        statusCode:HttpStatus.OK,
     }
   }
   async findByNameProduct(nameProduct:FindByNameProductDto) {
-    const products = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
-    if(!products) {
-      return await{
-        message:'aucun produit avec ce nom',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
+    const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
+    if(!product) throw new NotFoundException('product not found ')
+      return await {
+        data:product,
+        statusCode:HttpStatus.OK,
     }
-    return await {
-      message:products,
-      statusCode:HttpStatus.OK,
-    
+  }
+  async findByIdAndNameProduct(nameProduct:FindByNameAndIdProductDto) {
+    const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,id:nameProduct.id } });
+    if(!product) throw new NotFoundException('product not found ')
+      return await {
+        data:product,
+        statusCode:HttpStatus.OK,
     }
   }
   async findByCategory(nameCategory:FindByCategorieDto) {
     const categorie = await this.categoryService.findByName({nameCategory:nameCategory.nameCategory})
-    console.log(categorie)
-    if(!categorie) {
-      return await{
-        message:'la categorie que vous avez saisi n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
+    if(!categorie) throw new NotFoundException('categorie not found ')
     
-    const products = await this.productRepository.find( { where: { category: { id: categorie.id } }});
-    console.log(products)
-    if(!products) {
-      return await{
-        message:'aucun produit dans cette categorie',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      message: products,
-      statusCode: HttpStatus.OK,
-    
-    }
+    const products = await this.productRepository.find( { where: { category: { id: categorie.data.id } }});
+    if(!products) throw new NotFoundException('product not found ')
+      return products;
   }
     
 
@@ -131,7 +113,7 @@ export class ProductService {
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.role!=Roles.ADMIN) {
+    if(!admin || admin.data.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -164,7 +146,7 @@ export class ProductService {
     product.nameProduct = updateProductDto.nameProduct;
     product.description = updateProductDto.description;
     product.price = updateProductDto.price;
-    product.category = category;
+    product.category = category.data;
     product.updatedate = new Date();
     this.productRepository.save(product)
     return await {
@@ -181,7 +163,7 @@ export class ProductService {
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.role!=Roles.ADMIN) {
+    if(!admin || admin.data.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,

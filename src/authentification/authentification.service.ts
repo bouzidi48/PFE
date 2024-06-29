@@ -59,7 +59,7 @@ export class AuthentificationService {
       };
     }
     else {
-      const validPassword = await bcrypt.compare(userLoginDto.password, user.password);
+      const validPassword = await bcrypt.compare(userLoginDto.password, user.data.password);
       if (!validPassword) {
         return await {
           message: 'password incorrect',
@@ -67,7 +67,7 @@ export class AuthentificationService {
         };
       }
     }
-    request.idUser = user.id
+    request.idUser = user.data.id
     console.log(request.idUser)
     
     return await {
@@ -96,7 +96,7 @@ export class AuthentificationService {
     });
     request.code = codeConfirmation // Utilisez req.session.code pour stocker le code de confirmation
     request.user = user // Utilisez req.session.user pour stocker les données de l'utilisateur
-    await this.sendEmail(codeConfirmation, user.email);
+    await this.sendEmail(codeConfirmation, user.data.email);
     return await {
       message: 'le code est envoyer avec succes',
       statusCode: HttpStatus.OK,

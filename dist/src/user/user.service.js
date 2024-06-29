@@ -109,7 +109,10 @@ let UserService = class UserService {
         const user = await this.userRepository.findOneBy({ id });
         if (!user)
             throw new common_1.NotFoundException('user not found ');
-        return user;
+        return await {
+            data: user,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async create(createUserDto) {
         const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
@@ -117,15 +120,30 @@ let UserService = class UserService {
     }
     async findById(find) {
         const user = await this.userRepository.findOne({ where: { id: find.id } });
-        return user;
+        if (!user)
+            throw new common_1.NotFoundException('user not found ');
+        return await {
+            data: user,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async findByEmail(find) {
         const user = await this.userRepository.findOne({ where: { email: find.email } });
-        return user;
+        if (!user)
+            throw new common_1.NotFoundException('user not found ');
+        return await {
+            data: user,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async findByUserName(find) {
         const user = await this.userRepository.findOne({ where: { username: find.username } });
-        return user;
+        if (!user)
+            throw new common_1.NotFoundException('user not found ');
+        return await {
+            data: user,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async update(user, updateUserDto) {
         user.password = updateUserDto.password;

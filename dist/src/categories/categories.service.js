@@ -35,7 +35,7 @@ let CategoriesService = class CategoriesService {
             };
         }
         const admin = await this.userService.findById(idAdmin);
-        if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
+        if (!admin || admin.data.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
@@ -50,7 +50,7 @@ let CategoriesService = class CategoriesService {
         }
         const category = await this.categoryRepository.create(createCategoryDto);
         if (!createCategoryDto.NameparentCategory) {
-            category.addedBy = admin;
+            category.addedBy = admin.data;
             category.createdAt = new Date();
             this.categoryRepository.save(category);
         }
@@ -62,7 +62,7 @@ let CategoriesService = class CategoriesService {
                     statusCode: common_1.HttpStatus.BAD_REQUEST,
                 };
             }
-            category.addedBy = admin;
+            category.addedBy = admin.data;
             category.createdAt = new Date();
             category.parentCategory = parent;
             this.categoryRepository.save(category);
@@ -74,34 +74,33 @@ let CategoriesService = class CategoriesService {
     }
     async findSubcategories(parentCategoryName) {
         const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory } });
-        if (!category) {
-            return {
-                message: 'la categorie parente n\'existe pas',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
+        if (!category)
+            throw new common_1.NotFoundException('parent category not found ');
         const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } } });
-        return {
-            message: subcategories,
-            statusCode: common_1.HttpStatus.OK,
+        if (!subcategories)
+            throw new common_1.NotFoundException('subcategories not found ');
+        return await {
+            data: subcategories,
+            statusCode: common_1.HttpStatus.OK
         };
     }
     async findAll() {
         const categories = await this.categoryRepository.find();
-        if (!categories) {
-            return await {
-                message: 'aucun produit n\'existe',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
+        if (!categories)
+            throw new common_1.NotFoundException('categories not found ');
         return await {
-            message: categories,
-            statusCode: common_1.HttpStatus.OK,
+            data: categories,
+            statusCode: common_1.HttpStatus.OK
         };
     }
     async findByName(nameCategory) {
         const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-        return categorie;
+        if (!categorie)
+            throw new common_1.NotFoundException('Category not found.');
+        return await {
+            data: categorie,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async findOne(id) {
         return await this.categoryRepository.findOne({
@@ -128,7 +127,7 @@ let CategoriesService = class CategoriesService {
             };
         }
         const admin = await this.userService.findById(idAdmin);
-        if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
+        if (!admin || admin.data.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
@@ -150,7 +149,7 @@ let CategoriesService = class CategoriesService {
             };
         }
         const admin = await this.userService.findById(idAdmin);
-        if (!admin || admin.role != user_enum_1.Roles.ADMIN) {
+        if (!admin || admin.data.role != user_enum_1.Roles.ADMIN) {
             return await {
                 message: 'vous devez etre un admin',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
@@ -161,7 +160,12 @@ let CategoriesService = class CategoriesService {
     }
     async findByIdAndName(createCategoryDto) {
         const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id, nameCategory: createCategoryDto.nameCategory }, select: {} });
-        return categorie;
+        if (!categorie)
+            throw new common_1.NotFoundException('category not found ');
+        return await {
+            data: categorie,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
 };
 exports.CategoriesService = CategoriesService;

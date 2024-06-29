@@ -30,9 +30,21 @@ export declare class UserController {
         statusCode: HttpStatus;
     }>;
     create(createUserDto: UserCreateDto): Promise<void>;
-    findOne(id: string): Promise<User>;
-    findById(id: FindById): Promise<User>;
-    findByEmail(email: FindByEmail): Promise<User>;
-    findByUserName(username: FindByUsername): Promise<User>;
+    findOne(id: string): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
+    findById(id: FindById): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
+    findByEmail(email: FindByEmail): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
+    findByUserName(username: FindByUsername): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
     update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

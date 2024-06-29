@@ -37,7 +37,7 @@ export class CategoriesService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
-    if(!admin || admin.role!=Roles.ADMIN) {
+    if(!admin || admin.data.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -54,7 +54,7 @@ export class CategoriesService {
     const category=await this.categoryRepository.create(createCategoryDto);
     if(!createCategoryDto.NameparentCategory) {
       
-      category.addedBy=admin;
+      category.addedBy=admin.data;
       category.createdAt=new Date();
       this.categoryRepository.save(category)
     }
@@ -67,7 +67,7 @@ export class CategoriesService {
 
         }
       }
-      category.addedBy=admin;
+      category.addedBy=admin.data;
       category.createdAt=new Date();
       category.parentCategory=parent
       this.categoryRepository.save(category)
@@ -83,36 +83,32 @@ export class CategoriesService {
 
   async findSubcategories(parentCategoryName: FindByNameCategoryDto){
     const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
-    if(!category) {
-      return {
-        message: 'la categorie parente n\'existe pas',
-        statusCode: HttpStatus.BAD_REQUEST,
-      };
-    }
+    if(!category) throw new NotFoundException('parent category not found ')
     
     const subcategories = await this.categoryRepository.find({ where: { parentCategory : { id: (await category).id } }});
-    return {
-      message: subcategories,
-      statusCode: HttpStatus.OK,
-    };
+    if(!subcategories) throw new NotFoundException('subcategories not found ')
+      return await {
+        data: subcategories,
+        statusCode: HttpStatus.OK
+      };
   }
   
   async findAll() {
     const categories = await this.categoryRepository.find();
-    if(!categories) {
-      return await{
-        message:'aucun produit n\'existe',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      message:categories,
-      statusCode:HttpStatus.OK,
-    }
+    if(!categories) throw new NotFoundException('categories not found ')
+      return await {
+        data: categories,
+        statusCode: HttpStatus.OK
+      };
   }
-  async findByName(nameCategory:FindByNameCategoryDto ):Promise<CategoryEntity> {
+  async findByName(nameCategory:FindByNameCategoryDto ) {
     const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-    return categorie;
+    
+    if (!categorie) throw new NotFoundException('Category not found.')
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK
+      };
   }
  async  findOne(id: number):Promise<CategoryEntity> {
     return  await this.categoryRepository.findOne(
@@ -151,7 +147,7 @@ export class CategoriesService {
         }
       }
       const admin= await this.userService.findById(idAdmin)
-    if(!admin || admin.role!=Roles.ADMIN) {
+    if(!admin || admin.data.role!=Roles.ADMIN) {
       return await{
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -175,7 +171,7 @@ export class CategoriesService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
-  if(!admin || admin.role!=Roles.ADMIN) {
+  if(!admin || admin.data.role!=Roles.ADMIN) {
     return await{
       message:'vous devez etre un admin',
       statusCode:HttpStatus.BAD_REQUEST,
@@ -187,9 +183,13 @@ export class CategoriesService {
     return await this.categoryRepository.delete(id);
 
   }
-  async findByIdAndName(createCategoryDto: FindByIdAndNameDto ):Promise<CategoryEntity> {
+  async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
     const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
-    return categorie;
+    if(!categorie) throw new NotFoundException('category not found ')
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK
+      };
   }
 }
 

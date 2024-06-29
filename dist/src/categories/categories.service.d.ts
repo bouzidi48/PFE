@@ -19,20 +19,17 @@ export declare class CategoriesService {
         statusCode: HttpStatus;
     }>;
     findSubcategories(parentCategoryName: FindByNameCategoryDto): Promise<{
-        message: string;
-        statusCode: HttpStatus;
-    } | {
-        message: CategoryEntity[];
+        data: CategoryEntity[];
         statusCode: HttpStatus;
     }>;
     findAll(): Promise<{
-        message: string;
-        statusCode: HttpStatus;
-    } | {
-        message: CategoryEntity[];
+        data: CategoryEntity[];
         statusCode: HttpStatus;
     }>;
-    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity>;
+    findByName(nameCategory: FindByNameCategoryDto): Promise<{
+        data: CategoryEntity;
+        statusCode: HttpStatus;
+    }>;
     findOne(id: number): Promise<CategoryEntity>;
     update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity | {
         message: string;
@@ -42,5 +39,8 @@ export declare class CategoriesService {
         message: string;
         statusCode: HttpStatus;
     }>;
-    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<CategoryEntity>;
+    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<{
+        data: CategoryEntity;
+        statusCode: HttpStatus;
+    }>;
 }

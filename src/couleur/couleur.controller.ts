@@ -9,11 +9,10 @@ export class CouleurController {
 
   @Post('create')
   create(@Session() request:Record<string, any>,@Body() createCouleurDto: CreateCouleurDto) {
-    const idAdmin = request.idUser;
-    
+    return this.couleurService.create(request,createCouleurDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.couleurService.findAll();
   }
@@ -23,9 +22,9 @@ export class CouleurController {
     return this.couleurService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCouleurDto: UpdateCouleurDto) {
-    return this.couleurService.update(+id, updateCouleurDto);
+  @Patch('update')
+  update(@Session() request:Record<string, any>, @Body() updateCouleurDto: UpdateCouleurDto) {
+    return this.couleurService.update(request, updateCouleurDto);
   }
 
   @Delete(':id')

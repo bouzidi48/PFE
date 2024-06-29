@@ -29,10 +29,22 @@ export declare class UserService {
         message: string;
         statusCode: HttpStatus;
     }>;
-    findOne(id: number): Promise<User>;
+    findOne(id: number): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
     create(createUserDto: UserCreateDto): Promise<void>;
-    findById(find: FindById): Promise<User>;
-    findByEmail(find: FindByEmail): Promise<User>;
-    findByUserName(find: FindByUsername): Promise<User>;
+    findById(find: FindById): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
+    findByEmail(find: FindByEmail): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
+    findByUserName(find: FindByUsername): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
     update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

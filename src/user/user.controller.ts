@@ -46,7 +46,7 @@ export class UserController {
   }
 
   @Get('single/:id')
-  async findOne(@Param('id') id: string) :Promise<User> {
+  async findOne(@Param('id') id: string) {
     return  await this.userService.findOne(+id);
   }
 

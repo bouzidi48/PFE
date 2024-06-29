@@ -16,19 +16,16 @@ export declare class CategoriesController {
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
     findAll(): Promise<{
-        message: string;
-        statusCode: import("@nestjs/common").HttpStatus;
-    } | {
-        message: CategoryEntity[];
+        data: CategoryEntity[];
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
-    findByName(nameCategory: FindByNameCategoryDto): Promise<CategoryEntity>;
+    findByName(nameCategory: FindByNameCategoryDto): Promise<{
+        data: CategoryEntity;
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
     findOne(id: string): Promise<CategoryEntity>;
     findSubCategories(createCategoryDto: FindByNameCategoryDto): Promise<{
-        message: string;
-        statusCode: import("@nestjs/common").HttpStatus;
-    } | {
-        message: CategoryEntity[];
+        data: CategoryEntity[];
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
     update(request: Record<string, any>, id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity | {
@@ -39,5 +36,8 @@ export declare class CategoriesController {
         message: string;
         statusCode: import("@nestjs/common").HttpStatus;
     }>;
-    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<CategoryEntity>;
+    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<{
+        data: CategoryEntity;
+        statusCode: import("@nestjs/common").HttpStatus;
+    }>;
 }
