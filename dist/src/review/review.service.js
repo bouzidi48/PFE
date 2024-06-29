@@ -36,7 +36,7 @@ let ReviewService = class ReviewService {
             };
         }
         const admin = await this.userService.findById(idAdmin);
-        if (!admin || (admin.role != user_enum_1.Roles.ADMIN && admin.role != user_enum_1.Roles.USER)) {
+        if (!admin || (admin.data.role != user_enum_1.Roles.ADMIN && admin.data.role != user_enum_1.Roles.USER)) {
             return await {
                 message: 'vous devez etre appartient a cette application',
                 statusCode: common_1.HttpStatus.BAD_REQUEST,
@@ -57,7 +57,7 @@ let ReviewService = class ReviewService {
             };
         }
         review = this.reviewRepository.create(createReviewDto);
-        review.user = admin;
+        review.user = admin.data;
         review.createdate = new Date();
         this.reviewRepository.save(review);
         return await {

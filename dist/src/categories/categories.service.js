@@ -72,19 +72,6 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    async findAll() {
-        const categories = await this.categoryRepository.find();
-        if (!categories) {
-            return await {
-                message: 'aucun produit n\'existe',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
-        return await {
-            message: categories,
-            statusCode: common_1.HttpStatus.OK,
-        };
-    }
     async findSubcategories(parentCategoryName) {
         const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory } });
         if (!category)
@@ -99,20 +86,21 @@ let CategoriesService = class CategoriesService {
     }
     async findAll() {
         const categories = await this.categoryRepository.find();
-        if (!categories) {
-            return await {
-                message: 'aucun produit n\'existe',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
+        if (!categories)
+            throw new common_1.NotFoundException('subcategories not found ');
         return await {
-            message: categories,
-            statusCode: common_1.HttpStatus.OK,
+            data: categories,
+            statusCode: common_1.HttpStatus.OK
         };
     }
     async findByName(nameCategory) {
         const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-        return categorie;
+        if (!categorie)
+            throw new common_1.NotFoundException('subcategories not found ');
+        return await {
+            data: categorie,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
     async findOne(id) {
         return await this.categoryRepository.findOne({
@@ -173,7 +161,7 @@ let CategoriesService = class CategoriesService {
     async findByIdAndName(createCategoryDto) {
         const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id, nameCategory: createCategoryDto.nameCategory }, select: {} });
         if (!categorie)
-            throw new common_1.NotFoundException('category not found ');
+            throw new common_1.NotFoundException('subcategories not found ');
         return await {
             data: categorie,
             statusCode: common_1.HttpStatus.OK

@@ -27,7 +27,7 @@ export class ReviewService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
-    if(!admin || (admin.role!=Roles.ADMIN &&  admin.role!=Roles.USER) ) {
+    if(!admin || (admin.data.role!=Roles.ADMIN &&  admin.data.role!=Roles.USER) ) {
       return await{
         message:'vous devez etre appartient a cette application',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -51,7 +51,7 @@ export class ReviewService {
       }
     }
       review=this.reviewRepository.create(createReviewDto);
-      review.user=admin
+      review.user=admin.data;
       //review.product=product;
       review.createdate=new Date();
       this.reviewRepository.save(review)

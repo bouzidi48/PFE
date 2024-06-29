@@ -80,21 +80,7 @@ export class CategoriesService {
     
     }
   }
-  
 
-  async findAll() {
-    const categories = await this.categoryRepository.find();
-    if(!categories) {
-      return await{
-        message:'aucun produit n\'existe',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      message:categories,
-      statusCode:HttpStatus.OK,
-    }
-  }
   
   async findSubcategories(parentCategoryName: FindByNameCategoryDto){
     const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
@@ -110,20 +96,19 @@ export class CategoriesService {
   
   async findAll() {
     const categories = await this.categoryRepository.find();
-    if(!categories) {
-      return await{
-        message:'aucun produit n\'existe',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      message:categories,
-      statusCode:HttpStatus.OK,
-    }
+    if(!categories) throw new NotFoundException('subcategories not found ')
+      return await {
+        data: categories,
+        statusCode: HttpStatus.OK
+      };
   }
-  async findByName(nameCategory:FindByNameCategoryDto ):Promise<CategoryEntity> {
+  async findByName(nameCategory:FindByNameCategoryDto ) {
     const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-    return categorie;
+    if(!categorie) throw new NotFoundException('subcategories not found ')
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK
+      };
   }
   
  async  findOne(id: number):Promise<CategoryEntity> {
@@ -202,7 +187,11 @@ export class CategoriesService {
   }
   async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
     const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
-    return categorie;
+    if(!categorie) throw new NotFoundException('subcategories not found ')
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK
+      };
   }
  
 
