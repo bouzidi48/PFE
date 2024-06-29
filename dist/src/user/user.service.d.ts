@@ -43,8 +43,13 @@ export declare class UserService {
         statusCode: HttpStatus;
     }>;
     findByUserName(find: FindByUsername): Promise<{
+        message: any;
+        statusCode: HttpStatus;
+        data?: undefined;
+    } | {
         data: User;
         statusCode: HttpStatus;
+        message?: undefined;
     }>;
     update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
 }

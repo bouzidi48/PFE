@@ -8,6 +8,7 @@ import { ProductService } from 'src/product/product.service';
 import { CouleurRepository } from './couleur.repository';
 import { Roles } from 'src/enum/user_enum';
 import { FindByProductDto } from './dto/find-by-product.dto';
+import { RemoveCouleurDto } from './dto/remove-couleur.dto';
 
 @Injectable()
 export class CouleurService {
@@ -32,11 +33,11 @@ export class CouleurService {
       
       }
     }
-    const couleur1=await this.couleurRepository.findOne({where : {nameCouleur:createCouleurDto.nameCouleur}});
+    const couleur1=await this.couleurRepository.findOne({where : {nameCouleur:createCouleurDto.nameCouleur,product:{nameProduct:createCouleurDto.nameProduct}}});
     console.log(couleur1)
     if(couleur1) {
       return await{
-        message:'cette couleur existe deja',
+        message:'cette couleur existe deja dans se produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
@@ -64,7 +65,7 @@ export class CouleurService {
     const couleur = await this.couleurRepository.find();
     if(!couleur) {
       return await{
-        message:'aucun produit n\'existe',
+        data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
@@ -76,17 +77,38 @@ export class CouleurService {
 
   async findByProduct(nameCategory:FindByProductDto) {
     const product = await this.productService.findByNameProduct({nameProduct:nameCategory.nameProduct})
-    if(!product) throw new NotFoundException('product not found ')
+    if(!product) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
     
     const couleurs = await this.couleurRepository.find( { where: { product: { id: product.data.id } }});
-    if(!couleurs) throw new NotFoundException('couleurs not found ')
-      return couleurs;
+    if(!couleurs) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:couleurs,
+      statusCode:HttpStatus.OK,
+    }
   }
 
   async findOne(id: number) {
     const couleur = await this.couleurRepository.findOne({where : {id:id}});
-    if(!couleur) throw new NotFoundException('couleur not found ')
-      return couleur;
+    if(!couleur) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:couleur,
+      statusCode:HttpStatus.OK,
+    }
   }
 
   async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateCouleurDto) {
@@ -108,14 +130,14 @@ export class CouleurService {
     const couleur = await this.couleurRepository.findOne({where : {nameCouleur:updateCouleurDto.ancienNameCouleur,addedBy:idAdmin}});
     if(!couleur) {
       return await{
-        message:'aucun couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        message:'aucun couleur avec ce nom ou vous n\'etes pas l\'admin de cette couleur',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const product = await this.productService.findByNameProduct({nameProduct:updateCouleurDto.nameProduct})
+    const product = await this.productService.findByIdAndNameProduct({id:idAdmin,nameProduct:updateCouleurDto.nameProduct})
     if(!product) {
       return await{
-        message:'le produit que vous avez saisi n\'existe pas',
+        message:'le produit que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
@@ -129,6 +151,7 @@ export class CouleurService {
       }
     }
     couleur.nameCouleur = updateCouleurDto.nameCouleur;
+    couleur.addedBy = admin.data;
     couleur.updatedate = new Date();
     couleur.product = product.data;
     this.couleurRepository.save(couleur)
@@ -138,7 +161,33 @@ export class CouleurService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} couleur`;
+  async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveCouleurDto) {
+    const idAdmin = request.idUser
+    if(!idAdmin){  
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin = await this.userService.findById(idAdmin)
+    if(!admin || admin.data.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const couleur = await this.couleurRepository.findOne({where : {nameCouleur:removeCouleurDto.nameCouleur,addedBy:idAdmin}});
+    if(!couleur) {
+      return await{
+        message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    await this.couleurRepository.remove(couleur)
+    return await {
+      message:'la couleur a bien ete supprimer',
+      statusCode:HttpStatus.OK,
+    }
   }
 }

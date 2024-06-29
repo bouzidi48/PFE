@@ -73,7 +73,12 @@ export class ProductService {
 
   async findAll() {
     const products = await this.productRepository.find();
-    if(!products) throw new NotFoundException('products not found ')
+    if(!products){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data:products,
         statusCode:HttpStatus.OK,
@@ -81,7 +86,12 @@ export class ProductService {
   }
   async findByNameProduct(nameProduct:FindByNameProductDto) {
     const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
-    if(!product) throw new NotFoundException('product not found ')
+    if(!product){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data:product,
         statusCode:HttpStatus.OK,
@@ -89,7 +99,12 @@ export class ProductService {
   }
   async findByIdAndNameProduct(nameProduct:FindByNameAndIdProductDto) {
     const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,id:nameProduct.id } });
-    if(!product) throw new NotFoundException('product not found ')
+    if(!product){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
       return await {
         data:product,
         statusCode:HttpStatus.OK,
@@ -97,11 +112,24 @@ export class ProductService {
   }
   async findByCategory(nameCategory:FindByCategorieDto) {
     const categorie = await this.categoryService.findByName({nameCategory:nameCategory.nameCategory})
-    if(!categorie) throw new NotFoundException('categorie not found ')
+    if(!categorie){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
     
     const products = await this.productRepository.find( { where: { category: { id: categorie.data.id } }});
-    if(!products) throw new NotFoundException('product not found ')
-      return products;
+    if(!products){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data:products,
+      statusCode:HttpStatus.OK,
+    }
   }
     
 
@@ -129,10 +157,10 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const category = await this.categoryService.findByName({nameCategory:updateProductDto.nomCategory})
+    const category = await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:updateProductDto.nomCategory})
     if(!category) {
       return await{
-        message:'la categorie que vous avez saisi n\'existe pas',
+        message:'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }

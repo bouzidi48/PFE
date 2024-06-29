@@ -19,8 +19,10 @@ export class InscriptionService {
 
   async signup(@Session() request:Record<string, any>,userSignUpDto: UserSignUpDto) {
     const existingEmail = await this.userService.findByEmail({email:userSignUpDto.email});
+    console.log(existingEmail);
     const existingUser = await this.userService.findByUserName({username:userSignUpDto.username});
-    if (existingEmail || existingUser) {
+    console.log(existingUser);
+    if (existingEmail.data || existingUser.data) {
       return await {
         message: 'Email ou username déjà existe',
         statusCode: HttpStatus.BAD_REQUEST,
