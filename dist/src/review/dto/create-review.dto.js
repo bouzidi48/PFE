@@ -20,6 +20,11 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateReviewDto.prototype, "productId", void 0);
 __decorate([
+    (0, class_validator_1.IsNotEmpty)({ message: 'title can not be empty' }),
+    (0, class_validator_1.IsString)({ message: 'title should be string ' }),
+    __metadata("design:type", String)
+], CreateReviewDto.prototype, "nameProduct", void 0);
+__decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'ratings could not be empty' }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)

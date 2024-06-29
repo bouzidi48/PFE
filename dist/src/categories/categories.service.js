@@ -72,6 +72,19 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
+    async findAll() {
+        const categories = await this.categoryRepository.find();
+        if (!categories) {
+            return await {
+                message: 'aucun produit n\'existe',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        return await {
+            message: categories,
+            statusCode: common_1.HttpStatus.OK,
+        };
+    }
     async findSubcategories(parentCategoryName) {
         const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory } });
         if (!category) {
@@ -86,21 +99,8 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
-    async findAll() {
-        const categories = await this.categoryRepository.find();
-        if (!categories) {
-            return await {
-                message: 'aucun produit n\'existe',
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
-        return await {
-            message: categories,
-            statusCode: common_1.HttpStatus.OK,
-        };
-    }
-    async findByName(nameCategory) {
-        const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+    async findByName(nameCategories) {
+        const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategories.nameCategory }, select: {} });
         return categorie;
     }
     async findOne(id) {

@@ -17,6 +17,8 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProductService {
+ 
+ 
   constructor(
     private readonly categoryService:CategoriesService,
     private readonly userService:UserService,
@@ -27,7 +29,7 @@ export class ProductService {
     console.log(idAdmin)
     if(!idAdmin){
       return await {
-        message: 'vous devez vous connecter pour ajouter une categorie',
+        message: 'vous devez vous connecter pour ajouter un produit',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }

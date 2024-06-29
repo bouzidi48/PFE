@@ -5,6 +5,11 @@ export class CreateReviewDto {
    @IsNumber({},{message:'Product Id should be number'})
 
     productId:number;
+
+    @IsNotEmpty({message:'title can not be empty'})
+    @IsString({message:'title should be string '})
+    nameProduct:string;
+    
     @IsNotEmpty({message:'ratings could not be empty'})
     @IsNumber()
     ratings:number;

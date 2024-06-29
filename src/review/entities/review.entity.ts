@@ -8,7 +8,7 @@ export class ReviewEntity {
    id : number 
 
    @Column()
-   rating : number
+   ratings : number
    
    @Column()
    comment:string

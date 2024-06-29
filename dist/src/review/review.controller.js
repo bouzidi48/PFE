@@ -21,8 +21,8 @@ let ReviewController = class ReviewController {
     constructor(reviewService) {
         this.reviewService = reviewService;
     }
-    create(createReviewDto) {
-        return this.reviewService.create(createReviewDto);
+    async create(request, createReviewDto) {
+        return await this.reviewService.create(request, createReviewDto);
     }
     findAll() {
         return this.reviewService.findAll();
@@ -39,11 +39,12 @@ let ReviewController = class ReviewController {
 };
 exports.ReviewController = ReviewController;
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Post)('creat'),
+    __param(0, (0, common_1.Session)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_review_dto_1.CreateReviewDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, create_review_dto_1.CreateReviewDto]),
+    __metadata("design:returntype", Promise)
 ], ReviewController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
