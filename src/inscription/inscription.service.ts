@@ -29,6 +29,7 @@ export class InscriptionService {
     
     // Hash the password
     const saltRounds = 10;
+    
     const hashedPassword = await bcrypt.hash(userSignUpDto.password, saltRounds);
     
     // Replace the plain password with the hashed password

@@ -14,6 +14,7 @@ import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { UserController } from 'src/user/user.controller';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
+import { retry } from 'rxjs';
 
 
 
@@ -81,6 +82,20 @@ export class CategoriesService {
   }
   
 
+  async findAll() {
+    const categories = await this.categoryRepository.find();
+    if(!categories) {
+      return await{
+        message:'aucun produit n\'existe',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:categories,
+      statusCode:HttpStatus.OK,
+    }
+  }
+  
   async findSubcategories(parentCategoryName: FindByNameCategoryDto){
     const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
     if(!category) throw new NotFoundException('parent category not found ')
@@ -95,21 +110,22 @@ export class CategoriesService {
   
   async findAll() {
     const categories = await this.categoryRepository.find();
-    if(!categories) throw new NotFoundException('categories not found ')
-      return await {
-        data: categories,
-        statusCode: HttpStatus.OK
-      };
+    if(!categories) {
+      return await{
+        message:'aucun produit n\'existe',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:categories,
+      statusCode:HttpStatus.OK,
+    }
   }
-  async findByName(nameCategory:FindByNameCategoryDto ) {
+  async findByName(nameCategory:FindByNameCategoryDto ):Promise<CategoryEntity> {
     const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
-    
-    if (!categorie) throw new NotFoundException('Category not found.')
-      return await {
-        data: categorie,
-        statusCode: HttpStatus.OK
-      };
+    return categorie;
   }
+  
  async  findOne(id: number):Promise<CategoryEntity> {
     return  await this.categoryRepository.findOne(
       {
@@ -127,6 +143,7 @@ export class CategoriesService {
         
     });
   }
+
 
   /* async update(@Session() request:Record<string, any>,id: number, fields:Partial< UpdateCategoryDto> ) {
     const category=await this.findOne(id);
@@ -185,11 +202,12 @@ export class CategoriesService {
   }
   async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
     const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
-    if(!categorie) throw new NotFoundException('category not found ')
-      return await {
-        data: categorie,
-        statusCode: HttpStatus.OK
-      };
+    return categorie;
   }
+ 
+
+
+
+
 }
 

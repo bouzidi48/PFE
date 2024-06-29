@@ -23,7 +23,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], ReviewEntity.prototype, "rating", void 0);
+], ReviewEntity.prototype, "ratings", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
