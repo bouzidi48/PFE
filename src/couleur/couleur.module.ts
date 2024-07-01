@@ -16,5 +16,6 @@ import { CategoriesModule } from 'src/categories/categories.module';
   imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule,CategoriesModule],
   controllers: [CouleurController],
   providers: [CouleurService],
+  exports: [CouleurService],
 })
 export class CouleurModule {}

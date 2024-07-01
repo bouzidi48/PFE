@@ -1,8 +1,9 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { Image } from './entities/image.entity';
+import { Images } from './entities/image.entity';
 
 
 
 
-@EntityRepository(Image)
-export class ImageRepository extends Repository<Image> {}
+
+@EntityRepository(Images)
+export class ImageRepository extends Repository<Images> {}

@@ -8,7 +8,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 
 @Entity('images')
 
-export class Image {
+export class Images {
     @PrimaryGeneratedColumn()
     id: number;
 

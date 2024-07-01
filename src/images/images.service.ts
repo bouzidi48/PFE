@@ -10,10 +10,11 @@ import { FindByImageDto } from './dto/find-by-Image.dto';
 import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 import { RemoveImageDto } from './dto/remove-image.dto';
+import { Images } from './entities/image.entity';
 
 @Injectable()
 export class ImagesService {
-  constructor(@InjectRepository(Image) private readonly imageRepository:ImageRepository,
+  constructor(@InjectRepository(Images) private readonly imageRepository:ImageRepository,
   private readonly userService:UserService,
   private readonly couleurService:CouleurService,
   ){}

@@ -38,7 +38,6 @@ import { ImagesModule } from './images/images.module';
     CardModule,
     CouleurModule,
     ReviewModule,
-    
     InscriptionModule,
    
     AuthentificationModule,
