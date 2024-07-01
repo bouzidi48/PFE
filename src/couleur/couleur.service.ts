@@ -9,6 +9,8 @@ import { CouleurRepository } from './couleur.repository';
 import { Roles } from 'src/enum/user_enum';
 import { FindByProductDto } from './dto/find-by-product.dto';
 import { RemoveCouleurDto } from './dto/remove-couleur.dto';
+import { FindByCouleurDto } from './dto/find-by-couleur.dto';
+import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 
 @Injectable()
 export class CouleurService {
@@ -44,7 +46,7 @@ export class CouleurService {
     const product=await this.productService.findByIdAndNameProduct({id:idAdmin,nameProduct:createCouleurDto.nameProduct})
     if(!product) {
       return await{
-        message:'ce produit n\'existe pas',
+        message:'ce produit n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
@@ -63,7 +65,21 @@ export class CouleurService {
 
   async findAll() {
     const couleur = await this.couleurRepository.find();
-    if(!couleur) {
+    if(couleur.length==0) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:couleur,
+      statusCode:HttpStatus.OK,
+    }
+  }
+
+  async findByNameCouleur(nameCouleur:FindByCouleurDto) {
+    const couleur =  await this.couleurRepository.find({where : {nameCouleur:nameCouleur.nameCouleur}});
+    if(couleur.length==0) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
@@ -93,6 +109,20 @@ export class CouleurService {
     }
     return await {
       message:couleurs,
+      statusCode:HttpStatus.OK,
+    }
+  }
+
+  async findByNameAndId(nameProduct:FindByIdNameDto) {
+    const couleur =  await this.couleurRepository.findOne({where : {nameCouleur:nameProduct.nameCouleur,addedBy:{id:nameProduct.id}}});
+    if(!couleur) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data:couleur,
       statusCode:HttpStatus.OK,
     }
   }

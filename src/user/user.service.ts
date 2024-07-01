@@ -30,8 +30,11 @@ export class UserService {
 
   async ancienPassword(@Session() request:Record<string, any>,password:AncienPasswordDto) {
     const id = request.idUser
+    console.log(id)
     const user = await this.userRepository.findOne({ where: { id: id } });
+    console.log(user)
     const validPassword = await bcrypt.compare(password.password, user.password);
+    console.log(validPassword)
     if (!validPassword) {
       return await {
         message: 'ancien mot de passe incorrect',
@@ -48,6 +51,10 @@ export class UserService {
     const confirmpassword = updateDto.confirmpassword
     const password = updateDto.password
     const id = request.idUser
+    console.log(id)
+    console.log(confirmpassword)
+    console.log(password)
+    console.log(confirmpassword == password)
     if(confirmpassword == password) {
       const user = await this.userRepository.findOne({ where: { id: id } });
       const saltRounds = 10;
@@ -173,9 +180,10 @@ export class UserService {
     }
 
     async update(user:User, updateUserDto: UserUpdateDto) {
-      user.password = updateUserDto.password;
-      user.username = updateUserDto.username;
-      user.updatedate = new Date();
-      this.userRepository.save(user);
+      const user1 = await this.userRepository.findOne({ where: { id: user.id } });
+      user1.password = updateUserDto.password;
+      user1.username = updateUserDto.username;
+      user1.updatedate = new Date();
+      this.userRepository.save(user1);
     }
 }

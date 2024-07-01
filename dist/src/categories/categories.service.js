@@ -72,8 +72,21 @@ let CategoriesService = class CategoriesService {
             statusCode: common_1.HttpStatus.OK,
         };
     }
+    async findByIdAndName(createCategoryDto) {
+        const categorie = await this.categoryRepository.findOne({ where: { addedBy: { id: createCategoryDto.id }, nameCategory: createCategoryDto.nameCategory } });
+        if (!categorie) {
+            return await {
+                data: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        return await {
+            data: categorie,
+            statusCode: common_1.HttpStatus.OK
+        };
+    }
     async findSubcategories(parentCategoryName) {
-        const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory } });
+        const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameParentCategory } });
         if (!category) {
             return await {
                 data: null,
@@ -133,8 +146,12 @@ let CategoriesService = class CategoriesService {
     }
     async update(request, id, fields) {
         const category = await this.findOne(id);
-        if (!category)
-            throw new common_1.NotFoundException('Category not found.');
+        if (!category) {
+            return await {
+                message: 'Category not found.',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         const idAdmin = request.idUser;
         if (!idAdmin) {
             return await {
@@ -151,12 +168,20 @@ let CategoriesService = class CategoriesService {
         }
         Object.assign(category, fields);
         category.updatedAt = new Date();
-        return await this.categoryRepository.save(category);
+        await this.categoryRepository.save(category);
+        return await {
+            message: category,
+            statusCode: common_1.HttpStatus.OK,
+        };
     }
     async remove(request, id, fields) {
         const category = await this.findOne(id);
-        if (!category)
-            throw new common_1.NotFoundException('Category not found.');
+        if (!category) {
+            return await {
+                message: 'Category not found.',
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
         const idAdmin = request.idUser;
         if (!idAdmin) {
             return await {
@@ -172,19 +197,10 @@ let CategoriesService = class CategoriesService {
             };
         }
         Object.assign(category, fields);
-        return await this.categoryRepository.delete(id);
-    }
-    async findByIdAndName(createCategoryDto) {
-        const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id, nameCategory: createCategoryDto.nameCategory }, select: {} });
-        if (!categorie) {
-            return await {
-                data: null,
-                statusCode: common_1.HttpStatus.BAD_REQUEST,
-            };
-        }
+        await this.categoryRepository.delete(id);
         return await {
-            data: categorie,
-            statusCode: common_1.HttpStatus.OK
+            message: category,
+            statusCode: common_1.HttpStatus.OK,
         };
     }
 };

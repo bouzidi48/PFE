@@ -3,6 +3,9 @@ import { CouleurService } from './couleur.service';
 import { CreateCouleurDto } from './dto/create-couleur.dto';
 import { UpdateCouleurDto } from './dto/update-couleur.dto';
 import { RemoveCouleurDto } from './dto/remove-couleur.dto';
+import { FindByProductDto } from './dto/find-by-product.dto';
+import { FindByCouleurDto } from './dto/find-by-couleur.dto';
+import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 
 @Controller('couleur')
 export class CouleurController {
@@ -17,7 +20,19 @@ export class CouleurController {
   findAll() {
     return this.couleurService.findAll();
   }
+  @Get('findbyCouleur')
+  findByCouleur(@Body() findByCouleur: FindByCouleurDto) {
+    return this.couleurService.findByNameCouleur(findByCouleur);
+  }
 
+  @Get('findbyProduct')
+  findByProduct(@Body() findByProduct: FindByProductDto) {
+    return this.couleurService.findByProduct(findByProduct);
+  }
+  @Get('findbyIdAndName')
+  findByIdAndName(@Body() nameAndIdProduct: FindByIdNameDto) {
+    return this.couleurService.findByNameAndId(nameAndIdProduct);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.couleurService.findOne(+id);

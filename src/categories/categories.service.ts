@@ -15,6 +15,8 @@ import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { UserController } from 'src/user/user.controller';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 import { retry } from 'rxjs';
+import { FindByNameParentDto } from './dto/find-ByParentName.dto';
+
 
 
 
@@ -81,9 +83,23 @@ export class CategoriesService {
     }
   }
 
+  async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
+    const categorie = await this.categoryRepository.findOne({ where: { addedBy: { id: createCategoryDto.id},nameCategory:createCategoryDto.nameCategory } });
+    if(!categorie){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK
+      };
+  }
+
   
-  async findSubcategories(parentCategoryName: FindByNameCategoryDto){
-    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameCategory }});
+  async findSubcategories(parentCategoryName: FindByNameParentDto){
+    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameParentCategory }});
     if(!category){
       return await {
         data: null,
@@ -161,7 +177,12 @@ export class CategoriesService {
 
     async update(@Session() request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>) {
       const category = await this.findOne(id);
-      if (!category) throw new NotFoundException('Category not found.');
+      if (!category) {
+        return await {
+          message: 'Category not found.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
       const idAdmin=request.idUser
       if(!idAdmin) {
         return await {
@@ -180,12 +201,21 @@ export class CategoriesService {
     
       Object.assign(category, fields);
       category.updatedAt = new Date();
-      return await this.categoryRepository.save(category);
+      await this.categoryRepository.save(category);
+      return await {
+        message: category,
+        statusCode: HttpStatus.OK,
+      }
     }
 
   async remove(@Session() request:Record<string, any>,id: number, fields:Partial< DeleteCategoryDto>) {
     const category = await this.findOne(id);
-    if (!category) throw new NotFoundException('Category not found.');
+    if (!category) {
+      return await {
+        message: 'Category not found.',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
     const idAdmin=request.idUser
     if(!idAdmin) {
       return await {
@@ -202,23 +232,13 @@ export class CategoriesService {
     }
   }
     Object.assign(category,fields);
-
-    return await this.categoryRepository.delete(id);
-
-  }
-  async findByIdAndName(createCategoryDto: FindByIdAndNameDto ){
-    const categorie = await this.categoryRepository.findOne({ where: { id: createCategoryDto.id,nameCategory:createCategoryDto.nameCategory }, select: {} });
-    if(!categorie){
-      return await {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
+    await this.categoryRepository.delete(id);
+    return await {
+      message: category,
+      statusCode: HttpStatus.OK,
     }
-      return await {
-        data: categorie,
-        statusCode: HttpStatus.OK
-      };
   }
+  
  
 
 

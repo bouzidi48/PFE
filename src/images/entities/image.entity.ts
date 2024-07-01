@@ -1,22 +1,22 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
+import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
-import { Image } from "src/images/entities/image.entity";
 import { Product } from "src/product/entities/product.entity";
 import { Size } from "src/size/entities/size.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('couleurs')
+@Entity('images')
 
-export class Couleur {
+export class Image {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    nameCouleur: string;
+    UrlImage: string;
 
-    @ManyToOne(()=>Product,(pro)=>pro.colours)
-    product:Product;
+    @ManyToOne(()=>Couleur,(col)=>col.images)
+    couleur:Couleur;
 
     @Column()
     createdate: Date;
@@ -26,12 +26,6 @@ export class Couleur {
 
     @ManyToOne(()=>User,(user)=>user.couleurs)
     addedBy:User;
-
-    @OneToMany(()=>Size,(siz)=>siz.couleur)
-    sizes:Size[];
-
-    @OneToMany(()=>Image,(ima)=>ima.couleur)
-    images:Image[];
 
     
 

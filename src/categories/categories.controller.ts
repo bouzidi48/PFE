@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session, ParseIntPipe, Put } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -11,6 +11,7 @@ import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { CategoryEntity } from './entities/category.entity';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
+import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 
 
 
@@ -23,14 +24,26 @@ export class CategoriesController {
     
   }
 
+  @Get('findByIdAndName')
+  async findByIdAndName(@Body() createCategoryDto: FindByIdAndNameDto ) {
+    return  await this.categoriesService.findByIdAndName(createCategoryDto);
+  }
+  
+  @Get('Subcategories')
+  async findSubcategories(@Body()parentCategory:FindByNameParentDto){
+    return await this.categoriesService.findSubcategories(parentCategory)
+  }
+
   @Get('all')
   async findAll() {
     return await this.categoriesService.findAll();
   }
 
-   @Get('nameCategory')
-  findByName(@Body()nameCategory:FindByNameCategoryDto){
-    return this.categoriesService.findByName(nameCategory)
+  
+
+  @Get('nameCategory')
+  async findByName(@Body()nameCategory:FindByNameCategoryDto){
+    return await this.categoriesService.findByName(nameCategory)
   }  
 
   @Get(':id')
@@ -38,12 +51,9 @@ export class CategoriesController {
     return this.categoriesService.findOne(+id);
   }
 
-  @Get('SubCategories')
-  async findSubCategories(@Body() createCategoryDto: FindByNameCategoryDto ) {
-    return  await this.categoriesService.findSubcategories(createCategoryDto);
-    
-  }
-  @Patch(':id')
+  
+  
+  @Put(':id')
   async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(request,+id,updateCategoryDto);
   }
@@ -52,10 +62,8 @@ export class CategoriesController {
   async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
     return await this.categoriesService.remove(request,+id,deleteCategoryDto);
   }
-  @Get('findByIdAndName')
-  async findByIdAndName(@Body() createCategoryDto: FindByIdAndNameDto ) {
-    return  await this.categoriesService.findByIdAndName(createCategoryDto);
-  }
+  
+  
 }
 
 
