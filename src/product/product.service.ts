@@ -87,12 +87,12 @@ export class ProductService {
   async findByNameProduct(nameProduct:FindByNameProductDto) {
     const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
     if(!product){
-      return await {
+      return  {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-      return await {
+      return  {
         data:product,
         statusCode:HttpStatus.OK,
     }

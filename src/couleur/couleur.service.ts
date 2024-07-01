@@ -21,7 +21,7 @@ export class CouleurService {
     console.log(idAdmin)
     if(!idAdmin){
       return await {
-        message: 'vous devez vous connecter pour ajouter une categorie',
+        message: 'vous devez vous connecter pour ajouter une couleur',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
