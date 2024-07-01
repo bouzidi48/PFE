@@ -26,6 +26,8 @@ export class Size {
     @Column()
     stockQuantity: number;
 
+    @ManyToOne(()=>User,(user)=>user.products)
+    addedBy:User;
 
     
 

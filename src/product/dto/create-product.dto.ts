@@ -12,9 +12,6 @@ export class CreateProductDto {
     @IsNotEmpty({message:'price can not be empty'})
     price:number;
 
-    @IsNotEmpty({message:'stock can not be empty'})
-    stockQuantity:number;
-
     @IsNotEmpty({message:'nomCategory can not be empty'})
     nomCategory:string;
 }

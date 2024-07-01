@@ -30,7 +30,7 @@ export class UserController {
     return await this.userService.updatePassword(request,updatePasswordDto)
   }
 
-  @Post('ancienPassword')
+  @Post('ancienUsername')
   async ancienUsername(@Session() request:Record<string, any>,@Body() username:AncienUsernameDto) {
     return await this.userService.ancienUsername(request,username)
   }

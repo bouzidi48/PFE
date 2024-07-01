@@ -20,10 +20,7 @@ export class ProductController {
   findAll() {
     return this.productService.findAll();
   }
-  @Get('findbyCategory')
-  findByCategory(@Body() findByCategory: FindByCategorieDto) {
-    return this.productService.findByCategory(findByCategory);
-  }
+
   @Get('findbyNameProduct')
   findByNameProduct(@Body() nameProduct: FindByNameProductDto) {
     return this.productService.findByNameProduct(nameProduct);
@@ -32,6 +29,11 @@ export class ProductController {
   @Get('findbyNameAndIdProduct')
   findByNameAndIdProduct(@Body() nameAndIdProduct: FindByNameAndIdProductDto) {
     return this.productService.findByIdAndNameProduct(nameAndIdProduct);
+  }
+
+  @Get('findbyCategory')
+  findByCategory(@Body() findByCategory: FindByCategorieDto) {
+    return this.productService.findByCategory(findByCategory);
   }
 
   @Put('update')

@@ -1,24 +1,23 @@
 import { HttpStatus, Injectable, Session } from '@nestjs/common';
-import { CreateSizeDto } from './dto/create-size.dto';
-import { UpdateSizeDto } from './dto/update-size.dto';
+import { CreateImageDto } from './dto/create-image.dto';
+import { UpdateImageDto } from './dto/update-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Size } from './entities/size.entity';
-import { SizeRepository } from './size.repository';
+import { ImageRepository } from './image.repository';
 import { UserService } from 'src/user/user.service';
 import { CouleurService } from 'src/couleur/couleur.service';
 import { Roles } from 'src/enum/user_enum';
-import { FindBySizeDto } from './dto/find-by-size.dto';
+import { FindByImageDto } from './dto/find-by-Image.dto';
 import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
-import { RemoveSizeDto } from './dto/remove-size.dto';
+import { RemoveImageDto } from './dto/remove-image.dto';
 
 @Injectable()
-export class SizeService {
-  constructor(@InjectRepository(Size) private readonly sizeRepository:SizeRepository,
+export class ImagesService {
+  constructor(@InjectRepository(Image) private readonly imageRepository:ImageRepository,
   private readonly userService:UserService,
   private readonly couleurService:CouleurService,
   ){}
-  async create(@Session() request:Record<string, any>,createSizeDto: CreateSizeDto) {
+  async create(@Session() request:Record<string, any>,createImageDto: CreateImageDto) {
     const idAdmin=request.idUser
     console.log(idAdmin)
     if(!idAdmin){
@@ -35,15 +34,15 @@ export class SizeService {
       
       }
     }
-    const size1=await this.sizeRepository.findOne({where : {typeSize:createSizeDto.typeSize,couleur:{nameCouleur:createSizeDto.nameCouleur}}});
-    console.log(size1)
-    if(size1) {
+    const image1=await this.imageRepository.findOne({where : {UrlImage:createImageDto.UrlImage,couleur:{nameCouleur:createImageDto.nameCouleur}}});
+    console.log(image1)
+    if(image1) {
       return await{
-        message:'cette size existe deja dans se produit',
+        message:'cette image existe deja dans se produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
+    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createImageDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -51,11 +50,11 @@ export class SizeService {
       }
     }
 
-    const size=await this.sizeRepository.create(createSizeDto);
-    size.addedBy=admin.data;
-    size.createdate=new Date();
-    size.couleur=couleur.data;
-    this.sizeRepository.save(size);
+    const image=await this.imageRepository.create(createImageDto);
+    image.addedBy=admin.data;
+    image.createdate=new Date();
+    image.couleur=couleur.data;
+    this.imageRepository.save(image);
     return await {
       message: 'couleur ajoute avec succes',
       statusCode: HttpStatus.OK,
@@ -63,29 +62,29 @@ export class SizeService {
   }
 
   async findAll() {
-    const size = await this.sizeRepository.find();
-    if(size.length==0) {
+    const image = await this.imageRepository.find();
+    if(image.length==0) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:size,
+      message:image,
       statusCode:HttpStatus.OK,
     }
   }
 
-  async findByNameSize(typeSize:FindBySizeDto) {
-    const size =  await this.sizeRepository.find({where : {typeSize:typeSize.typeSize}});
-    if(size.length==0) {
+  async findByNameImage(url:FindByImageDto) {
+    const image =  await this.imageRepository.find({where : {UrlImage:url.urlImage}});
+    if(image.length==0) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:size,
+      message:image,
       statusCode:HttpStatus.OK,
     }
   }
@@ -99,48 +98,48 @@ export class SizeService {
       }
     }
     
-    const sizes = await this.sizeRepository.find( { where: { couleur: { id: couleur.data.id } }});
-    if(!sizes) {
+    const images = await this.imageRepository.find( { where: { couleur: { id: couleur.data.id } }});
+    if(images.length==0) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:sizes,
+      message:images,
       statusCode:HttpStatus.OK,
     }
   }
 
   async findByNameAndId(nameProduct:FindByIdNameDto) {
-    const size =  await this.sizeRepository.findOne({where : {typeSize:nameProduct.typeSize,addedBy:{id:nameProduct.id}}});
-    if(!size) {
+    const image =  await this.imageRepository.findOne({where : {UrlImage:nameProduct.urlImage,addedBy:{id:nameProduct.id}}});
+    if(!image) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:size,
+      data:image,
       statusCode:HttpStatus.OK,
     }
   }
 
   async findOne(id: number) {
-    const size = await this.sizeRepository.findOne({where : {id:id}});
-    if(!size) {
+    const image = await this.imageRepository.findOne({where : {id:id}});
+    if(!image) {
       return await{
         data:null,
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:size,
+      message:image,
       statusCode:HttpStatus.OK,
     }
   }
 
-  async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateSizeDto) {
+  async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateImageDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  
       return await {
@@ -156,8 +155,8 @@ export class SizeService {
       
       }
     }
-    const size = await this.sizeRepository.findOne({where : {typeSize:updateCouleurDto.typeSize,addedBy:idAdmin}});
-    if(!size) {
+    const image = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage,addedBy:idAdmin}});
+    if(!image) {
       return await{
         message:'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -170,28 +169,27 @@ export class SizeService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    if(updateCouleurDto.typeSize) {
-      const siz = await this.sizeRepository.findOne({where : {typeSize:updateCouleurDto.typeSize}});
-      if(siz) {
+    if(updateCouleurDto.urlImage) {
+      const ima = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage}});
+      if(ima) {
         return await{
           message:'cette couleur existe deja',
           statusCode:HttpStatus.BAD_REQUEST,
         }
       }
     }
-    size.typeSize = updateCouleurDto.typeSize;
-    size.addedBy = admin.data;
-    size.updatedate = new Date();
-    size.stockQuantity = updateCouleurDto.stockQuantity;
-    size.couleur = couleur.data;
-    this.sizeRepository.save(size)
+    image.UrlImage = updateCouleurDto.urlImage;
+    image.addedBy = admin.data;
+    image.updatedate = new Date();
+    image.couleur = couleur.data;
+    this.imageRepository.save(image)
     return await {
-      message:size,
+      message:image,
       statusCode:HttpStatus.OK,
     }
   }
 
-  async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveSizeDto) {
+  async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveImageDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  
       return await {
@@ -207,14 +205,14 @@ export class SizeService {
       
       }
     }
-    const size = await this.sizeRepository.findOne({where : {typeSize:removeCouleurDto.typeSize,addedBy:idAdmin}});
-    if(!size) {
+    const image = await this.imageRepository.findOne({where : {UrlImage:removeCouleurDto.urlImage,addedBy:idAdmin}});
+    if(!image) {
       return await{
         message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    await this.sizeRepository.remove(size)
+    await this.imageRepository.remove(image)
     return await {
       message:'la couleur a bien ete supprimer',
       statusCode:HttpStatus.OK,

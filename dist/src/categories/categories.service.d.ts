@@ -7,6 +7,7 @@ import { CategoryRepository } from './category.repository';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
+import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 export declare class CategoriesService {
     private readonly categoryRepository;
     private readonly userService;
@@ -18,7 +19,11 @@ export declare class CategoriesService {
         message: CategoryEntity;
         statusCode: HttpStatus;
     }>;
-    findSubcategories(parentCategoryName: FindByNameCategoryDto): Promise<{
+    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<{
+        data: CategoryEntity;
+        statusCode: HttpStatus;
+    }>;
+    findSubcategories(parentCategoryName: FindByNameParentDto): Promise<{
         data: CategoryEntity[];
         statusCode: HttpStatus;
     }>;
@@ -31,16 +36,18 @@ export declare class CategoriesService {
         statusCode: HttpStatus;
     }>;
     findOne(id: number): Promise<CategoryEntity>;
-    update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<CategoryEntity | {
+    update(request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>): Promise<{
         message: string;
         statusCode: HttpStatus;
-    }>;
-    remove(request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>): Promise<import("typeorm").DeleteResult | {
-        message: string;
+    } | {
+        message: CategoryEntity;
         statusCode: HttpStatus;
     }>;
-    findByIdAndName(createCategoryDto: FindByIdAndNameDto): Promise<{
-        data: CategoryEntity;
+    remove(request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>): Promise<{
+        message: string;
+        statusCode: HttpStatus;
+    } | {
+        message: CategoryEntity;
         statusCode: HttpStatus;
     }>;
 }

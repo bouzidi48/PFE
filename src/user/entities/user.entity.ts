@@ -3,6 +3,7 @@ import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
 import { Product } from "src/product/entities/product.entity";
 import { ReviewEntity } from "src/review/entities/review.entity";
+import { Size } from "src/size/entities/size.entity";
 //import { ReviewEntity } from "src/review/entities/review.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -43,6 +44,8 @@ export class User {
     @OneToMany(()=>Product,(product)=>product.addedBy)
     products:Product[];
 
+    @OneToMany(()=>Size,(size)=>size.addedBy)
+    sizes:Size[];
 
   @OneToMany(() => ReviewEntity, (rev) => rev.user)
   review: ReviewEntity[];  

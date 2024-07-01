@@ -78,7 +78,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updatePassword", null);
 __decorate([
-    (0, common_1.Post)('ancienPassword'),
+    (0, common_1.Post)('ancienUsername'),
     __param(0, (0, common_1.Session)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),

@@ -98,7 +98,7 @@ export class ProductService {
     }
   }
   async findByIdAndNameProduct(nameProduct:FindByNameAndIdProductDto) {
-    const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,id:nameProduct.id } });
+    const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,addedBy: { id: nameProduct.id} } });
     if(!product){
       return await {
         data: null,

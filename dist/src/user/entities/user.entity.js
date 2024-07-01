@@ -15,6 +15,7 @@ const couleur_entity_1 = require("../../couleur/entities/couleur.entity");
 const user_enum_1 = require("../../enum/user_enum");
 const product_entity_1 = require("../../product/entities/product.entity");
 const review_entity_1 = require("../../review/entities/review.entity");
+const size_entity_1 = require("../../size/entities/size.entity");
 const typeorm_1 = require("typeorm");
 let User = class User {
 };
@@ -63,6 +64,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => product_entity_1.Product, (product) => product.addedBy),
     __metadata("design:type", Array)
 ], User.prototype, "products", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => size_entity_1.Size, (size) => size.addedBy),
+    __metadata("design:type", Array)
+], User.prototype, "sizes", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => review_entity_1.ReviewEntity, (rev) => rev.user),
     __metadata("design:type", Array)

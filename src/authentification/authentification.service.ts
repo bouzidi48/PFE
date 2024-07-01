@@ -125,7 +125,7 @@ export class AuthentificationService {
       console.log("1")
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(passDto.password, saltRounds);
-      const updateUser = { ...user, password: hashedPassword };
+      const updateUser = { username: user.username, password: hashedPassword };
       await this.userService.update(user,updateUser)
       console.log(user)
       return await {

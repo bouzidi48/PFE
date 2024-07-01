@@ -15,6 +15,8 @@ import { InscriptionModule } from './inscription/inscription.module';
 import { AuthentificationModule } from './authentification/authentification.module';
 import { ProductModule } from './product/product.module';
 import { ReviewModule } from './review/review.module';
+import { CouleurModule } from './couleur/couleur.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -34,7 +36,7 @@ import { ReviewModule } from './review/review.module';
     
     CategoriesModule,
     CardModule,
-   
+    CouleurModule,
     ReviewModule,
     
     InscriptionModule,
@@ -42,6 +44,8 @@ import { ReviewModule } from './review/review.module';
     AuthentificationModule,
    
     ProductModule,
+   
+    ImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService]

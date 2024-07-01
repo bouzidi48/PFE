@@ -2,15 +2,11 @@ import { PartialType } from '@nestjs/mapped-types';
 
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateSizeDto{
-    @IsNotEmpty({message:'nameCouleur can not be empty'})
-    @IsString({message:'nameCouleur should be string '})
+export class UpdateImageDto{
+    @IsNotEmpty({message:'urlImage can not be empty'})
+    @IsString({message:'urlImage should be string '})
     @IsOptional()
-    typeSize:string;
-
-    @IsNotEmpty({message:'stock can not be empty'})
-    @IsNumber({},{message:'stock should be number '})
-    stockQuantity: number;
+    urlImage:string;
 
 
     @IsOptional()
@@ -20,5 +16,6 @@ export class UpdateSizeDto{
 
     @IsNotEmpty({message:'ancienNameCouleur can not be empty'})
     @IsString({message:'ancienNameCouleur should be string '})
-    ancientypeSize:string;
+    ancienUrl:string;
 }
+

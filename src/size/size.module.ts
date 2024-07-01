@@ -15,5 +15,6 @@ import { CouleurModule } from 'src/couleur/couleur.module';
   imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,CouleurModule],
   controllers: [SizeController],
   providers: [SizeService],
+  exports: [SizeService],
 })
 export class SizeModule {}
