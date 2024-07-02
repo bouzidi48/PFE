@@ -50,7 +50,7 @@ exports.AppModule = AppModule = __decorate([
             authentification_module_1.AuthentificationModule,
             product_module_1.ProductModule,
             images_module_1.ImagesModule,
-            product_like_module_1.ProductLikeModule
+            product_like_module_1.ProductLikeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]
