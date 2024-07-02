@@ -3,6 +3,7 @@ import { ProductLikeService } from './product-like.service';
 import { CreateProductLikeDto } from './dto/create-product-like.dto';
 import { UpdateProductLikeDto } from './dto/update-product-like.dto';
 
+
 @Controller('product-like')
 export class ProductLikeController {
   constructor(private readonly productLikeService: ProductLikeService) {}

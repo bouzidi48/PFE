@@ -8,6 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { ProductService } from 'src/product/product.service';
 import { User } from 'src/user/entities/user.entity';
 import { Product } from 'src/product/entities/product.entity';
+import { UpdateProductLikeDto } from './dto/update-product-like.dto';
 
 
 @Injectable()
