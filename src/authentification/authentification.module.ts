@@ -5,10 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { UserModule } from 'src/user/user.module';
+import { ProductService } from 'src/product/product.service';
+import { ProductModule } from 'src/product/product.module';
+import { ProductLikeModule } from 'src/product-like/product-like.module';
 
 
 @Module({
-  imports:[UserModule],
+  imports:[UserModule,ProductModule,ProductLikeModule],
   controllers: [AuthentificationController],
   providers: [AuthentificationService],
 })

@@ -15,11 +15,15 @@ import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { request } from 'http';
 import { UserService } from 'src/user/user.service';
 import { UserUpdateDto } from 'src/user/dto/update-user.dto';
+import { ProductService } from 'src/product/product.service';
+import { ProductLikeService } from 'src/product-like/product-like.service';
 @Injectable()
 export class AuthentificationService {
   constructor(
     private readonly userService: UserService,
     private readonly mailerService:MailerService,
+    private readonly productService:ProductService,
+    private readonly productLikedService:ProductLikeService,
   ) {}
 
 
@@ -67,9 +71,17 @@ export class AuthentificationService {
         };
       }
     }
-    request.idUser = user.data.id
+     request.idUser = user.data.id
     console.log(request.idUser)
-    
+    if (request.likes && request.likes.length > 0) {
+      for (const productId of request.likes) {
+        const product = await this.productService.findById(productId);
+        if (product) {
+          await this.productLikedService.likeProduct(request, productId);
+        }
+      }
+      request.likes = [];
+    } 
     return await {
       message: 'Bienvenue dans notre application',
       statusCode: HttpStatus.OK,

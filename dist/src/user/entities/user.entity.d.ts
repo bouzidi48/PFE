@@ -16,4 +16,5 @@ export declare class User {
     products: Product[];
     sizes: Size[];
     review: ReviewEntity[];
+    likedProducts: Product[];
 }
