@@ -1,10 +1,11 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
+import { ProductLikeEntity } from "src/product-like/entities/product-like.entity";
 import { ReviewEntity } from "src/review/entities/review.entity";
 
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('products')
 
@@ -39,6 +40,8 @@ export class Product {
 
     @OneToMany(()=>ReviewEntity,(rev)=>rev.product)
     review:ReviewEntity[];
-
-     
+ 
+    @ManyToMany(() => User, user => user.likedProducts)
+    likedBy: User[]; 
+  
 }

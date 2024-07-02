@@ -45,4 +45,9 @@ export class ProductController {
   remove(@Session() request:Record<string, any>, @Body() updateProductDto: RemoveProductDto) {
     return this.productService.remove(request,updateProductDto);
   }
+  @Get('findById')
+  async findById(@Body() id:number){
+    return await  this.productService.findById(id);
+  }
+
 }

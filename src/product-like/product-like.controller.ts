@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session } from '@nestjs/common';
 import { ProductLikeService } from './product-like.service';
 import { CreateProductLikeDto } from './dto/create-product-like.dto';
 import { UpdateProductLikeDto } from './dto/update-product-like.dto';
@@ -7,14 +7,19 @@ import { UpdateProductLikeDto } from './dto/update-product-like.dto';
 export class ProductLikeController {
   constructor(private readonly productLikeService: ProductLikeService) {}
 
-  @Post()
-  create(@Body() createProductLikeDto: CreateProductLikeDto) {
-    return this.productLikeService.create(createProductLikeDto);
+  @Post('like')
+   likeProduct(@Session() request: Record<string, any>,@Body() productId:CreateProductLikeDto) {
+    return this.productLikeService.likeProduct(request,productId);
   }
 
-  @Get()
-  findAll() {
-    return this.productLikeService.findAll();
+  @Delete('unlike')
+  unlikeProduct(@Session() request: Record<string, any>,@Body() productId:CreateProductLikeDto) {
+    return this.productLikeService.unlikeProduct(request,productId);
+  }
+ 
+  @Get('findall')
+  findAll(@Session() request: Record<string, any>) {
+    return this.productLikeService.findAll(request)
   }
 
   @Get(':id')

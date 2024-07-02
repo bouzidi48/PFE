@@ -17,7 +17,7 @@ import { ProductModule } from './product/product.module';
 import { ReviewModule } from './review/review.module';
 import { CouleurModule } from './couleur/couleur.module';
 import { ImagesModule } from './images/images.module';
-import { ProductLikeModule } from './product-like/product-like.module';
+
 import { ProductLikeModule } from './product-like/product-like.module';
 
 @Module({
@@ -48,7 +48,7 @@ import { ProductLikeModule } from './product-like/product-like.module';
    
     ImagesModule,
    
-    ProductLikeModule,
+    ProductLikeModule
   ],
   controllers: [AppController],
   providers: [AppService]

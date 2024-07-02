@@ -213,4 +213,18 @@ export class ProductService {
       statusCode:HttpStatus.OK,
     }
   }
+  async findById(id:number){
+    const product = await this.productRepository.findOne({where:{id:id}});
+    if(!product){
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data:product,
+      statusCode:HttpStatus.OK,
+    }
+  }
+
 }

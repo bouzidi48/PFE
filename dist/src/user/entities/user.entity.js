@@ -72,6 +72,15 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => review_entity_1.ReviewEntity, (rev) => rev.user),
     __metadata("design:type", Array)
 ], User.prototype, "review", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => product_entity_1.Product, product => product.likedBy),
+    (0, typeorm_1.JoinTable)({
+        name: 'product_liked',
+        joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' }
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "likedProducts", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);
