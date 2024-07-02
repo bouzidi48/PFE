@@ -23,7 +23,7 @@ export class ImagesService {
     console.log(idAdmin)
     if(!idAdmin){
       return await {
-        message: 'vous devez vous connecter pour ajouter une categorie',
+        message: 'vous devez vous connecter pour ajouter une image',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
