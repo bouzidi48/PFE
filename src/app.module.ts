@@ -8,8 +8,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import {config} from 'dotenv'
 
 
+
+
 import { CategoriesModule } from './categories/categories.module';
-import { CardModule } from './card/card.module';
+
 
 import { InscriptionModule } from './inscription/inscription.module';
 import { AuthentificationModule } from './authentification/authentification.module';
@@ -18,7 +20,7 @@ import { ReviewModule } from './review/review.module';
 import { CouleurModule } from './couleur/couleur.module';
 import { ImagesModule } from './images/images.module';
 import { ProductLikeModule } from './product-like/product-like.module';
-import { CardModule } from './card/card.module';
+import { SizeModule } from './size/size.module';
 
 
 @Module({
@@ -38,7 +40,7 @@ import { CardModule } from './card/card.module';
     }),
     
     CategoriesModule,
-    CardModule,
+
     CouleurModule,
     ReviewModule,
     InscriptionModule,
@@ -50,6 +52,8 @@ import { CardModule } from './card/card.module';
     ImagesModule,
    
     ProductLikeModule,
+   SizeModule,
+
   ],
   controllers: [AppController],
   providers: [AppService]
