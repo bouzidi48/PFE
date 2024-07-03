@@ -140,6 +140,19 @@ export class CouleurService {
       statusCode:HttpStatus.OK,
     }
   }
+  async findByIdCouleurIdProduct(idProduct: number,idCouleur) {
+    const couleur = await this.couleurRepository.findOne({where:{id:idCouleur,product:{id:idProduct}}});
+    if(!couleur) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:couleur,
+      statusCode:HttpStatus.OK,
+    }
+  }
 
   async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateCouleurDto) {
     const idAdmin = request.idUser

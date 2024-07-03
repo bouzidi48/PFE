@@ -1,3 +1,4 @@
+
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
@@ -48,8 +49,9 @@ export class User {
     @OneToMany(()=>Size,(size)=>size.addedBy)
     sizes:Size[];
 
-  @OneToMany(() => ReviewEntity, (rev) => rev.user)
-  review: ReviewEntity[];  
+    @OneToMany(() => ReviewEntity, (rev) => rev.user)
+    review: ReviewEntity[]; 
+     
 
   @ManyToMany(() => Product, product => product.likedBy)
   @JoinTable({

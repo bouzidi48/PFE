@@ -15,7 +15,6 @@ const data_source_1 = require("../db/data_source");
 const user_module_1 = require("./user/user.module");
 const mailer_1 = require("@nestjs-modules/mailer");
 const categories_module_1 = require("./categories/categories.module");
-const card_module_1 = require("./card/card.module");
 const inscription_module_1 = require("./inscription/inscription.module");
 const authentification_module_1 = require("./authentification/authentification.module");
 const product_module_1 = require("./product/product.module");
@@ -23,6 +22,7 @@ const review_module_1 = require("./review/review.module");
 const couleur_module_1 = require("./couleur/couleur.module");
 const images_module_1 = require("./images/images.module");
 const product_like_module_1 = require("./product-like/product-like.module");
+const size_module_1 = require("./size/size.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,7 +43,6 @@ exports.AppModule = AppModule = __decorate([
                 },
             }),
             categories_module_1.CategoriesModule,
-            card_module_1.CardModule,
             couleur_module_1.CouleurModule,
             review_module_1.ReviewModule,
             inscription_module_1.InscriptionModule,
@@ -51,6 +50,7 @@ exports.AppModule = AppModule = __decorate([
             product_module_1.ProductModule,
             images_module_1.ImagesModule,
             product_like_module_1.ProductLikeModule,
+            size_module_1.SizeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

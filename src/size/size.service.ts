@@ -140,6 +140,20 @@ export class SizeService {
     }
   }
 
+  async findByIdSizeIdCouleur(idSize: number,idCouleur: number) {
+    const couleur = await this.sizeRepository.findOne({where:{id:idSize,couleur:{id:idCouleur}}});
+    if(!couleur) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:couleur,
+      statusCode:HttpStatus.OK,
+    }
+  }
+
   async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateSizeDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  

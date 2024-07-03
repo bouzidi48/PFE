@@ -1,3 +1,4 @@
+
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
@@ -40,6 +41,8 @@ export class Product {
 
     @OneToMany(()=>ReviewEntity,(rev)=>rev.product)
     review:ReviewEntity[];
+
+    
  
     @ManyToMany(() => User, user => user.likedProducts)
     likedBy: User[]; 
