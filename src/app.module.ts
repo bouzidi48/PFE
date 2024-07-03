@@ -18,6 +18,7 @@ import { ReviewModule } from './review/review.module';
 import { CouleurModule } from './couleur/couleur.module';
 import { ImagesModule } from './images/images.module';
 import { ProductLikeModule } from './product-like/product-like.module';
+import { CardModule } from './card/card.module';
 
 
 @Module({
