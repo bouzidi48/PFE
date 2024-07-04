@@ -264,8 +264,7 @@ export class ProductService {
       }
     }
     for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==productId && request.panier[i].couleurId==couleurId) {
-        request.panier[i].sizeId = sizeId
+      if(request.panier[i].productId==productId && request.panier[i].couleurId==couleurId && request.panier[i].sizeId==sizeId) {
         request.panier[i].quantity = request.panier[i].quantity+quantity
         request.panier[i].price = request.panier[i].quantity*product.price
         return await {
@@ -300,8 +299,8 @@ export class ProductService {
 
   async removePanier(@Session() request:Record<string, any>, removePanierDto: RemovePanierDto) {
     for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==removePanierDto.productId && request.panier[i].couleurId==removePanierDto.couleurId) {
-        request.panier.splice(i,1)
+      if(request.panier[i].productId==removePanierDto.productId && request.panier[i].couleurId==removePanierDto.couleurId && request.panier[i].sizeId==removePanierDto.sizeId) {
+        request.panier.remove(i)
         return await {
           message:request.panier,
           statusCode:HttpStatus.OK,

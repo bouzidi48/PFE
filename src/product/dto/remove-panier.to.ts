@@ -9,4 +9,8 @@ export class RemovePanierDto {
     @IsNotEmpty({message:'title can not be empty'})
     @IsNumber()
     couleurId: number;
+    
+    @IsNotEmpty({message:'title can not be empty'})
+    @IsNumber()
+    sizeId: number;
 }
