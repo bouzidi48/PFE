@@ -15,19 +15,6 @@ import { RemoveProductDto } from './dto/remove-product.dto';
 import { CategoriesService } from 'src/categories/categories.service';
 import { UserService } from 'src/user/user.service';
 import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
-<<<<<<< HEAD
-import { Couleur } from 'src/couleur/entities/couleur.entity';
-import { CouleurService } from 'src/couleur/couleur.service';
-import { SizeService } from 'src/size/size.service';
-=======
-import { AjouetrPanierDto } from './dto/ajouter-panier.dto';
-import { CouleurService } from 'src/couleur/couleur.service';
-import { Couleur } from 'src/couleur/entities/couleur.entity';
-import { CouleurRepository } from 'src/couleur/couleur.repository';
-import { Size } from 'src/size/entities/size.entity';
-import { SizeRepository } from 'src/size/size.repository';
-import { RemovePanierDto } from './dto/remove-panier.to';
->>>>>>> 879244b793d43a2849050b73d08d2b87dc95c6b0
 
 @Injectable()
 export class ProductService {
@@ -36,13 +23,6 @@ export class ProductService {
   constructor(
     private readonly categoryService:CategoriesService,
     private readonly userService:UserService,
-<<<<<<< HEAD
-    private readonly couleurService:CouleurService,
-    private readonly sizeService:SizeService,
-=======
-    @InjectRepository(Couleur) private readonly couleurRepository:CouleurRepository,
-    @InjectRepository(Size) private readonly sizeRepository:SizeRepository,  
->>>>>>> 879244b793d43a2849050b73d08d2b87dc95c6b0
     @InjectRepository(Product) private readonly productRepository:ProductRepository  
   ){}
   async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
@@ -247,90 +227,4 @@ export class ProductService {
     }
   }
 
-<<<<<<< HEAD
-
-
-
-
-=======
-  async ajouterPanier(@Session() request:Record<string, any>, ajouterPanierDto: AjouetrPanierDto) {
-    const productId = ajouterPanierDto.productId
-    const couleurId = ajouterPanierDto.couleurId
-    const sizeId = ajouterPanierDto.sizeId
-    const quantity = ajouterPanierDto.quantity
-    if(!request.panier) {
-      request.panier =[]
-    }
-    const product = await this.productRepository.findOne({where:{id:productId}})
-    if(!product) {
-      return await{
-        message:'ce produit n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    const couleur = await this.couleurRepository.findOne({where:{id:couleurId}})
-    if(!couleur) {
-      return await{
-        message:'ce couleur n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    const size = await this.sizeRepository.findOne({where:{id:sizeId}})
-    if(!size) {
-      return await{
-        message:'ce taille n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-    for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==productId && request.panier[i].couleurId==couleurId) {
-        request.panier[i].sizeId = sizeId
-        request.panier[i].quantity = request.panier[i].quantity+quantity
-        request.panier[i].price = request.panier[i].quantity*product.price
-        return await {
-          message:request.panier,
-          statusCode:HttpStatus.OK,
-        }
-      }
-    }
-    
-      request.panier.push({
-        productId:productId,
-        couleurId:couleurId,
-        sizeId:sizeId,
-        quantity:quantity,
-        price:quantity*product.price
-      })
-    
-    return await {
-      message:request.panier,
-      statusCode:HttpStatus.OK,
-    
-
-    }
-  }
-  async listePanier(@Session() request:Record<string, any>) {
-    return await {
-      data:request.panier,
-      statusCode:HttpStatus.OK,
-    }
-  }
-
-
-  async removePanier(@Session() request:Record<string, any>, removePanierDto: RemovePanierDto) {
-    for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==removePanierDto.productId && request.panier[i].couleurId==removePanierDto.couleurId) {
-        request.panier.splice(i,1)
-        return await {
-          message:request.panier,
-          statusCode:HttpStatus.OK,
-        }
-      }
-    }
-    return await {
-      message:request.panier,
-      statusCode:HttpStatus.OK,
-    }
-  }
->>>>>>> 879244b793d43a2849050b73d08d2b87dc95c6b0
 }
