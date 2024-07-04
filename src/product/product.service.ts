@@ -15,6 +15,9 @@ import { RemoveProductDto } from './dto/remove-product.dto';
 import { CategoriesService } from 'src/categories/categories.service';
 import { UserService } from 'src/user/user.service';
 import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
+import { Couleur } from 'src/couleur/entities/couleur.entity';
+import { CouleurService } from 'src/couleur/couleur.service';
+import { SizeService } from 'src/size/size.service';
 
 @Injectable()
 export class ProductService {
@@ -23,6 +26,8 @@ export class ProductService {
   constructor(
     private readonly categoryService:CategoriesService,
     private readonly userService:UserService,
+    private readonly couleurService:CouleurService,
+    private readonly sizeService:SizeService,
     @InjectRepository(Product) private readonly productRepository:ProductRepository  
   ){}
   async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
@@ -226,5 +231,9 @@ export class ProductService {
       statusCode:HttpStatus.OK,
     }
   }
+
+
+
+
 
 }
