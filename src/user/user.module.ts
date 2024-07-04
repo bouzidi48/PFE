@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { Cookie } from 'express-session';
 
 import { UserRepository } from './user.repository';
+import { OrderModule } from 'src/order/order.module';
 
 
 @Module({

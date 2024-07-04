@@ -1,5 +1,6 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/enum/user_enum";
+import { Order } from "src/order/entities/order.entity";
 import { Product } from "src/product/entities/product.entity";
 import { ReviewEntity } from "src/review/entities/review.entity";
 import { Size } from "src/size/entities/size.entity";
@@ -17,4 +18,6 @@ export declare class User {
     sizes: Size[];
     review: ReviewEntity[];
     likedProducts: Product[];
+    orders: Order[];
+    orderUpdateBy: Order[];
 }

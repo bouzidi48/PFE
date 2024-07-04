@@ -2,12 +2,13 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
+import { Order } from "src/order/entities/order.entity";
 import { ProductLikeEntity } from "src/product-like/entities/product-like.entity";
 import { Product } from "src/product/entities/product.entity";
 import { ReviewEntity } from "src/review/entities/review.entity";
 import { Size } from "src/size/entities/size.entity";
 //import { ReviewEntity } from "src/review/entities/review.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 
@@ -60,4 +61,11 @@ export class User {
     inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' }
   })
   likedProducts: Product[]; 
+
+
+  @OneToMany(() => Order, order => order.user)
+  orders: Order[];
+
+  @OneToMany(()=>Order,(order)=>order.orderUpdateBy)
+  orderUpdateBy:Order[];
 }
