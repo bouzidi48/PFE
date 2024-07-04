@@ -6,6 +6,7 @@ import { FindByNameProductDto } from './dto/find-by-name-product.dto';
 import { FindByCategorieDto } from './dto/find-by-categorie.dto';
 import { RemoveProductDto } from './dto/remove-product.dto';
 import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
+import { AjouetrPanierDto } from './dto/ajouter-panier.dto';
 
 @Controller('product')
 export class ProductController {
@@ -48,6 +49,11 @@ export class ProductController {
   @Get('findById')
   async findById(@Body() id:number){
     return await  this.productService.findById(id);
+  }
+
+  @Post('createPanier')
+  async createPanier(@Session() request:Record<string, any>,@Body() createProductDto: AjouetrPanierDto) {
+    return await  this.productService.ajouterPanier(request,createProductDto);
   }
 
 }
