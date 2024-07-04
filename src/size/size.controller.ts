@@ -11,7 +11,7 @@ import { RemoveSizeDto } from './dto/remove-size.dto';
 export class SizeController {
   constructor(private readonly sizeService: SizeService) {}
 
-  @Post()
+  @Post('create')
   create(@Session() request:Record<string, any>,@Body() createSizeDto: CreateSizeDto) {
     return this.sizeService.create(request,createSizeDto);
   }
