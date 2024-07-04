@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
@@ -9,11 +9,12 @@ import { generate } from 'randomstring';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import { UserVerifyDto } from './dto/verify-user.dto';
 import { UserService } from 'src/user/user.service';
+import { UserController } from 'src/user/user.controller';
 
 @Injectable()
 export class InscriptionService {
   constructor(
-    private readonly userService: UserService,
+    @Inject(UserController) private readonly userService: UserController,
     private readonly mailerService:MailerService,
   ) {}
 

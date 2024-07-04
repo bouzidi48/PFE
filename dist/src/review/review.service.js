@@ -15,12 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewService = void 0;
 const common_1 = require("@nestjs/common");
 const create_review_dto_1 = require("./dto/create-review.dto");
-const user_service_1 = require("../user/user.service");
 const typeorm_1 = require("@nestjs/typeorm");
 const review_entity_1 = require("./entities/review.entity");
-const product_service_1 = require("../product/product.service");
 const user_enum_1 = require("../enum/user_enum");
 const review_repository_1 = require("./review.repository");
+const user_controller_1 = require("../user/user.controller");
+const product_controller_1 = require("../product/product.controller");
 let ReviewService = class ReviewService {
     constructor(userService, productService, reviewRepository) {
         this.userService = userService;
@@ -200,9 +200,11 @@ __decorate([
 ], ReviewService.prototype, "create", null);
 exports.ReviewService = ReviewService = __decorate([
     (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(user_controller_1.UserController)),
+    __param(1, (0, common_1.Inject)(product_controller_1.ProductController)),
     __param(2, (0, typeorm_1.InjectRepository)(review_entity_1.ReviewEntity)),
-    __metadata("design:paramtypes", [user_service_1.UserService,
-        product_service_1.ProductService,
+    __metadata("design:paramtypes", [user_controller_1.UserController,
+        product_controller_1.ProductController,
         review_repository_1.ReviewRepository])
 ], ReviewService);
 //# sourceMappingURL=review.service.js.map

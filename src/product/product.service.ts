@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,17 +21,22 @@ import { CouleurRepository } from 'src/couleur/couleur.repository';
 import { Size } from 'src/size/entities/size.entity';
 import { SizeRepository } from 'src/size/size.repository';
 import { RemovePanierDto } from './dto/remove-panier.to';
+import { CategoriesController } from 'src/categories/categories.controller';
+import { UserController } from 'src/user/user.controller';
+import { CouleurController } from 'src/couleur/couleur.controller';
+import { SizeController } from 'src/size/size.controller';
+import { ProductController } from './product.controller';
 
 @Injectable()
 export class ProductService {
  
  
   constructor(
-    private readonly categoryService:CategoriesService,
-    private readonly userService:UserService,
+    @Inject(CategoriesController) private readonly categoryService:CategoriesController,
+    @Inject(UserController) private readonly userService:UserController,
     @InjectRepository(Couleur) private readonly couleurRepository:CouleurRepository,
     @InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-    @InjectRepository(Product) private readonly productRepository:ProductRepository  
+    @InjectRepository(Product) private readonly productRepository:ProductRepository, 
   ){}
   async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
     const idAdmin=request.idUser
@@ -105,7 +110,7 @@ export class ProductService {
         statusCode:HttpStatus.OK,
     }
   }
-  async findByIdAndNameProduct(nameProduct:FindByNameAndIdProductDto) {
+  async findByNameAndIdProduct(nameProduct:FindByNameAndIdProductDto) {
     const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,addedBy: { id: nameProduct.id} } });
     if(!product){
       return await {

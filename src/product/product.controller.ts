@@ -29,7 +29,7 @@ export class ProductController {
 
   @Get('findbyNameAndIdProduct')
   findByNameAndIdProduct(@Body() nameAndIdProduct: FindByNameAndIdProductDto) {
-    return this.productService.findByIdAndNameProduct(nameAndIdProduct);
+    return this.productService.findByNameAndIdProduct(nameAndIdProduct);
   }
 
   @Get('findbyCategory')

@@ -10,11 +10,13 @@ import { Size } from './entities/size.entity';
 import { SizeRepository } from './size.repository';
 import { UserModule } from 'src/user/user.module';
 import { CouleurModule } from 'src/couleur/couleur.module';
+import { UserController } from 'src/user/user.controller';
+import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,CouleurModule],
   controllers: [SizeController],
-  providers: [SizeService],
+  providers: [SizeService,UserController,CouleurController],
   exports: [SizeService],
 })
 export class SizeModule {}

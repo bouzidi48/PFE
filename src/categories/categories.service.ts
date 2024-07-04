@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,7 +25,7 @@ import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity) private readonly categoryRepository:CategoryRepository,
-    private readonly userService:UserService,
+    @Inject(UserController) private readonly userService:UserController,
  
   ){}
   

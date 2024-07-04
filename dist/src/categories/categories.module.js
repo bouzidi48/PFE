@@ -14,6 +14,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
 const category_repository_1 = require("./category.repository");
 const user_module_1 = require("../user/user.module");
+const user_controller_1 = require("../user/user.controller");
 let CategoriesModule = class CategoriesModule {
 };
 exports.CategoriesModule = CategoriesModule;
@@ -21,7 +22,7 @@ exports.CategoriesModule = CategoriesModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([category_entity_1.CategoryEntity, category_repository_1.CategoryRepository]), user_module_1.UserModule],
         controllers: [categories_controller_1.CategoriesController],
-        providers: [categories_service_1.CategoriesService],
+        providers: [categories_service_1.CategoriesService, user_controller_1.UserController],
         exports: [categories_service_1.CategoriesService]
     })
 ], CategoriesModule);

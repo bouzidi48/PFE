@@ -17,9 +17,9 @@ const common_1 = require("@nestjs/common");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const typeorm_1 = require("@nestjs/typeorm");
 const category_entity_1 = require("./entities/category.entity");
-const user_service_1 = require("../user/user.service");
 const category_repository_1 = require("./category.repository");
 const user_enum_1 = require("../enum/user_enum");
+const user_controller_1 = require("../user/user.controller");
 let CategoriesService = class CategoriesService {
     constructor(categoryRepository, userService) {
         this.categoryRepository = categoryRepository;
@@ -226,7 +226,8 @@ __decorate([
 exports.CategoriesService = CategoriesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.CategoryEntity)),
+    __param(1, (0, common_1.Inject)(user_controller_1.UserController)),
     __metadata("design:paramtypes", [category_repository_1.CategoryRepository,
-        user_service_1.UserService])
+        user_controller_1.UserController])
 ], CategoriesService);
 //# sourceMappingURL=categories.service.js.map

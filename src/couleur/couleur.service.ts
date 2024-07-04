@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCouleurDto } from './dto/create-couleur.dto';
 import { UpdateCouleurDto } from './dto/update-couleur.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,14 @@ import { FindByProductDto } from './dto/find-by-product.dto';
 import { RemoveCouleurDto } from './dto/remove-couleur.dto';
 import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
 
 @Injectable()
 export class CouleurService {
   constructor(@InjectRepository(Couleur) private readonly couleurRepository:CouleurRepository,
-  private readonly userService:UserService,
-  private readonly productService:ProductService,
+  @Inject(UserController) private readonly userService:UserController,
+  @Inject(ProductController) private readonly productService:ProductController,
   ){}
   async create(@Session() request:Record<string, any>,createCouleurDto: CreateCouleurDto) {
     const idAdmin=request.idUser
@@ -43,7 +45,7 @@ export class CouleurService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const product=await this.productService.findByIdAndNameProduct({id:idAdmin,nameProduct:createCouleurDto.nameProduct})
+    const product=await this.productService.findByNameAndIdProduct({id:idAdmin,nameProduct:createCouleurDto.nameProduct})
     if(!product) {
       return await{
         message:'ce produit n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -177,7 +179,7 @@ export class CouleurService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const product = await this.productService.findByIdAndNameProduct({id:idAdmin,nameProduct:updateCouleurDto.nameProduct})
+    const product = await this.productService.findByNameAndIdProduct({id:idAdmin,nameProduct:updateCouleurDto.nameProduct})
     if(!product) {
       return await{
         message:'le produit que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
