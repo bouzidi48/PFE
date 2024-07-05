@@ -10,19 +10,15 @@ import { ProductService } from 'src/product/product.service';
 import { OrderItems } from './entities/order-item.entity';
 import { SizeService } from 'src/size/size.service';
 import { CouleurService } from 'src/couleur/couleur.service';
-import { UserController } from 'src/user/user.controller';
-import { ProductController } from 'src/product/product.controller';
-import { SizeController } from 'src/size/size.controller';
-import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRespoitory:OrderRepository,
-    @Inject(UserController) private readonly userService:UserController,
-    @Inject(ProductController) private readonly productservice:ProductController,
-    @Inject(SizeController) private readonly sizeService:SizeController,
-    @Inject(CouleurController) private readonly couleurService:CouleurController
+    private readonly userService:UserService,
+    private readonly productservice:ProductService,
+    private readonly sizeService:SizeService,
+    private readonly couleurService:CouleurService
    
   ){}
  async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
@@ -57,18 +53,15 @@ export class OrderService {
     order.total_reduction = panier.data.totalAvecReduction
 //{ productId: 4, couleurId: 1, sizeId: 1, quantity: 10, price: 12340 }
     const orders=await this.orderRespoitory.save(order)
-    
-    
-     for(let i =0;i<panier.data.list.length;i++){
-      
-      const product= await this.productservice.findById(panier.data.list[i].productId)
-      
-      const size = await this.sizeService.findOne(panier.data.list[i].sizeId)
-      
-      const couleur = await this.couleurService.findOne(panier.data.list[i].couleurId)
-      
-      const quantity=panier.data.list[i].quantity;
-      const price = panier.data.list[i].price
+     const panier= await this.productservice.listePanier(request)
+     
+     for(let i =0;panier.data.length;i++){
+
+
+/* 
+      const product= await this.productservice.findById( panier.data[i].)
+      const size = await this.sizeService.findOne(panier.data[i].)
+      const quantity=panier.data[i].quantity;
       const orderItems=new OrderItems();
       orderItems.product=product.data
       orderItems.size=size.data
@@ -76,15 +69,10 @@ export class OrderService {
       orderItems.price=price
       orderItems.quantity=quantity
       orderItems.order=orders
-      orderItems.created_at=new Date()
-      await this.orderRespoitory.save(orderItems)
-      
+      await this.orderRespoitory.save(orderItems) */
      }
 
-    return {
-      data:orders,
-      statusCode:HttpStatus.OK,
-    }
+
   }
 
   findAll() {

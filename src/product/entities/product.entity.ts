@@ -3,7 +3,6 @@ import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
 import { OrderItems } from "src/order/entities/order-item.entity";
-//import { OrderItems } from "src/order/entities/order-item";
 
 import { Order } from "src/order/entities/order.entity";
 import { ProductLikeEntity } from "src/product-like/entities/product-like.entity";
@@ -52,6 +51,6 @@ export class Product {
     likedBy: User[]; 
 
     @OneToMany(()=>OrderItems,(op)=>op.product)
-    orderItems:OrderItems[]; 
+     orderItems:OrderItems[]; 
   
 }
