@@ -8,13 +8,16 @@ import { OrderRepository } from './order.repository';
 
 import { Shipping } from './entities/shipping.entity';
 import { OrderItems } from './entities/order-item.entity';
+import { ProductModule } from 'src/product/product.module';
+import { CouleurModule } from 'src/couleur/couleur.module';
+import { SizeModule } from 'src/size/size.module';
 import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
 import { SizeController } from 'src/size/size.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule],
+  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule,ProductModule,CouleurModule,SizeModule],
   controllers: [OrderController],
   providers: [OrderService,UserController,ProductController,CouleurController,SizeController],
   exports:[OrderService]
