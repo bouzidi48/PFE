@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,14 @@ import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 import { RemoveImageDto } from './dto/remove-image.dto';
 import { Images } from './entities/image.entity';
+import { UserController } from 'src/user/user.controller';
+import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Injectable()
 export class ImagesService {
   constructor(@InjectRepository(Images) private readonly imageRepository:ImageRepository,
-  private readonly userService:UserService,
-  private readonly couleurService:CouleurService,
+  @Inject(UserController) private readonly userService:UserController,
+  @Inject(CouleurController) private readonly couleurService:CouleurController,
   ){}
   async create(@Session() request:Record<string, any>,createImageDto: CreateImageDto) {
     const idAdmin=request.idUser
@@ -43,7 +45,7 @@ export class ImagesService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createImageDto.nameCouleur})
+    const couleur =await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:createImageDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -91,7 +93,7 @@ export class ImagesService {
   }
 
   async findByCouleur(nameCategory:FindByCouleurDto) {
-    const couleur = await this.couleurService.findByNameCouleur({nameCouleur:nameCategory.nameCouleur})
+    const couleur = await this.couleurService.findByCouleur({nameCouleur:nameCategory.nameCouleur})
     if(!couleur) {
       return await{
         data:null,
@@ -163,7 +165,7 @@ export class ImagesService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
+    const couleur = await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',

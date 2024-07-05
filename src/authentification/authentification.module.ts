@@ -8,11 +8,14 @@ import { UserModule } from 'src/user/user.module';
 import { ProductService } from 'src/product/product.service';
 import { ProductModule } from 'src/product/product.module';
 import { ProductLikeModule } from 'src/product-like/product-like.module';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
+import { ProductLikeController } from 'src/product-like/product-like.controller';
 
 
 @Module({
   imports:[UserModule,ProductModule,ProductLikeModule],
   controllers: [AuthentificationController],
-  providers: [AuthentificationService],
+  providers: [AuthentificationService,UserController,ProductController,ProductLikeController],
 })
 export class AuthentificationModule {}

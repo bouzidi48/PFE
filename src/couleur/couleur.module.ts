@@ -12,12 +12,11 @@ import { ProductModule } from 'src/product/product.module';
 import { UserModule } from 'src/user/user.module';
 import { CategoriesModule } from 'src/categories/categories.module';
 import { CouleurController } from './couleur.controller';
-import { OrderModule } from 'src/order/order.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule,CategoriesModule],
   controllers: [CouleurController],
-  providers: [CouleurService],
+  providers: [CouleurService,UserController,ProductController,CategoriesController],
   exports: [CouleurService],
 })
 export class CouleurModule {}

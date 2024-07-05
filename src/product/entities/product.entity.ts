@@ -51,6 +51,6 @@ export class Product {
     likedBy: User[]; 
 
     @OneToMany(()=>OrderItems,(op)=>op.product)
-     orderItems:OrderItems[];  
+     orderItems:OrderItems[]; 
   
 }

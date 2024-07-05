@@ -14,13 +14,15 @@ import { CouleurModule } from 'src/couleur/couleur.module';
 import { Couleur } from 'src/couleur/entities/couleur.entity';
 import { Size } from 'src/size/entities/size.entity';
 import { SizeRepository } from 'src/size/size.repository';
-import { Order } from 'src/order/entities/order.entity';
+import { UserController } from 'src/user/user.controller';
+import { CategoriesController } from 'src/categories/categories.controller';
 import { OrderModule } from 'src/order/order.module';
+import { CouleurRepository } from 'src/couleur/couleur.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product,ProductRepository,Couleur,CategoryRepository,Size,SizeRepository]),UserModule,CategoriesModule,OrderModule],
+  imports: [TypeOrmModule.forFeature([Product,ProductRepository,Couleur,CouleurRepository,Size,SizeRepository]),UserModule,CategoriesModule],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService,UserController,CategoriesController],
  exports: [ProductService],
 })
 export class ProductModule {}

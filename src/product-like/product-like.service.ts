@@ -1,4 +1,4 @@
-import { Body, HttpStatus, Injectable, Session } from '@nestjs/common';
+import { Body, HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateProductLikeDto } from './dto/create-product-like.dto';
 
 import { ProductLikeRepository } from './product-like.repository';
@@ -9,14 +9,16 @@ import { ProductService } from 'src/product/product.service';
 import { User } from 'src/user/entities/user.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { UpdateProductLikeDto } from './dto/update-product-like.dto';
+import { ProductController } from 'src/product/product.controller';
+import { UserController } from 'src/user/user.controller';
 
 
 @Injectable()
 export class ProductLikeService {
   productLikedService: any;
   constructor(
-    private readonly productService:ProductService,
-    private readonly userService:UserService,
+    @Inject(ProductController) private readonly productService:ProductController,
+    @Inject(UserController) private readonly userService:UserController,
     @InjectRepository(ProductLikeEntity) private readonly productLikeRepository:ProductLikeRepository
   ){}
 

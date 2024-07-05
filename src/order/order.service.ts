@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,23 +10,18 @@ import { ProductService } from 'src/product/product.service';
 import { OrderItems } from './entities/order-item.entity';
 import { SizeService } from 'src/size/size.service';
 import { CouleurService } from 'src/couleur/couleur.service';
-import { Couleur } from 'src/couleur/entities/couleur.entity';
-import { Size } from 'src/size/entities/size.entity';
-import { CouleurRepository } from 'src/couleur/couleur.repository';
-import { SizeRepository } from 'src/size/size.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRespoitory:OrderRepository,
     private readonly userService:UserService,
-   // private readonly sizeService:SizeService,
-   // private readonly couleurService:CouleurService, 
- 
+    private readonly productservice:ProductService,
+    private readonly sizeService:SizeService,
+    private readonly couleurService:CouleurService
    
-   // private readonly productservice:ProductService,
   ){}
- /* async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
+ async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
     const idUser=request.idUser
     console.log(idUser)
     if(!idUser){
@@ -47,31 +42,38 @@ export class OrderService {
 
     const shipping=new Shipping()
     Object.assign(shipping,createOrderDto.shippingAddress);
-
+    const panier= await this.productservice.listePanier(request)
     const order=new Order();
     order.shipping_address=shipping;
+    order.billing_address = createOrderDto.billing_address
     order.user=user.data;
-
+    order.order_date = new Date()
+    order.created_at = new Date()
+    order.total_amount = panier.data.total
+    order.total_reduction = panier.data.totalAvecReduction
+//{ productId: 4, couleurId: 1, sizeId: 1, quantity: 10, price: 12340 }
     const orders=await this.orderRespoitory.save(order)
      const panier= await this.productservice.listePanier(request)
      
      for(let i =0;panier.data.length;i++){
 
 
-
+/* 
       const product= await this.productservice.findById( panier.data[i].)
       const size = await this.sizeService.findOne(panier.data[i].)
       const quantity=panier.data[i].quantity;
       const orderItems=new OrderItems();
       orderItems.product=product.data
-      orderItems.price=panier.data[i].price
+      orderItems.size=size.data
+      orderItems.couleur=couleur.data
+      orderItems.price=price
       orderItems.quantity=quantity
       orderItems.order=orders
-      await this.orderRespoitory.save(orderItems) 
+      await this.orderRespoitory.save(orderItems) */
      }
 
 
-  } */
+  }
 
   findAll() {
     return `This action returns all order`;

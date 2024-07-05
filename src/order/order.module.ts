@@ -8,14 +8,11 @@ import { OrderRepository } from './order.repository';
 
 import { Shipping } from './entities/shipping.entity';
 import { OrderItems } from './entities/order-item.entity';
-import { ProductModule } from 'src/product/product.module';
-import { CouleurModule } from 'src/couleur/couleur.module';
-import { SizeModule } from 'src/size/size.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping]),UserModule],
+  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [OrderService,UserController,ProductController,CouleurController,SizeController],
   exports:[OrderService]
 })
 export class OrderModule {}

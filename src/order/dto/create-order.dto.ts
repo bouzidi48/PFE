@@ -1,14 +1,15 @@
 import { Type } from "class-transformer";
 import { CreateShippingDto } from "./create-shipping.dto";
-import { ValidateNested } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
 import { OrderedProductsDto } from "./ordered-products.dto";
 
 export class CreateOrderDto {
     @Type(()=>CreateShippingDto)
     @ValidateNested()
     shippingAddress:CreateShippingDto;
-    @Type(()=>OrderedProductsDto)
-    @ValidateNested()
-    orderedProducts:OrderedProductsDto[];
     
+    @IsOptional()
+    @IsString({message:'billing_address format should be string '})
+    @IsNotEmpty({message:'billing_address Can not be empty.'})
+    billing_address:string;
 }

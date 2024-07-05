@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,14 @@ import { FindBySizeDto } from './dto/find-by-size.dto';
 import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 import { RemoveSizeDto } from './dto/remove-size.dto';
+import { UserController } from 'src/user/user.controller';
+import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Injectable()
 export class SizeService {
   constructor(@InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-  private readonly userService:UserService,
-  private readonly couleurService:CouleurService,
+  @Inject(UserController) private readonly userService:UserController,
+  @Inject(CouleurController) private readonly couleurService:CouleurController,
   ){}
   async create(@Session() request:Record<string, any>,createSizeDto: CreateSizeDto) {
     const idAdmin=request.idUser
@@ -43,7 +45,7 @@ export class SizeService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
+    const couleur =await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -91,7 +93,7 @@ export class SizeService {
   }
 
   async findByCouleur(nameCategory:FindByCouleurDto) {
-    const couleur = await this.couleurService.findByNameCouleur({nameCouleur:nameCategory.nameCouleur})
+    const couleur = await this.couleurService.findByCouleur({nameCouleur:nameCategory.nameCouleur})
     if(!couleur) {
       return await{
         data:null,
@@ -135,7 +137,7 @@ export class SizeService {
       }
     }
     return await {
-      message:size,
+      data:size,
       statusCode:HttpStatus.OK,
     }
   }
@@ -177,7 +179,7 @@ export class SizeService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
+    const couleur = await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',

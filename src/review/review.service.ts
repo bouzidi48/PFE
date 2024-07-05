@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { UserService } from 'src/user/user.service';
@@ -11,13 +11,15 @@ import { Roles } from '../enum/user_enum';
 import { ReviewRepository } from './review.repository';
 import { FindByNameProductDto } from 'src/product/dto/find-by-name-product.dto';
 import { DeleteReviewDto } from './dto/delete-review.dto';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
 
 @Injectable()
 export class ReviewService {
   constructor(
   
-  private readonly userService:UserService,
-  private readonly productService : ProductService,
+  @Inject(UserController) private readonly userService:UserController,
+  @Inject(ProductController) private readonly productService : ProductController,
   @InjectRepository(ReviewEntity) private readonly reviewRepository:ReviewRepository ){}
 
   async create(@Session() request:Record<string, any>,createReviewDto: CreateReviewDto)  { 

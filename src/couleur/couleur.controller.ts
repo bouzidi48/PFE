@@ -38,6 +38,11 @@ export class CouleurController {
     return this.couleurService.findOne(+id);
   }
 
+  @Get('findByIdCouleurIdProduct')
+  findByIdCouleurIdProduct(@Body() idProduct:number,idCouleur:number) {
+    return this.couleurService.findByIdCouleurIdProduct(idProduct,idCouleur);
+    
+  }
   @Put('update')
   update(@Session() request:Record<string, any>, @Body() updateCouleurDto: UpdateCouleurDto) {
     return this.couleurService.update(request, updateCouleurDto);

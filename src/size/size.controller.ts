@@ -38,6 +38,10 @@ export class SizeController {
   findOne(@Param('id') id: string) {
     return this.sizeService.findOne(+id);
   }
+  @Get('findByIdSizeIdCouleur')
+  findByIdSizeIdCouleur(@Body()idSize: number,idCouleur: number) {
+    return this.sizeService.findByIdSizeIdCouleur(idSize,idCouleur);
+  }
 
   @Put('update')
   update(@Session() request:Record<string, any>, @Body() updateSizeDto: UpdateSizeDto) {

@@ -2,16 +2,16 @@ import { HttpStatus } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
-import { UserService } from 'src/user/user.service';
 import { CategoryRepository } from './category.repository';
 import { DeleteCategoryDto } from './dto/delete-category.dto';
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
+import { UserController } from 'src/user/user.controller';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 export declare class CategoriesService {
     private readonly categoryRepository;
     private readonly userService;
-    constructor(categoryRepository: CategoryRepository, userService: UserService);
+    constructor(categoryRepository: CategoryRepository, userService: UserController);
     create(request: Record<string, any>, createCategoryDto: CreateCategoryDto): Promise<{
         message: string;
         statusCode: HttpStatus;

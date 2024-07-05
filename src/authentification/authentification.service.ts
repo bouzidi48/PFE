@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Req, Session } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Req, Session } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
@@ -17,13 +17,17 @@ import { UserService } from 'src/user/user.service';
 import { UserUpdateDto } from 'src/user/dto/update-user.dto';
 import { ProductService } from 'src/product/product.service';
 import { ProductLikeService } from 'src/product-like/product-like.service';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
+import { ProductLikeController } from 'src/product-like/product-like.controller';
 @Injectable()
 export class AuthentificationService {
   constructor(
-    private readonly userService: UserService,
+    @Inject(UserController)
+    private readonly userService: UserController,
     private readonly mailerService:MailerService,
-    private readonly productService:ProductService,
-    private readonly productLikedService:ProductLikeService,
+    private readonly productService:ProductController,
+    private readonly productLikedService:ProductLikeController,
   ) {}
 
 

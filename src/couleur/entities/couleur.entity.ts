@@ -1,6 +1,7 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/enum/user_enum";
 import { Images } from "src/images/entities/image.entity";
+import { OrderItems } from "src/order/entities/order-item.entity";
 import { Product } from "src/product/entities/product.entity";
 import { Size } from "src/size/entities/size.entity";
 import { User } from "src/user/entities/user.entity";
@@ -33,6 +34,7 @@ export class Couleur {
     @OneToMany(()=>Images,(ima)=>ima.couleur)
     images:Images[];
 
-    
+    @OneToMany(()=>OrderItems,(op)=>op.couleur)
+    orderItems:OrderItems[]; 
 
 }

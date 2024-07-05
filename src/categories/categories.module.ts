@@ -8,11 +8,12 @@ import { CategoryRepository } from './category.repository';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { UserModule } from 'src/user/user.module';
+import { UserController } from 'src/user/user.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CategoryEntity,CategoryRepository]),UserModule],
   controllers: [CategoriesController],
-  providers: [CategoriesService],
+  providers: [CategoriesService,UserController],
   exports:[CategoriesService]
   
   

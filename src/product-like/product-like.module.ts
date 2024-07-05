@@ -6,12 +6,14 @@ import { ProductLikeEntity } from './entities/product-like.entity';
 import { ProductLikeRepository } from './product-like.repository';
 import { UserModule } from 'src/user/user.module';
 import { ProductModule } from 'src/product/product.module';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
 
 
 @Module({
   imports: [TypeOrmModule.forFeature([ProductLikeEntity,ProductLikeRepository]),UserModule,ProductModule],
   controllers: [ProductLikeController],
-  providers: [ProductLikeService],
+  providers: [ProductLikeService,UserController,ProductController],
   exports:[ProductLikeService]
 })
 export class ProductLikeModule {}

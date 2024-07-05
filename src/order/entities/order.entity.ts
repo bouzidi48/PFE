@@ -13,7 +13,8 @@ export class Order {
     id:number;
     @Column()
     total_amount: number;
-
+    @Column()
+    total_reduction: number;
     @Column()
     order_date: Date;
 
@@ -23,7 +24,6 @@ export class Order {
     shipping_address: Shipping;
 
     @Column({nullable:true})
-    
     billing_address: string; 
 
     @Column()
