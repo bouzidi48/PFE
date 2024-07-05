@@ -10,18 +10,23 @@ import { ProductService } from 'src/product/product.service';
 import { OrderItems } from './entities/order-item.entity';
 import { SizeService } from 'src/size/size.service';
 import { CouleurService } from 'src/couleur/couleur.service';
+import { Couleur } from 'src/couleur/entities/couleur.entity';
+import { Size } from 'src/size/entities/size.entity';
+import { CouleurRepository } from 'src/couleur/couleur.repository';
+import { SizeRepository } from 'src/size/size.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRespoitory:OrderRepository,
     private readonly userService:UserService,
-    private readonly productservice:ProductService,
-    private readonly sizeService:SizeService,
-    private readonly couleurService:CouleurService
+   // private readonly sizeService:SizeService,
+   // private readonly couleurService:CouleurService, 
+ 
    
+   // private readonly productservice:ProductService,
   ){}
- async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
+ /* async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
     const idUser=request.idUser
     console.log(idUser)
     if(!idUser){
@@ -53,7 +58,7 @@ export class OrderService {
      for(let i =0;panier.data.length;i++){
 
 
-/* 
+
       const product= await this.productservice.findById( panier.data[i].)
       const size = await this.sizeService.findOne(panier.data[i].)
       const quantity=panier.data[i].quantity;
@@ -62,11 +67,11 @@ export class OrderService {
       orderItems.price=panier.data[i].price
       orderItems.quantity=quantity
       orderItems.order=orders
-      await this.orderRespoitory.save(orderItems) */
+      await this.orderRespoitory.save(orderItems) 
      }
 
 
-  }
+  } */
 
   findAll() {
     return `This action returns all order`;
