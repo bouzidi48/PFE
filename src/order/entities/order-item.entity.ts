@@ -20,4 +20,5 @@ export class OrderItems{
     order: Order; 
     @ManyToOne(() => Product, (product) => product.orderItems,{cascade:true})
     product: Product; 
+    
 } 

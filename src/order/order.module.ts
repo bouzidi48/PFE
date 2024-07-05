@@ -8,6 +8,10 @@ import { OrderRepository } from './order.repository';
 
 import { Shipping } from './entities/shipping.entity';
 import { OrderItems } from './entities/order-item.entity';
+import { UserController } from 'src/user/user.controller';
+import { ProductController } from 'src/product/product.controller';
+import { CouleurController } from 'src/couleur/couleur.controller';
+import { SizeController } from 'src/size/size.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule],
