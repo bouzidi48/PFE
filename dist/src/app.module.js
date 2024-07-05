@@ -23,6 +23,7 @@ const couleur_module_1 = require("./couleur/couleur.module");
 const images_module_1 = require("./images/images.module");
 const product_like_module_1 = require("./product-like/product-like.module");
 const size_module_1 = require("./size/size.module");
+const order_module_1 = require("./order/order.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -47,6 +48,7 @@ exports.AppModule = AppModule = __decorate([
             review_module_1.ReviewModule,
             inscription_module_1.InscriptionModule,
             authentification_module_1.AuthentificationModule,
+            order_module_1.OrderModule,
             product_module_1.ProductModule,
             images_module_1.ImagesModule,
             product_like_module_1.ProductLikeModule,

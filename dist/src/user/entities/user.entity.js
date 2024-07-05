@@ -13,6 +13,7 @@ exports.User = void 0;
 const category_entity_1 = require("../../categories/entities/category.entity");
 const couleur_entity_1 = require("../../couleur/entities/couleur.entity");
 const user_enum_1 = require("../../enum/user_enum");
+const order_entity_1 = require("../../order/entities/order.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
 const review_entity_1 = require("../../review/entities/review.entity");
 const size_entity_1 = require("../../size/entities/size.entity");
@@ -81,6 +82,14 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], User.prototype, "likedProducts", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => order_entity_1.Order, order => order.user),
+    __metadata("design:type", Array)
+], User.prototype, "orders", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => order_entity_1.Order, (order) => order.orderUpdateBy),
+    __metadata("design:type", Array)
+], User.prototype, "orderUpdateBy", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

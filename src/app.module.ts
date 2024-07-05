@@ -21,6 +21,8 @@ import { CouleurModule } from './couleur/couleur.module';
 import { ImagesModule } from './images/images.module';
 import { ProductLikeModule } from './product-like/product-like.module';
 import { SizeModule } from './size/size.module';
+import { Order } from './order/entities/order.entity';
+import { OrderModule } from './order/order.module';
 
 
 @Module({
@@ -44,9 +46,9 @@ import { SizeModule } from './size/size.module';
     CouleurModule,
     ReviewModule,
     InscriptionModule,
-   
+    
     AuthentificationModule,
-   
+    OrderModule,
     ProductModule,
    
     ImagesModule,
