@@ -245,7 +245,11 @@ export class ProductService {
     const sizeId = ajouterPanierDto.sizeId
     const quantity = ajouterPanierDto.quantity
     if(!request.panier) {
-      request.panier =[]
+      request.panier ={
+        list:[],
+        total:0,
+        totalAvecReduction:0
+      }
     }
     const product = await this.productRepository.findOne({where:{id:productId}})
     if(!product) {
@@ -268,33 +272,47 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==productId && request.panier[i].couleurId==couleurId && request.panier[i].sizeId==sizeId) {
-        request.panier[i].quantity = request.panier[i].quantity+quantity
-        request.panier[i].price = request.panier[i].quantity*product.price
+    for(let i=0;i<request.panier.list.length;i++) {
+      if(request.panier.list[i].productId==productId && request.panier.list[i].couleurId==couleurId && request.panier.list[i].sizeId==sizeId) {
+        request.panier.list[i].quantity = request.panier.list[i].quantity+quantity
+        request.panier.total = request.panier.total-request.panier.list[i].price
+        request.panier.list[i].price = request.panier.list[i].quantity*product.price
+        request.panier.total = request.panier.total+(request.panier.list[i].quantity*product.price)
+        if(request.panier.total>3000) {
+          request.panier.totalAvecReduction = request.panier.total*0.15
+        }
         return await {
-          message:request.panier,
+          data:request.panier,
           statusCode:HttpStatus.OK,
         }
       }
     }
     
-      request.panier.push({
+      request.panier.list.push({
         productId:productId,
         couleurId:couleurId,
         sizeId:sizeId,
         quantity:quantity,
         price:quantity*product.price
       })
-    
+      request.panier.total = request.panier.total+(quantity*product.price)
+      if(request.panier.total>3000) {
+        request.panier.totalAvecReduction = request.panier.total-request.panier.total*0.15
+      }
     return await {
-      message:request.panier,
+      data:request.panier,
       statusCode:HttpStatus.OK,
     
 
     }
   }
   async listePanier(@Session() request:Record<string, any>) {
+    if(!request.panier) {
+      return await {
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
     return await {
       data:request.panier,
       statusCode:HttpStatus.OK,
@@ -313,7 +331,7 @@ export class ProductService {
       }
     }
     return await {
-      message:request.panier,
+      data:request.panier,
       statusCode:HttpStatus.OK,
 
     } 

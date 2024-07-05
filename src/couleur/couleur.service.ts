@@ -138,11 +138,11 @@ export class CouleurService {
       }
     }
     return await {
-      message:couleur,
+      data:couleur,
       statusCode:HttpStatus.OK,
     }
   }
-  async findByIdCouleurIdProduct(idProduct: number,idCouleur) {
+  async findByIdCouleurIdProduct(idProduct: number,idCouleur:number) {
     const couleur = await this.couleurRepository.findOne({where:{id:idCouleur,product:{id:idProduct}}});
     if(!couleur) {
       return await{

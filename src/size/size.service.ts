@@ -137,7 +137,7 @@ export class SizeService {
       }
     }
     return await {
-      message:size,
+      data:size,
       statusCode:HttpStatus.OK,
     }
   }

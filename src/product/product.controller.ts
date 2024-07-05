@@ -7,6 +7,8 @@ import { FindByCategorieDto } from './dto/find-by-categorie.dto';
 import { RemoveProductDto } from './dto/remove-product.dto';
 import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
 import { AjouetrPanierDto } from './dto/ajouter-panier.dto';
+import { get } from 'http';
+import { RemovePanierDto } from './dto/remove-panier.to';
 
 @Controller('product')
 export class ProductController {
@@ -54,6 +56,14 @@ export class ProductController {
   @Post('createPanier')
   async createPanier(@Session() request:Record<string, any>,@Body() createProductDto: AjouetrPanierDto) {
     return await  this.productService.ajouterPanier(request,createProductDto);
+  }
+  @Get('listePnaier')
+  listePanier(@Session() request:Record<string, any>) {
+    return this.productService.listePanier(request);
+  }
+  @Delete('deletePanier')
+  removePanier(@Session() request:Record<string, any>,@Body() removePanierDto: RemovePanierDto) {
+    return this.productService.removePanier(request,removePanierDto);
   }
 
 }
