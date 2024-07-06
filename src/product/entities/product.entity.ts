@@ -26,6 +26,9 @@ export class Product {
     @Column()
     price: number;
 
+    @Column()
+    stock:number;
+
 
     @OneToMany(()=>Couleur,(col)=>col.product)
     colours:Couleur[];

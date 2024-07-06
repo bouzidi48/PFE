@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Session } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session, Put } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { FindOrderById } from './dto/find-by-id.dto';
+import { updateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('order')
 export class OrderController {
@@ -9,26 +11,37 @@ export class OrderController {
 
   @Post('create')
   create(@Session() request:Record<string, any>,@Body() createOrderDto: CreateOrderDto) {
-   // return this.orderService.create(request,createOrderDto);
+    return this.orderService.create(request,createOrderDto);
   }
 
-  @Get()
+  @Get('AllOrder')
   findAll() {
     return this.orderService.findAll();
   }
 
+  @Get('findById')
+  findOne(@Body() findbyid:FindOrderById) {
+    return this.orderService.findOne(findbyid);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
+  findOnne(@Param('id') id: string) {
+    return this.orderService.findOnne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateOrderStatusDto: updateOrderStatusDto) {
+    return this.orderService.update(request,+id, updateOrderStatusDto);
+  }
+
+  @Put('cancel/:id')
+
+  async cancelled(@Session() request:Record<string, any>,@Param('id') id:string){
+   return await this.orderService.cancelled(request,+id)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  remove(@Session() request: Record<string, any>,@Param('id') id: string) {
+    return this.orderService.deleteOrder(request,+id);
   }
 }

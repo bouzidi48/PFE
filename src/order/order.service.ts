@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,12 @@ import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { SizeController } from 'src/size/size.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
+import { FindOrderById } from './dto/find-by-id.dto';
+import { FindOptionsRelations } from 'typeorm/find-options/FindOptionsRelations';
+import { Roles } from 'src/enum/user_enum';
+import { updateOrderStatusDto } from './dto/update-order-status.dto';
+import { NotFoundError } from 'rxjs';
+import { OrderStatus } from 'src/enum/order-status.enum';
 
 @Injectable()
 export class OrderService {
@@ -87,19 +93,204 @@ export class OrderService {
     }
   }
 
-  findAll() {
-    return `This action returns all order`;
+  async findAll() {
+    const order=await this.orderRespoitory.find();
+    if(!order){
+      return await  {
+        data : null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await{
+      data:order,
+      statusCode:HttpStatus.OK,
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+ async findOne(findbyid:FindOrderById) {
+    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid.id}})
+    if(!orderid){
+      return await {
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+
+      }
+      return await {
+        data:orderid,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    async findOnne(id:number):Promise<Order>{
+      return await this.orderRespoitory.findOne({
+        where: { id },
+        relations:{
+          shipping_address:true,
+          user:true,
+          orderItems:{product:true}
+          
+        },
+      });
+    }
+  
+
+  async update(@Session() request:Record<string, any>,id: number, updateOrderStatusDto: updateOrderStatusDto) {
+     
+    const idAdmin=request.idUser
+    if(!idAdmin) {
+      return await {
+        message: 'vous devez vous connecter pour Modifier status de commande',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin= await this.userService.findById(idAdmin)
+  if(!admin || admin.data.role!=Roles.ADMIN) {
+    return await{
+      message:'vous devez etre un admin',
+      statusCode:HttpStatus.BAD_REQUEST,
+    
+    }
+  }
+  let order =await this.findOnne(id);
+  if(!order) throw new BadRequestException ('Commande non trouvée');
+
+  if((order.status===OrderStatus.DELIVERED)||(order.status===OrderStatus.CENCELLED)){
+    throw new BadRequestException(`Commande déjà  ${order.status}`)
+  }
+  if((order.status===OrderStatus.PROCESSING)&&(updateOrderStatusDto.status!=OrderStatus.SHIPPED)){
+    throw new BadRequestException(`La livraison doit se faire après shipped !!!`)
+  }
+//Si le nouveau statut est SHIPPED et que le statut actuel est déjà SHIPPED, la fonction retourne la commande sans modification.
+  if((updateOrderStatusDto.status===OrderStatus.SHIPPED)&&(order.status===OrderStatus.SHIPPED)){
+    return order;
+  }
+//Si le nouveau statut est SHIPPED, elle met à jour le champ ShippedAt avec la date actuelle.
+  if(updateOrderStatusDto.status===OrderStatus.SHIPPED){
+
+   order.ShippeAt=new Date();
+  }
+//Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
+  if(updateOrderStatusDto.status===OrderStatus.DELIVERED){
+
+    order.delivered=new Date();
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  order.status=updateOrderStatusDto.status;
+  order.orderUpdateBy= request.idUser;
+  order= await this.orderRespoitory.save(order);
+  //pour mettre à jour le stock des produits dans la commande + -
+  if(updateOrderStatusDto.status===OrderStatus.DELIVERED){
+    await this.stockUpdate(order,OrderStatus.DELIVERED)
+  }
+  return order;
+}
+//pour mettre à jour le stock du produit.
+ async stockUpdate(order:Order,status:string){
+  for(const op of order.orderItems){
+    await this.productservice.updateStock(op.product.id,op.quantity,status);
+
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+ }
+ async cancelled(@Session() request:Record<string, any>,id:number){
+  const idAdmin=request.idUser
+    if(!idAdmin) {
+      return await {
+        message: 'vous devez vous connecter pour Modifier status de commande',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin= await this.userService.findById(idAdmin)
+  if(!admin || admin.data.role!=Roles.ADMIN) {
+    return await{
+      message:'vous devez etre un admin',
+      statusCode:HttpStatus.BAD_REQUEST,
+    
+    }
   }
+    let order =await this.findOnne(id);
+    if(!order) throw new NotFoundException('order Not found.');
+// deja annulee alors sans modifier
+    if(order.status===OrderStatus.CENCELLED) return order;
+//La fonction met à jour le statut de la commande à CENCELLED
+    order.status= OrderStatus.CENCELLED;
+    order.orderUpdateBy= request.idUser;
+    order=await this.orderRespoitory.save(order);
+//pour mettre à jour le stock des produits dans la commande + -
+    await this.stockUpdate(order,OrderStatus.CENCELLED);
+    return order;
+ }
+ /* async deleteOrder(@Session() request: Record<string, any>, id: number) {
+  const idAdmin = request.idUser;
+  if (!idAdmin) {
+    return {
+      message: 'Vous devez vous connecter pour supprimer une commande',
+      statusCode: HttpStatus.BAD_REQUEST,
+    };
+  }
+
+  const admin = await this.userService.findById(idAdmin);
+  if (!admin ||(admin.data.role!=Roles.ADMIN &&  admin.data.role!=Roles.USER)) {
+    return {
+      message: `Vous devez être membre a notre app  pour supprimer une commande`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    };
+  }
+
+  let order = await this.orderRespoitory.findOne( {where:{id:id}});
+  if (!order) {
+    throw new NotFoundException('Commande non trouvée.');
+  }
+
+  await this.orderRespoitory.remove(order);
+  return {
+    message: 'Commande supprimée avec succès',
+    statusCode: HttpStatus.OK,
+  };
+} */
+
+
+  async deleteOrder(@Session() request: Record<string, any>, id: number) {
+    const idUser = request.idUser;
+    if (!idUser) {
+        throw new BadRequestException('Vous devez vous connecter pour supprimer une commande');
+    }
+
+    let order = await this.findOnne(id);
+    if (!order) {
+        throw new NotFoundException('Commande non trouvée');
+    }
+
+    // Vérifiez que l'utilisateur est bien celui qui a passé la commande
+    if (order.user.id !== idUser) {
+        throw new BadRequestException('Vous ne pouvez pas supprimer cette commande');
+    }
+
+    // Vérifiez que la commande n'a pas été expédiée ou livrée
+    if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
+        throw new BadRequestException(`Impossible de supprimer une commande ${order.status.toLowerCase()}`);
+    }
+
+    // Restaurez les stocks des produits
+    await this.restoreStock(order);
+
+    // Supprimez la commande
+    await this.orderRespoitory.remove(order);
+
+    return {
+        message: 'Commande supprimée avec succès',
+        statusCode: HttpStatus.OK,
+    };
+}
+
+async restoreStock(order: Order) {
+    for (const orderItem of order.orderItems) {
+        await this.productservice.updateStock1(
+            orderItem.product.id,
+            orderItem.quantity,
+            'restore'
+        );
+    }
+}
 }

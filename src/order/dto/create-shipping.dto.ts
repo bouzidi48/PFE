@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateShippingDto{
+    
    @IsNotEmpty({message:'Phone Can not be empty.'})
    @IsString({message:'Phone format should be string '})
     phone:string ;

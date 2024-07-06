@@ -26,6 +26,7 @@ import { UserController } from 'src/user/user.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
 import { SizeController } from 'src/size/size.controller';
 import { ProductController } from './product.controller';
+import { OrderStatus } from 'src/enum/order-status.enum';
 
 @Injectable()
 export class ProductService {
@@ -336,4 +337,29 @@ export class ProductService {
 
     } 
   }
+  async updateStock(id :number,stock:number,status:string){
+    let product=await this.findById(id);
+    if(status===OrderStatus.DELIVERED){
+      product.data.stock=-stock
+
+    }else{
+      product.data.stock+=stock;
+    }
+    product.data=await this.productRepository.save(product.data);
+    return product;
+
+
+  }
+
+  async updateStock1(productId: number, quantity: number, action: string) {
+    let product = await this.findById(productId);
+
+    if (action === 'restore') {
+        product.data.stock += quantity;
+    } else if (action === 'deduct') {
+        product.data.stock -= quantity;
+    }
+
+    await this.productRepository.save(product.data);
+}
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Session, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session, Put, HttpStatus } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -12,6 +12,9 @@ import { RemovePanierDto } from './dto/remove-panier.to';
 
 @Controller('product')
 export class ProductController {
+  updateStock1(id: number, quantity: number, arg2: string) {
+    throw new Error('Method not implemented.');
+  }
   constructor(private readonly productService: ProductService) {}
 
   @Post('create')
@@ -43,6 +46,9 @@ export class ProductController {
   update(@Session() request:Record<string, any>, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(request,updateProductDto);
   }
+   
+
+
 
   @Delete('delete')
   remove(@Session() request:Record<string, any>, @Body() updateProductDto: RemoveProductDto) {
@@ -64,6 +70,23 @@ export class ProductController {
   @Delete('deletePanier')
   removePanier(@Session() request:Record<string, any>,@Body() removePanierDto: RemovePanierDto) {
     return this.productService.removePanier(request,removePanierDto);
+  }
+
+  @Patch(':id/stock')
+  async updateStock(@Body() id :number ,stock:number,status:string ) {
+    
+    try {
+      const updatedProduct = await this.productService.updateStock(id, stock, status);
+      return {
+        data: updatedProduct,
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      return {
+        message: error.message,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
   }
 
 }

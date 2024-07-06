@@ -29,4 +29,6 @@ export class OrderItems{
 
     @ManyToOne(() => Size, (size) => size.orderItems,{cascade:true})
     size: Size;
+
+     
 } 

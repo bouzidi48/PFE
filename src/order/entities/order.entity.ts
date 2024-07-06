@@ -3,6 +3,7 @@ import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Shipping } from "./shipping.entity";
 import { OrderItems } from "./order-item.entity";
+import { Product } from "src/product/entities/product.entity";
 
 
 
@@ -53,6 +54,8 @@ export class Order {
 
     @ManyToOne(()=>User,(user)=>user.orderUpdateBy)
     orderUpdateBy:User
+
+    
 
 
     
