@@ -20,11 +20,16 @@ import { Roles } from 'src/enum/user_enum';
 import { updateOrderStatusDto } from './dto/update-order-status.dto';
 import { NotFoundError } from 'rxjs';
 import { OrderStatus } from 'src/enum/order-status.enum';
+import { OrderItemsRepository } from './order-item.repository';
+import { ShippingRepository } from './shipping.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRespoitory:OrderRepository,
+    @InjectRepository(Shipping) private readonly shippingRepository:ShippingRepository,
+
+    @InjectRepository(OrderItems) private readonly orderItemsRepository:OrderItemsRepository,
     @Inject(UserController) private readonly userService:UserController,
     @Inject(ProductController) private readonly productservice:ProductController,
     @Inject(SizeController) private readonly sizeService:SizeController,
@@ -49,9 +54,11 @@ export class OrderService {
     }
     
     
-
-    const shipping=new Shipping()
-    Object.assign(shipping,createOrderDto.shippingAddress);
+    console.log(createOrderDto.shippingAddress.address)
+    const shipping= await this.shippingRepository.create(createOrderDto.shippingAddress)
+    console.log(shipping.address)
+    console.log(shipping)
+    await this.shippingRepository.save(shipping);
     const panier= await this.productservice.listePanier(request)
     const order=new Order();
     order.shipping_address=shipping;
@@ -83,7 +90,7 @@ export class OrderService {
       orderItems.quantity=quantity
       orderItems.order=orders
       orderItems.created_at=new Date()
-      await this.orderRespoitory.save(orderItems)
+      await this.orderItemsRepository.save(orderItems)
       
      }
 
@@ -159,7 +166,8 @@ export class OrderService {
     throw new BadRequestException(`Commande déjà  ${order.status}`)
   }
   if((order.status===OrderStatus.PROCESSING)&&(updateOrderStatusDto.status!=OrderStatus.SHIPPED)){
-    throw new BadRequestException(`La livraison doit se faire après shipped !!!`)
+    throw new BadRequestException(`La livraison doit se faire après shipped !!!`);
+    order.updated_at= new Date();
   }
 //Si le nouveau statut est SHIPPED et que le statut actuel est déjà SHIPPED, la fonction retourne la commande sans modification.
   if((updateOrderStatusDto.status===OrderStatus.SHIPPED)&&(order.status===OrderStatus.SHIPPED)){
@@ -169,11 +177,14 @@ export class OrderService {
   if(updateOrderStatusDto.status===OrderStatus.SHIPPED){
 
    order.ShippeAt=new Date();
+   order.updated_at= new Date();
+   
   }
 //Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
   if(updateOrderStatusDto.status===OrderStatus.DELIVERED){
 
     order.delivered=new Date();
+    order.updated_at= new Date();
   }
 
   order.status=updateOrderStatusDto.status;
