@@ -29,8 +29,8 @@ export class OrderController {
     return this.orderService.findOnne(+id);
   }
 
-  @Patch(':id')
-  update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateOrderStatusDto: updateOrderStatusDto) {
+  @Put(':id')
+  update(@Session() request:Record<string, any>,@Param('id') id: number, @Body() updateOrderStatusDto: updateOrderStatusDto) {
     return this.orderService.update(request,+id, updateOrderStatusDto);
   }
 

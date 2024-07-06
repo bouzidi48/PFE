@@ -10,7 +10,7 @@ export class CreateShippingDto{
     name:string ;
     @IsNotEmpty({message:'adresse Can not be empty.'})
     @IsString({message:'adresse format should be string '})
-    adresse:string ;
+    address:string ;
     @IsNotEmpty({message:'city Can not be empty.'})
     @IsString({message:'city format should be string '})
     city:string ;
