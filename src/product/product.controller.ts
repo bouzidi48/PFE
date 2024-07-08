@@ -73,10 +73,10 @@ export class ProductController {
   }
 
   @Patch(':id/stock')
-  async updateStock(@Body() id :number ,stock:number,status:string ) {
+  async updateStock(@Body() sizeId :number ,couleurId:number,productId:number,stock:number,status:string ) {
     
     try {
-      const updatedProduct = await this.productService.updateStock(id, stock, status);
+      const updatedProduct = await this.productService.updateStock(sizeId, couleurId, productId, stock, status);
       return {
         data: updatedProduct,
         statusCode: HttpStatus.OK,
