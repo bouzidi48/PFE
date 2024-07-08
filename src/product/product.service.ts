@@ -337,29 +337,44 @@ export class ProductService {
 
     } 
   }
-  async updateStock(id :number,stock:number,status:string){
-    let product=await this.findById(id);
+  async updateStock(sizeId: number, couleurId:number, productId: number, quantity: number, status: string){
+    let product=await this.findById(productId);
+    let couleur=await this.couleurRepository.findOne({where:{id:couleurId,product:{id:productId}}});
+    let size=await this.sizeRepository.findOne({where:{id:sizeId,couleur:{id:couleurId}}});
     if(status===OrderStatus.DELIVERED){
-      product.data.stock=-stock
+      size.stockQuantity=-quantity
 
     }else{
-      product.data.stock+=stock;
+      size.stockQuantity+=quantity;
     }
-    product.data=await this.productRepository.save(product.data);
-    return product;
+    await this.productRepository.save(product.data);
+    await this.sizeRepository.save(size);
+    await this.couleurRepository.save(couleur);
+    return {
+      message:'stock updated successfully',
+      statusCode:HttpStatus.OK,
+    }
 
 
   }
 
-  async updateStock1(productId: number, quantity: number, action: string) {
+  async updateStock1(sizeId: number, couleurId:number, productId: number, quantity: number, action: string) {
     let product = await this.findById(productId);
+    let couleur = await this.couleurRepository.findOne({ where: { id: couleurId, product: { id: productId} } });
+    let size = await this.sizeRepository.findOne({ where: { id: sizeId ,couleur:{id:couleurId}} });
 
     if (action === 'restore') {
-        product.data.stock += quantity;
+        size.stockQuantity += quantity;
     } else if (action === 'deduct') {
-        product.data.stock -= quantity;
+        size.stockQuantity -= quantity;
     }
 
     await this.productRepository.save(product.data);
+    await this.sizeRepository.save(size);
+    await this.couleurRepository.save(couleur);
+    return {
+        message: 'Stock updated successfully',
+        statusCode: HttpStatus.OK,
+    }
 }
 }

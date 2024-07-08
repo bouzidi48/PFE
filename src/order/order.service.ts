@@ -22,7 +22,7 @@ import { NotFoundError } from 'rxjs';
 import { OrderStatus } from 'src/enum/order-status.enum';
 import { OrderItemsRepository } from './order-item.repository';
 import { ShippingRepository } from './shipping.repository';
-
+import { cron } from 'node-cron';
 @Injectable()
 export class OrderService {
   constructor(
@@ -35,7 +35,9 @@ export class OrderService {
     @Inject(SizeController) private readonly sizeService:SizeController,
     @Inject(CouleurController) private readonly couleurService:CouleurController
    
-  ){}
+  ){
+    this.setupScheduledTask();
+  }
  async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
     const idUser=request.idUser
     console.log(idUser)
@@ -167,7 +169,7 @@ export class OrderService {
   }
   if((order.status===OrderStatus.PROCESSING)&&(updateOrderStatusDto.status!=OrderStatus.SHIPPED)){
     throw new BadRequestException(`La livraison doit se faire après shipped !!!`);
-    order.updated_at= new Date();
+    
   }
 //Si le nouveau statut est SHIPPED et que le statut actuel est déjà SHIPPED, la fonction retourne la commande sans modification.
   if((updateOrderStatusDto.status===OrderStatus.SHIPPED)&&(order.status===OrderStatus.SHIPPED)){
@@ -178,16 +180,18 @@ export class OrderService {
 
    order.ShippeAt=new Date();
    order.updated_at= new Date();
-   
+   order.delivered = new Date(order.ShippeAt.setDate(order.ShippeAt.getDate() + 7));
+   order.status = OrderStatus.SHIPPED;
   }
+  const currentDate = new Date();
 //Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
-  if(updateOrderStatusDto.status===OrderStatus.DELIVERED){
+  if(currentDate.getDate() === order.delivered.getDate()){
 
-    order.delivered=new Date();
+    order.status = OrderStatus.DELIVERED;
     order.updated_at= new Date();
   }
 
-  order.status=updateOrderStatusDto.status;
+  
   order.orderUpdateBy= request.idUser;
   order= await this.orderRespoitory.save(order);
   //pour mettre à jour le stock des produits dans la commande + -
@@ -199,7 +203,7 @@ export class OrderService {
 //pour mettre à jour le stock du produit.
  async stockUpdate(order:Order,status:string){
   for(const op of order.orderItems){
-    await this.productservice.updateStock(op.product.id,op.quantity,status);
+    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status);
 
   }
 
@@ -304,4 +308,31 @@ async restoreStock(order: Order) {
         );
     }
 }
+private async checkDeliveredOrders(@Session() request:Record<string, any>) {
+  const orders = await this.orderRespoitory.find({ where: { status: OrderStatus.SHIPPED } });
+  for(const order of orders) {
+    this.update(request,order.id,{status:OrderStatus.DELIVERED})
+  }
+  // Vérifiez et mettez à jour les commandes livrées
+  // ...
 }
+private async setupScheduledTask() {
+  const request:Record<string, any> = {};
+  const cron = require('node-cron');
+  const task = await cron.schedule('0 10 * * *', async () => {
+    await this.checkDeliveredOrders(request);
+  });
+  if (task) {
+    console.log('La tâche planifiée a été correctement configurée');
+    task.start(); // Assurez-vous de vérifier que task est défini avant d'appeler start()
+  } else {
+    console.error('La tâche planifiée n\'a pas été correctement configurée');
+  }
+}
+public async startScheduledTask() {
+  await this.setupScheduledTask();
+}
+}
+
+
+
