@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -351,13 +351,17 @@ export class ProductService {
 
   }
 
-  async updateStock1(productId: number, quantity: number, action: string) {
+  async updateStock1(productId: number, quantity: number, action: 'restore' | 'deduct') {
     let product = await this.findById(productId);
 
     if (action === 'restore') {
         product.data.stock += quantity;
     } else if (action === 'deduct') {
         product.data.stock -= quantity;
+    }
+
+    if (product.data.stock < 0) {
+        throw new BadRequestException('Stock insuffisant');
     }
 
     await this.productRepository.save(product.data);
