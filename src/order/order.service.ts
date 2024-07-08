@@ -185,7 +185,7 @@ export class OrderService {
   }
   const currentDate = new Date();
 //Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
-  if(currentDate.getDate() === order.delivered.getDate()){
+  if(currentDate.getFullYear() === order.delivered.getFullYear() && currentDate.getMonth() === order.delivered.getMonth() && currentDate.getDay() === order.delivered.getDay()) {
 
     order.status = OrderStatus.DELIVERED;
     order.updated_at= new Date();
