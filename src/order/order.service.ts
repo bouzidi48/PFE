@@ -120,8 +120,8 @@ export class OrderService {
     }
   }
 
- async findOne(findbyid:FindOrderById) {
-    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid.id}})
+ async findOne(findbyid:number) {
+    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid}})
     if(!orderid){
       return await {
         data:null,

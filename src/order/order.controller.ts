@@ -20,12 +20,12 @@ export class OrderController {
   }
 
   @Get('findById')
-  findOne(@Body() findbyid:FindOrderById) {
+  findOne(@Body() findbyid:number) {
     return this.orderService.findOne(findbyid);
   }
 
   @Get(':id')
-  findOnne(@Param('id') id: string) {
+  findOnne(@Param('id') id: number) {
     return this.orderService.findOnne(+id);
   }
 

@@ -4,6 +4,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGene
 import { Shipping } from "./shipping.entity";
 import { OrderItems } from "./order-item.entity";
 import { Product } from "src/product/entities/product.entity";
+import { Payment } from "src/payment/entities/payment.entity";
 
 
 
@@ -55,7 +56,8 @@ export class Order {
     @ManyToOne(()=>User,(user)=>user.orderUpdateBy)
     orderUpdateBy:User
 
-    
+    @OneToOne(() => Payment, (payment) => payment.order)
+    payment: Payment;
 
 
     
