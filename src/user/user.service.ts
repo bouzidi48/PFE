@@ -20,6 +20,9 @@ import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
 
+import { Roles } from 'src/enum/user_enum';
+import { FindByUsernameByEmail } from './dto/find-username-email.dto';
+
 
 
 @Injectable()
@@ -185,5 +188,25 @@ export class UserService {
       user1.username = updateUserDto.username;
       user1.updatedate = new Date();
       this.userRepository.save(user1);
+    }
+
+    async createAdmin(createUserAdminDto:UserCreateDto) {
+      const user = this.userRepository.create(createUserAdminDto);
+      user.role = Roles.ADMIN;
+      this.userRepository.save(user);
+    }
+
+    async findByUsernameAndEmail(find:FindByUsernameByEmail) {
+      const user = await this.userRepository.findOne({ where: { email: find.email, username: find.username } });
+      if(!user){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
     }
 }

@@ -10,6 +10,7 @@ import { FindById } from './dto/find-id.dto';
 import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
+import { FindByUsernameByEmail } from './dto/find-username-email.dto';
 export declare class UserService {
     private userRepository;
     constructor(userRepository: UserRepository);
@@ -52,4 +53,9 @@ export declare class UserService {
         message?: undefined;
     }>;
     update(user: User, updateUserDto: UserUpdateDto): Promise<void>;
+    createAdmin(createUserAdminDto: UserCreateDto): Promise<void>;
+    findByUsernameAndEmail(find: FindByUsernameByEmail): Promise<{
+        data: User;
+        statusCode: HttpStatus;
+    }>;
 }

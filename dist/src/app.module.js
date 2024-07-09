@@ -24,6 +24,8 @@ const images_module_1 = require("./images/images.module");
 const product_like_module_1 = require("./product-like/product-like.module");
 const size_module_1 = require("./size/size.module");
 const order_module_1 = require("./order/order.module");
+const contact_module_1 = require("./contact/contact.module");
+const demande_admin_module_1 = require("./demande-admin/demande-admin.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -53,6 +55,8 @@ exports.AppModule = AppModule = __decorate([
             images_module_1.ImagesModule,
             product_like_module_1.ProductLikeModule,
             size_module_1.SizeModule,
+            contact_module_1.ContactModule,
+            demande_admin_module_1.DemandeAdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

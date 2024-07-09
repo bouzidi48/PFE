@@ -341,8 +341,15 @@ export class ProductService {
     let product=await this.findById(productId);
     let couleur=await this.couleurRepository.findOne({where:{id:couleurId,product:{id:productId}}});
     let size=await this.sizeRepository.findOne({where:{id:sizeId,couleur:{id:couleurId}}});
+    if(!product.data || !couleur || !size){
+      return await {
+        message:'product not found',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
     if(status===OrderStatus.DELIVERED){
-      size.stockQuantity=-quantity
+      size.stockQuantity-=quantity
+      size.updatedate=new Date()
 
     }else{
       size.stockQuantity+=quantity;

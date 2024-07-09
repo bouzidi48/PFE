@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CouleurService } from './couleur.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,9 +15,11 @@ import { CouleurController } from './couleur.controller';
 import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { CategoriesController } from 'src/categories/categories.controller';
+import { SizeModule } from 'src/size/size.module';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule,CategoriesModule],
+  imports: [TypeOrmModule.forFeature([Couleur,CouleurRepository]),UserModule,ProductModule,CategoriesModule,forwardRef(() => SizeModule),forwardRef(() => ImagesModule)],
   controllers: [CouleurController],
   providers: [CouleurService,UserController,ProductController,CategoriesController],
   exports: [CouleurService],

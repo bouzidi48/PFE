@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SizeService } from './size.service';
 import { SizeController } from './size.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +14,7 @@ import { UserController } from 'src/user/user.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,CouleurModule],
+  imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,forwardRef(() => CouleurModule)],
   controllers: [SizeController],
   providers: [SizeService,UserController,CouleurController],
   exports: [SizeService],

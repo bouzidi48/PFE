@@ -22,6 +22,7 @@ const update_username_dto_1 = require("./dto/update-username.dto");
 const bcrypt = require("bcrypt");
 const ancien_password_dto_1 = require("./dto/ancien-password.dto");
 const ancien_username_dto_1 = require("./dto/ancien-username.dto");
+const user_enum_1 = require("../enum/user_enum");
 let UserService = class UserService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -174,6 +175,24 @@ let UserService = class UserService {
         user1.username = updateUserDto.username;
         user1.updatedate = new Date();
         this.userRepository.save(user1);
+    }
+    async createAdmin(createUserAdminDto) {
+        const user = this.userRepository.create(createUserAdminDto);
+        user.role = user_enum_1.Roles.ADMIN;
+        this.userRepository.save(user);
+    }
+    async findByUsernameAndEmail(find) {
+        const user = await this.userRepository.findOne({ where: { email: find.email, username: find.username } });
+        if (!user) {
+            return await {
+                data: null,
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+            };
+        }
+        return await {
+            data: user,
+            statusCode: common_1.HttpStatus.OK
+        };
     }
 };
 exports.UserService = UserService;

@@ -23,6 +23,8 @@ import { ProductLikeModule } from './product-like/product-like.module';
 import { SizeModule } from './size/size.module';
 import { Order } from './order/entities/order.entity';
 import { OrderModule } from './order/order.module';
+import { ContactModule } from './contact/contact.module';
+import { DemandeAdminModule } from './demande-admin/demande-admin.module';
 
 
 @Module({
@@ -55,6 +57,8 @@ import { OrderModule } from './order/order.module';
    
     ProductLikeModule,
    SizeModule,
+   ContactModule,
+   DemandeAdminModule,
 
   ],
   controllers: [AppController],

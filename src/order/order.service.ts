@@ -35,9 +35,7 @@ export class OrderService {
     @Inject(SizeController) private readonly sizeService:SizeController,
     @Inject(CouleurController) private readonly couleurService:CouleurController
    
-  ){
-    this.setupScheduledTask();
-  }
+  ){}
  async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
     const idUser=request.idUser
     console.log(idUser)
@@ -62,6 +60,7 @@ export class OrderService {
     console.log(shipping)
     await this.shippingRepository.save(shipping);
     const panier= await this.productservice.listePanier(request)
+    
     const order=new Order();
     order.shipping_address=shipping;
     order.billing_address = createOrderDto.billing_address
@@ -81,11 +80,14 @@ export class OrderService {
       const size = await this.sizeService.findOne(panier.data.list[i].sizeId)
       
       const couleur = await this.couleurService.findOne(panier.data.list[i].couleurId)
-      
+      console.log(couleur.data)
+      console.log(size.data)
+      console.log(product.data)
       const quantity=panier.data.list[i].quantity;
       const price = panier.data.list[i].price
       const orderItems=new OrderItems();
       orderItems.product=product.data
+      
       orderItems.size=size.data
       orderItems.couleur=couleur.data
       orderItems.price=price
@@ -95,8 +97,10 @@ export class OrderService {
       await this.orderItemsRepository.save(orderItems)
       
      }
-
-    return {
+     console.log(orders)
+     const orderItem = await this.orderItemsRepository.find({where:{order:orders},relations: ['product', 'couleur', 'size'],})
+     console.log(orderItem)
+    return await {
       data:orders,
       statusCode:HttpStatus.OK,
     }
@@ -147,6 +151,7 @@ export class OrderService {
   async update(@Session() request:Record<string, any>,id: number, updateOrderStatusDto: updateOrderStatusDto) {
      
     const idAdmin=request.idUser
+    console.log('salut')
     if(!idAdmin) {
       return await {
         message: 'vous devez vous connecter pour Modifier status de commande',
@@ -180,33 +185,56 @@ export class OrderService {
 
    order.ShippeAt=new Date();
    order.updated_at= new Date();
-   order.delivered = new Date(order.ShippeAt.setDate(order.ShippeAt.getDate() + 7));
+   order.ShippeAt = new Date();
+   order.delivered = new Date(order.ShippeAt.getTime());
+   order.delivered.setDate(order.delivered.getDate());
+   console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
   }
+  order.orderUpdateBy= order.user;
+  order= await this.orderRespoitory.save(order);
+  return order;
+}
+//pour mettre à jour le stock du produit.
+ async stockUpdate(order:Order,status:string){
+  console.log(order)
+  const orderItem = await this.orderItemsRepository.find({where:{order:{id:order.id}},relations: ['product', 'couleur', 'size']})
+  console.log(orderItem)
+  for(const op of orderItem){
+    console.log(op)
+    console.log(op.couleur)
+    console.log(op.product)
+    console.log(op.size)
+    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status);
+
+  }
+
+ }
+
+ async delivred(id:number,updateOrderStatusDto: updateOrderStatusDto){
+  console.log('salut')
+  let order =await this.findOnne(id);
+  if(!order) throw new BadRequestException ('Commande non trouvée');
   const currentDate = new Date();
+  console.log(order.delivered.getFullYear() , order.delivered.getMonth() , order.delivered.getDate())
 //Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
-  if(currentDate.getFullYear() === order.delivered.getFullYear() && currentDate.getMonth() === order.delivered.getMonth() && currentDate.getDay() === order.delivered.getDay()) {
+  if(currentDate.getFullYear() === order.delivered.getFullYear() && currentDate.getMonth() === order.delivered.getMonth() && currentDate.getDate() === order.delivered.getDate()) {
 
     order.status = OrderStatus.DELIVERED;
     order.updated_at= new Date();
   }
 
   
-  order.orderUpdateBy= request.idUser;
+  order.orderUpdateBy= order.user;
   order= await this.orderRespoitory.save(order);
   //pour mettre à jour le stock des produits dans la commande + -
-  if(updateOrderStatusDto.status===OrderStatus.DELIVERED){
+  if(order.status===OrderStatus.DELIVERED){
     await this.stockUpdate(order,OrderStatus.DELIVERED)
   }
-  return order;
-}
-//pour mettre à jour le stock du produit.
- async stockUpdate(order:Order,status:string){
-  for(const op of order.orderItems){
-    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status);
-
+  return await {
+    data:order,
+    statusCode:HttpStatus.OK,
   }
-
  }
  async cancelled(@Session() request:Record<string, any>,id:number){
   const idAdmin=request.idUser
@@ -308,19 +336,19 @@ async restoreStock(order: Order) {
         );
     }
 }
-private async checkDeliveredOrders(@Session() request:Record<string, any>) {
+private async checkDeliveredOrders() {
   const orders = await this.orderRespoitory.find({ where: { status: OrderStatus.SHIPPED } });
   for(const order of orders) {
-    this.update(request,order.id,{status:OrderStatus.DELIVERED})
+    this.delivred(order.id,{status:OrderStatus.DELIVERED})
   }
   // Vérifiez et mettez à jour les commandes livrées
   // ...
 }
 private async setupScheduledTask() {
-  const request:Record<string, any> = {};
+  
   const cron = require('node-cron');
-  const task = await cron.schedule('0 10 * * *', async () => {
-    await this.checkDeliveredOrders(request);
+  const task = await cron.schedule('58 12 * * *', async () => {
+    await this.checkDeliveredOrders();
   });
   if (task) {
     console.log('La tâche planifiée a été correctement configurée');

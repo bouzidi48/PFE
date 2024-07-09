@@ -25,6 +25,7 @@ const find_id_dto_1 = require("./dto/find-id.dto");
 const find_email_dto_1 = require("./dto/find-email.dto");
 const find_username_dto_1 = require("./dto/find-username.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const find_username_email_dto_1 = require("./dto/find-username-email.dto");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -58,6 +59,12 @@ let UserController = class UserController {
     }
     async update(user, updateUserDto) {
         return await this.userService.update(user, updateUserDto);
+    }
+    async createAdmin(createUserDto) {
+        return await this.userService.createAdmin(createUserDto);
+    }
+    async findByUsernameEmail(usernameEmail) {
+        return await this.userService.findByUsernameAndEmail(usernameEmail);
     }
 };
 exports.UserController = UserController;
@@ -135,6 +142,20 @@ __decorate([
     __metadata("design:paramtypes", [user_entity_1.User, update_user_dto_1.UserUpdateDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "update", null);
+__decorate([
+    (0, common_1.Post)('createAdmin'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_user_dto_1.UserCreateDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createAdmin", null);
+__decorate([
+    (0, common_1.Get)('findbyUsernameEmail'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [find_username_email_dto_1.FindByUsernameByEmail]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "findByUsernameEmail", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.UserService])
