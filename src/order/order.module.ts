@@ -15,6 +15,8 @@ import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
 import { SizeController } from 'src/size/size.controller';
+import { PaymentController } from 'src/payment/payment.controller';
+import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule,ProductModule,CouleurModule,SizeModule],

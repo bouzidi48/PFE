@@ -24,6 +24,7 @@ const images_module_1 = require("./images/images.module");
 const product_like_module_1 = require("./product-like/product-like.module");
 const size_module_1 = require("./size/size.module");
 const order_module_1 = require("./order/order.module");
+const payment_module_1 = require("./payment/payment.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -53,6 +54,7 @@ exports.AppModule = AppModule = __decorate([
             images_module_1.ImagesModule,
             product_like_module_1.ProductLikeModule,
             size_module_1.SizeModule,
+            payment_module_1.PaymentModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]
