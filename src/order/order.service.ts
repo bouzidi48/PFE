@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { BadRequestException, forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,6 +23,9 @@ import { OrderStatus } from 'src/enum/order-status.enum';
 import { OrderItemsRepository } from './order-item.repository';
 import { ShippingRepository } from './shipping.repository';
 import { cron } from 'node-cron';
+import { PaymentMethod } from 'src/enum/payment_method.enum';
+import { PaymentController } from 'src/payment/payment.controller';
+import { PaymentService } from 'src/payment/payment.service';
 @Injectable()
 export class OrderService {
   constructor(
@@ -30,10 +33,12 @@ export class OrderService {
     @InjectRepository(Shipping) private readonly shippingRepository:ShippingRepository,
 
     @InjectRepository(OrderItems) private readonly orderItemsRepository:OrderItemsRepository,
-    @Inject(UserController) private readonly userService:UserController,
-    @Inject(ProductController) private readonly productservice:ProductController,
-    @Inject(SizeController) private readonly sizeService:SizeController,
-    @Inject(CouleurController) private readonly couleurService:CouleurController
+      private readonly userService:UserService,
+      private readonly productservice:ProductService,
+      private readonly sizeService:SizeService,
+      private readonly couleurService:CouleurService,
+      @Inject(forwardRef(() => PaymentService))
+      private readonly paymentService:PaymentService
    
   ){}
  async  create(@Session() request:Record<string, any>,createOrderDto: CreateOrderDto) {
@@ -56,6 +61,7 @@ export class OrderService {
     
     console.log(createOrderDto.shippingAddress.address)
     const shipping= await this.shippingRepository.create(createOrderDto.shippingAddress)
+    shipping.createdate = new Date()
     console.log(shipping.address)
     console.log(shipping)
     await this.shippingRepository.save(shipping);
@@ -166,7 +172,7 @@ export class OrderService {
     
     }
   }
-  let order =await this.findOnne(id);
+  let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
   if(!order) throw new BadRequestException ('Commande non trouvée');
 
   if((order.status===OrderStatus.DELIVERED)||(order.status===OrderStatus.CENCELLED)){
@@ -187,9 +193,22 @@ export class OrderService {
    order.updated_at= new Date();
    order.ShippeAt = new Date();
    order.delivered = new Date(order.ShippeAt.getTime());
-   order.delivered.setDate(order.delivered.getDate());
+   order.delivered.setDate(order.delivered.getDate()+7);
    console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
+   console.log(order.payment)
+   console.log(order.payment.id)
+   if( order.payment.payment_method===PaymentMethod.CASH){
+    const updateCashPaymentDto = { paymentId: order.payment.id };
+    console.log(updateCashPaymentDto)
+     await this.paymentService.updatePaymentCash(updateCashPaymentDto);
+   }
+   else if(order.payment && order.payment.payment_method===PaymentMethod.CARD){
+   const updateCardPaymentDto = { paymentId: order.payment.id };
+   
+     await this.paymentService.updatePaymentCard(updateCardPaymentDto);
+   }
+  
   }
   order.orderUpdateBy= order.user;
   order= await this.orderRespoitory.save(order);
@@ -213,7 +232,7 @@ export class OrderService {
 
  async delivred(id:number,updateOrderStatusDto: updateOrderStatusDto){
   console.log('salut')
-  let order =await this.findOnne(id);
+  let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
   if(!order) throw new BadRequestException ('Commande non trouvée');
   const currentDate = new Date();
   console.log(order.delivered.getFullYear() , order.delivered.getMonth() , order.delivered.getDate())
@@ -222,6 +241,13 @@ export class OrderService {
 
     order.status = OrderStatus.DELIVERED;
     order.updated_at= new Date();
+    order = await this.orderRespoitory.save(order);
+    if(order.payment.payment_method===PaymentMethod.CASH){
+      await this.paymentService.updatePaymentCash({paymentId:order.payment.id});
+    }
+    else if(order.payment.payment_method===PaymentMethod.CARD){
+      await this.paymentService.updatePaymentCard({paymentId:order.payment.id});
+    }
   }
 
   
@@ -263,6 +289,20 @@ export class OrderService {
 //pour mettre à jour le stock des produits dans la commande + -
     await this.stockUpdate(order,OrderStatus.CENCELLED);
     return order;
+ }
+ async findByStatus(status:OrderStatus){
+  const order = await this.orderRespoitory.find({where:{status:status}});
+  if(!order){
+    return await {
+      data: null,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  }
+    return await {
+      data:order,
+      statusCode:HttpStatus.OK,
+  } 
+   
  }
  /* async deleteOrder(@Session() request: Record<string, any>, id: number) {
   const idAdmin = request.idUser;
@@ -330,6 +370,8 @@ export class OrderService {
 async restoreStock(order: Order) {
     for (const orderItem of order.orderItems) {
         await this.productservice.updateStock1(
+            orderItem.size.id,
+            orderItem.couleur.id,
             orderItem.product.id,
             orderItem.quantity,
             'restore'
@@ -347,7 +389,7 @@ private async checkDeliveredOrders() {
 private async setupScheduledTask() {
   
   const cron = require('node-cron');
-  const task = await cron.schedule('58 12 * * *', async () => {
+  const task = await cron.schedule('0 10 * * *', async () => {
     await this.checkDeliveredOrders();
   });
   if (task) {

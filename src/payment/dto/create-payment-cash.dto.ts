@@ -5,8 +5,7 @@ import { Column } from 'typeorm';
 export class CreateCashPaymentDto {
   @IsNumber()
   orderId: number;
-  @IsNumber()
-  paymentId:number;
+  
 
 
 

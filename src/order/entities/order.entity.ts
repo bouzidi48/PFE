@@ -38,7 +38,6 @@ export class Order {
         enum: OrderStatus,
         default: OrderStatus.PROCESSING
     })
-    
     status: OrderStatus;
 
     @Column()

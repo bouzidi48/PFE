@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCardPaymentDto } from './dto/create-payment-card.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { Payment } from './entities/payment.entity';
@@ -17,12 +17,14 @@ import { OrderStatus } from 'src/enum/order-status.enum';
 import { Roles } from 'src/enum/user_enum';
 import { UserService } from 'src/user/user.service';
 import { UpdateCardPaymentDto } from './dto/update-card-payment.dto';
+import { UserController } from 'src/user/user.controller';
 @Injectable()
 export class PaymentService {
   private readonly encryptionKey: string;
   constructor(
     @InjectRepository
     (Payment) private readonly paymentRepository: PaymentRepository,
+    @Inject(forwardRef(() => OrderService))
     private readonly orderService:OrderService,
     private readonly userService:UserService
 
@@ -104,12 +106,12 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   }
   
 
-  async updatePaymentCash(@Session() request:Record<string, any>, updateCashPaymentDto: UpdateCashPaymentDto) {
+  async updatePaymentCash( updateCashPaymentDto: UpdateCashPaymentDto) {
     
 
     const { paymentId } = updateCashPaymentDto;
-
-    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+    console.log(paymentId)
+    const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
 
     if (!payment) {
       throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
@@ -120,8 +122,13 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     if (!order) {
       throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
     }
+    if(order.data.status===OrderStatus.SHIPPED){
+      payment.updated_at=new Date();
+      payment.payment_date=order.data.order_date;
 
-    if (order.data.status === OrderStatus.DELIVERED) {
+    }
+
+    else if (order.data.status === OrderStatus.DELIVERED) {
       payment.payment_status = PaymentStatus.COMPLETED;
       payment.updated_at=new Date();
     }
@@ -155,9 +162,9 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   }
     
 
-   async updatePaymentCard(@Session() request:Record<string, any>, updateCardPaymentDto: UpdateCardPaymentDto) {
+   async updatePaymentCard( updateCardPaymentDto: UpdateCardPaymentDto) {
       const {paymentId} = updateCardPaymentDto;
-      const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+      const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
       if (!payment) {
         throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
       }
@@ -170,7 +177,7 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       }
 
       if(order.data.status===OrderStatus.SHIPPED){
-        payment.payment_status = PaymentStatus.PENDING;
+        payment.updated_at=new Date();
         payment.payment_date=order.data.order_date;
 
       }else if(order.data.status===OrderStatus.DELIVERED){
@@ -180,9 +187,17 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       }
 
 
+      await this.paymentRepository.save(payment);
+      return {
+        message: 'Le statut du paiement a été mis à jour avec succès',
+        statusCode: HttpStatus.OK,
+        data: payment,
+      };
   }
 
   remove(id: number) {
     return `This action removes a #${id} payment`;
   }
+
+  
 }
