@@ -26,12 +26,13 @@ import { cron } from 'node-cron';
 import { PaymentMethod } from 'src/enum/payment_method.enum';
 import { PaymentController } from 'src/payment/payment.controller';
 import { PaymentService } from 'src/payment/payment.service';
+import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRespoitory:OrderRepository,
     @InjectRepository(Shipping) private readonly shippingRepository:ShippingRepository,
-
+    private readonly mailerService:MailerService,
     @InjectRepository(OrderItems) private readonly orderItemsRepository:OrderItemsRepository,
       private readonly userService:UserService,
       private readonly productservice:ProductService,
@@ -246,7 +247,22 @@ export class OrderService {
   }
 
  }
+ async sendEmail(email: string,username:string) {
+  await this.mailerService.sendMail({
+    to: email,
+    from:process.env.EMAIL_HOST_USER,
+    subject: "demande d'admin",
+    text:`Cher ${username},
 
+      Nous vous remercions pour votre commande. Votre achat a bien été enregistré. En cas de problème ou si vous avez des questions, n'hésitez pas à nous contacter dans notre site dans la partie "Contactez-nous".
+
+      Cordialement, [L'équipe de votre entreprise]"`
+  });
+  return await {
+    message: 'le message est envoyer avec succes',
+    statusCode: HttpStatus.OK,
+  };
+}
  async delivred(id:number,updateOrderStatusDto: updateOrderStatusDto){
   console.log('salut')
   let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
@@ -277,6 +293,7 @@ export class OrderService {
   order= await this.orderRespoitory.save(order);
   //pour mettre à jour le stock des produits dans la commande + -
   if(order.status===OrderStatus.DELIVERED){
+    await this.sendEmail(order.user.email,order.user.username)
     await this.stockUpdate(order,OrderStatus.DELIVERED)
   }
   return await {
