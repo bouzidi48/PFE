@@ -12,11 +12,11 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('cash')
-  async createCashPayment(@Body() createCashPaymentDto: CreateCashPaymentDto): Promise<Payment> {
+  async createCashPayment(@Body() createCashPaymentDto: CreateCashPaymentDto) {
     return await this.paymentService.createCashPayment(createCashPaymentDto);
   }
   @Post('Card')
-  async createCardPayment(@Body() createCardPaymentDto: CreateCardPaymentDto): Promise<Payment> {
+  async createCardPayment(@Body() createCardPaymentDto: CreateCardPaymentDto) {
     return await this.paymentService.createCardPayment(createCardPaymentDto);
   }
 

@@ -37,7 +37,10 @@ export class PaymentService {
     const order = await this.orderService.findOnne(orderId);
 
     if (!order) {
-        throw new NotFoundException(`Order with ID ${orderId} not found`);
+        return await {
+          message:`Order with this id :${orderId} does not exist`,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
     }
 
     const payment = this.paymentRepository.create({
@@ -49,13 +52,20 @@ export class PaymentService {
 
     });
 
-    return await this.paymentRepository.save(payment);
+    await this.paymentRepository.save(payment);
+    return await {
+      data:payment,
+      statusCode: HttpStatus.OK,
+    }
 }
 async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   const { orderId, cardNumber, cardExpiry, cardCvc } = createCardPaymentDto;
   const order = await this.orderService.findOnne(orderId);
   if (!order) {
-    throw new Error('Order not found');
+    return await {
+      message:`Order with this id :${orderId} does not exist`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
   }
   
   // Encrypt card details before saving (implement your encryption logic here)
@@ -75,7 +85,12 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     cardCvc: encryptedCardCvc,
 
   });
-  return this.paymentRepository.save(payment);
+  await this.paymentRepository.save(payment);
+
+  return await {
+    data:payment,
+    statusCode: HttpStatus.OK,
+  }
 }
 /* private encryptCardDetails(cardDetail: string): string {
   // Implémentez ici votre logique de chiffrement
@@ -114,13 +129,19 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
 
     if (!payment) {
-      throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
+      return await {
+        message: `Le paiement ${paymentId} n'existe pas`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
     }
 
     const order = await this.orderService.findOne(payment.order.id);
 
     if (!order) {
-      throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
+      return await {
+        message: `La commande ${payment.order.id} n'existe pas`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
     }
 
     if (order.data.status === OrderStatus.DELIVERED) {
@@ -164,13 +185,19 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       const {paymentId} = updateCardPaymentDto;
       const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
       if (!payment) {
-        throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
+        return await {
+          message: `Le paiement ${paymentId} n'existe pas`,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
       }
 
       const order = await this.orderService.findOne(payment.order.id);
 
       if (!order) {
-        throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
+        return await {
+          message: `La commande ${payment.order.id} n'existe pas`,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
 
       }
 

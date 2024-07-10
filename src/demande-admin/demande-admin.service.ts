@@ -97,6 +97,13 @@ export class DemandeAdminService {
         statusCode:HttpStatus.NOT_FOUND
       }
     }
+    const user = await this.userController.findByUsernameEmail({username:demande.nom,email:demande.email});
+    if(!user) {
+      demande.status = DemandeAdminStatus.ACCEPT;
+      await this.demandeAdminRepository.save(demande);
+      user.data.role = Roles.ADMIN;
+      return await this.sendEmailAccepter(demande.email,demande.nom,user.data.password);
+    }
     const usernameExist = await this.userController.findByUserName({username:demande.nom});
     const emailExist = await this.userController.findByEmail({email:demande.email});
     if(usernameExist && emailExist) {
@@ -106,13 +113,7 @@ export class DemandeAdminService {
       }
       
     }
-    const user = await this.userController.findByUsernameEmail({username:demande.nom,email:demande.email});
-    if(!user) {
-      demande.status = DemandeAdminStatus.ACCEPT;
-      await this.demandeAdminRepository.save(demande);
-      user.data.role = Roles.ADMIN;
-      return await this.sendEmailAccepter(demande.email,demande.nom,user.data.password);
-    }
+    
     demande.status = DemandeAdminStatus.ACCEPT;
     await this.demandeAdminRepository.save(demande);
     const password = await generate({

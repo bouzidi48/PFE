@@ -173,18 +173,32 @@ export class OrderService {
     }
   }
   let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
-  if(!order) throw new BadRequestException ('Commande non trouvée');
+  if(!order){
+    return await {
+      message:"la commande n'existe pas",
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
+  }
 
   if((order.status===OrderStatus.DELIVERED)||(order.status===OrderStatus.CENCELLED)){
-    throw new BadRequestException(`Commande déjà  ${order.status}`)
+    return await {
+      message:"la commande est déja livrée ou annulée",
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
   }
   if((order.status===OrderStatus.PROCESSING)&&(updateOrderStatusDto.status!=OrderStatus.SHIPPED)){
-    throw new BadRequestException(`La livraison doit se faire après shipped !!!`);
+    return await {
+      message:"la commande n'est pas en cours de livraison",
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
     
   }
 //Si le nouveau statut est SHIPPED et que le statut actuel est déjà SHIPPED, la fonction retourne la commande sans modification.
   if((updateOrderStatusDto.status===OrderStatus.SHIPPED)&&(order.status===OrderStatus.SHIPPED)){
-    return order;
+    return await {
+      data:order,
+      statusCode:HttpStatus.OK,
+    }
   }
 //Si le nouveau statut est SHIPPED, elle met à jour le champ ShippedAt avec la date actuelle.
   if(updateOrderStatusDto.status===OrderStatus.SHIPPED){
@@ -212,7 +226,10 @@ export class OrderService {
   }
   order.orderUpdateBy= order.user;
   order= await this.orderRespoitory.save(order);
-  return order;
+  return await {
+    data:order,
+    statusCode:HttpStatus.OK,
+  }
 }
 //pour mettre à jour le stock du produit.
  async stockUpdate(order:Order,status:string){
@@ -233,7 +250,12 @@ export class OrderService {
  async delivred(id:number,updateOrderStatusDto: updateOrderStatusDto){
   console.log('salut')
   let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
-  if(!order) throw new BadRequestException ('Commande non trouvée');
+  if(!order){
+    return await {
+      message:"la commande n'existe pas",
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
+  }
   const currentDate = new Date();
   console.log(order.delivered.getFullYear() , order.delivered.getMonth() , order.delivered.getDate())
 //Si le nouveau statut est DELIVERED, elle met à jour le champ delivered avec la date actuelle.
@@ -279,16 +301,29 @@ export class OrderService {
     }
   }
     let order =await this.findOnne(id);
-    if(!order) throw new NotFoundException('order Not found.');
+    if(!order){
+      return await {
+        message:"la commande n'existe pas",
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
 // deja annulee alors sans modifier
-    if(order.status===OrderStatus.CENCELLED) return order;
+    if(order.status===OrderStatus.CENCELLED){
+      return await {
+        data:order,
+        statusCode:HttpStatus.OK,
+      }
+    }
 //La fonction met à jour le statut de la commande à CENCELLED
     order.status= OrderStatus.CENCELLED;
     order.orderUpdateBy= request.idUser;
     order=await this.orderRespoitory.save(order);
 //pour mettre à jour le stock des produits dans la commande + -
     await this.stockUpdate(order,OrderStatus.CENCELLED);
-    return order;
+    return await {
+      data:order,
+      statusCode:HttpStatus.OK,
+    }
  }
  async findByStatus(status:OrderStatus){
   const order = await this.orderRespoitory.find({where:{status:status}});
@@ -337,22 +372,34 @@ export class OrderService {
   async deleteOrder(@Session() request: Record<string, any>, id: number) {
     const idUser = request.idUser;
     if (!idUser) {
-        throw new BadRequestException('Vous devez vous connecter pour supprimer une commande');
+        return await {
+          message: 'Vous devez vous connecter pour supprimer une commande',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
     }
 
     let order = await this.findOnne(id);
     if (!order) {
-        throw new NotFoundException('Commande non trouvée');
+        return await {
+          message: 'Commande non trouvée.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
     }
 
     // Vérifiez que l'utilisateur est bien celui qui a passé la commande
     if (order.user.id !== idUser) {
-        throw new BadRequestException('Vous ne pouvez pas supprimer cette commande');
+        return await {
+          message: 'Vous n\'avez pas la permission de supprimer cette commande.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
     }
 
     // Vérifiez que la commande n'a pas été expédiée ou livrée
     if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
-        throw new BadRequestException(`Impossible de supprimer une commande ${order.status.toLowerCase()}`);
+        return await {
+          message: 'Impossible de supprimer une commande expédiée ou livrée.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
     }
 
     // Restaurez les stocks des produits
