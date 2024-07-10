@@ -120,10 +120,16 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     if (!order) {
       throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
     }
+    if(order.data.status===OrderStatus.SHIPPED){
+    
+      payment.payment_date=order.data.order_date;
+      payment.updated_at=new Date();
 
+    }else
     if (order.data.status === OrderStatus.DELIVERED) {
       payment.payment_status = PaymentStatus.COMPLETED;
       payment.updated_at=new Date();
+    
     }
     
 
@@ -136,6 +142,8 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       data: payment,
     };
   }
+
+
   findAll() {
     return `This action returns all payment`;
   }
@@ -170,17 +178,51 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       }
 
       if(order.data.status===OrderStatus.SHIPPED){
-        payment.payment_status = PaymentStatus.PENDING;
+        
         payment.payment_date=order.data.order_date;
 
-      }else if(order.data.status===OrderStatus.DELIVERED){
+      }else
+       if(order.data.status===OrderStatus.DELIVERED){
 
         payment.payment_status = PaymentStatus.COMPLETED;
         payment.updated_at=new Date();
       }
 
+      await this.paymentRepository.save(payment);
+
 
   }
+
+  /* private async checkCompletePayment() {
+    const orders = await this.orderService.find({ where: { status: OrderStatus. } });
+    for (const order of orders) {
+      const payment = await this.paymentRepository.findOne({ where: { order } });
+      if(payment.payment_method===PaymentMethod.CARD) {
+        this.
+      }
+    }
+    const paiement = await this.paymentRepository.find({ where:{ order:{id:orders.}}})
+    // Vérifiez et mettez à jour les commandes livrées
+    // ...
+  }
+  private async setupScheduledTask() {
+    
+    const cron = require('node-cron');
+    const task = await cron.schedule('58 12 * * *', async () => {
+      await this.checkDeliveredOrders();
+    });
+    if (task) {
+      console.log('La tâche planifiée a été correctement configurée');
+      task.start(); // Assurez-vous de vérifier que task est défini avant d'appeler start()
+    } else {
+      console.error('La tâche planifiée n\'a pas été correctement configurée');
+    }
+  }
+  public async startScheduledTask() {
+    await this.setupScheduledTask();
+  } */
+
+
 
   remove(id: number) {
     return `This action removes a #${id} payment`;
