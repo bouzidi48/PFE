@@ -5,12 +5,9 @@ import { PaymentMethod } from "src/enum/payment_method.enum";
 
 
 export class UpdateCardPaymentDto  {
-    @IsNumber()
-    orderId: number;
+    
     @IsNumber()
     paymentId:number;
   
-    @IsEnum(PaymentMethod)
-    paymentMethod: PaymentMethod;
 
 }

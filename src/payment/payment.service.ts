@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCardPaymentDto } from './dto/create-payment-card.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { Payment } from './entities/payment.entity';
@@ -17,12 +17,14 @@ import { OrderStatus } from 'src/enum/order-status.enum';
 import { Roles } from 'src/enum/user_enum';
 import { UserService } from 'src/user/user.service';
 import { UpdateCardPaymentDto } from './dto/update-card-payment.dto';
+import { UserController } from 'src/user/user.controller';
 @Injectable()
 export class PaymentService {
   private readonly encryptionKey: string;
   constructor(
     @InjectRepository
     (Payment) private readonly paymentRepository: PaymentRepository,
+    @Inject(forwardRef(() => OrderService))
     private readonly orderService:OrderService,
     private readonly userService:UserService
 
@@ -104,12 +106,12 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   }
   
 
-  async updatePaymentCash(@Session() request:Record<string, any>, updateCashPaymentDto: UpdateCashPaymentDto) {
+  async updatePaymentCash( updateCashPaymentDto: UpdateCashPaymentDto) {
     
 
     const { paymentId } = updateCashPaymentDto;
-
-    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+    console.log(paymentId)
+    const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
 
     if (!payment) {
       throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
@@ -120,12 +122,7 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     if (!order) {
       throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
     }
-    if(order.data.status===OrderStatus.SHIPPED){
-    
-      payment.payment_date=order.data.order_date;
-      payment.updated_at=new Date();
 
-    }else
     if (order.data.status === OrderStatus.DELIVERED) {
       payment.payment_status = PaymentStatus.COMPLETED;
       payment.updated_at=new Date();
@@ -163,9 +160,9 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   }
     
 
-   async updatePaymentCard(@Session() request:Record<string, any>, updateCardPaymentDto: UpdateCardPaymentDto) {
+   async updatePaymentCard( updateCardPaymentDto: UpdateCardPaymentDto) {
       const {paymentId} = updateCardPaymentDto;
-      const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+      const payment = await this.paymentRepository.findOne({ where: { id: paymentId }, relations: ['order'] });
       if (!payment) {
         throw new NotFoundException(`Paiement avec l'ID ${paymentId} introuvable`);
       }
@@ -178,7 +175,7 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       }
 
       if(order.data.status===OrderStatus.SHIPPED){
-        
+        payment.payment_status = PaymentStatus.PENDING;
         payment.payment_date=order.data.order_date;
 
       }else
@@ -188,43 +185,12 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
         payment.updated_at=new Date();
       }
 
-      await this.paymentRepository.save(payment);
-
 
   }
-
-  /* private async checkCompletePayment() {
-    const orders = await this.orderService.find({ where: { status: OrderStatus. } });
-    for (const order of orders) {
-      const payment = await this.paymentRepository.findOne({ where: { order } });
-      if(payment.payment_method===PaymentMethod.CARD) {
-        this.
-      }
-    }
-    const paiement = await this.paymentRepository.find({ where:{ order:{id:orders.}}})
-    // Vérifiez et mettez à jour les commandes livrées
-    // ...
-  }
-  private async setupScheduledTask() {
-    
-    const cron = require('node-cron');
-    const task = await cron.schedule('58 12 * * *', async () => {
-      await this.checkDeliveredOrders();
-    });
-    if (task) {
-      console.log('La tâche planifiée a été correctement configurée');
-      task.start(); // Assurez-vous de vérifier que task est défini avant d'appeler start()
-    } else {
-      console.error('La tâche planifiée n\'a pas été correctement configurée');
-    }
-  }
-  public async startScheduledTask() {
-    await this.setupScheduledTask();
-  } */
-
-
 
   remove(id: number) {
     return `This action removes a #${id} payment`;
   }
+
+  
 }

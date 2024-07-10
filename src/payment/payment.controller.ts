@@ -31,13 +31,13 @@ export class PaymentController {
   }
 
   @Put('update-cash-payment')
-  updateCash(@Session() request:Record<string, any>, @Body() updateCashPaymentDto:UpdateCashPaymentDto) {
-    return this.paymentService.updatePaymentCash(request,updateCashPaymentDto);
+  updateCash( @Body() updateCashPaymentDto:UpdateCashPaymentDto) {
+    return this.paymentService.updatePaymentCash(updateCashPaymentDto);
   }
 
   @Put('update-card-payment')
-  updateCard(@Session() request:Record<string, any>, @Body() updateCardPaymentDto: UpdateCardPaymentDto) {
-    return this.paymentService.updatePaymentCard(request,updateCardPaymentDto);
+  updateCard( @Body() updateCardPaymentDto: UpdateCardPaymentDto) {
+    return this.paymentService.updatePaymentCard(updateCardPaymentDto);
   }
 
   @Delete(':id')
