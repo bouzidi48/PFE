@@ -254,7 +254,7 @@ export class OrderService {
     subject: "demande d'admin",
     text:`Cher ${username},
 
-      Nous vous remercions pour votre commande. Votre achat a bien été enregistré. En cas de problème ou si vous avez des questions, n'hésitez pas à nous contacter dans notre site dans la partie "Contactez-nous".
+      Nous vous remercions pour votre commande. Votre achat a bien été enregistré.Vous devriez recevoir la commande aujourd'hui, en cas de problème ou si vous avez des questions, n'hésitez pas à nous contacter dans notre site dans la partie "Contactez-nous".
 
       Cordialement, [L'équipe de votre entreprise]"`
   });
