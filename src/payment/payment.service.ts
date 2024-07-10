@@ -122,15 +122,11 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
     if (!order) {
       throw new NotFoundException(`Commande associée au paiement ${paymentId} introuvable`);
     }
-    if(order.data.status===OrderStatus.SHIPPED){
-      payment.updated_at=new Date();
-      payment.payment_date=order.data.order_date;
 
-    }
-
-    else if (order.data.status === OrderStatus.DELIVERED) {
+    if (order.data.status === OrderStatus.DELIVERED) {
       payment.payment_status = PaymentStatus.COMPLETED;
       payment.updated_at=new Date();
+    
     }
     
 
@@ -143,6 +139,8 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       data: payment,
     };
   }
+
+
   findAll() {
     return `This action returns all payment`;
   }
@@ -177,22 +175,17 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
       }
 
       if(order.data.status===OrderStatus.SHIPPED){
-        payment.updated_at=new Date();
+        payment.payment_status = PaymentStatus.PENDING;
         payment.payment_date=order.data.order_date;
 
-      }else if(order.data.status===OrderStatus.DELIVERED){
+      }else
+       if(order.data.status===OrderStatus.DELIVERED){
 
         payment.payment_status = PaymentStatus.COMPLETED;
         payment.updated_at=new Date();
       }
 
 
-      await this.paymentRepository.save(payment);
-      return {
-        message: 'Le statut du paiement a été mis à jour avec succès',
-        statusCode: HttpStatus.OK,
-        data: payment,
-      };
   }
 
   remove(id: number) {
