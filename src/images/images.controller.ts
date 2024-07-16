@@ -6,14 +6,23 @@ import { FindByImageDto } from './dto/find-by-Image.dto';
 import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 import { RemoveImageDto } from './dto/remove-image.dto';
+import { CreateImageCategoryDto } from './dto/create-image-category.dto';
+
+import { UpdateImageCategoryDto } from './dto/update-image-category.dto';
+import { FindByCategorieDto } from './dto/find-by-category.dto';
 
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Post()
-  create(@Session() request:Record<string, any>,@Body() createImageDto: CreateImageDto) {
-    return this.imagesService.create(request,createImageDto);
+  @Post('createProduct')
+  create_product(@Session() request:Record<string, any>,@Body() createImageDto: CreateImageDto) {
+    return this.imagesService.create_product(request,createImageDto);
+  }
+
+  @Post('createProduct')
+  create_category(@Session() request:Record<string, any>,@Body() createImageDto: CreateImageCategoryDto) {
+    return this.imagesService.create_category(request,createImageDto);
   }
 
   @Get()
@@ -30,6 +39,10 @@ export class ImagesController {
   async findByCouleur(@Body() findByCouleur: FindByCouleurDto) {
     return await this.imagesService.findByCouleur(findByCouleur);
   }
+  @Get('findByCategorie')
+  async findByCategorie(@Body() findByCouleur: FindByCategorieDto) {
+    return await this.imagesService.findByCategory(findByCouleur);
+  }
   @Get('findByNameAndId')
   async findByNameAndId(@Body() nameAndIdProduct: FindByIdNameDto) {
     return await this.imagesService.findByNameAndId(nameAndIdProduct);
@@ -39,13 +52,21 @@ export class ImagesController {
     return this.imagesService.findOne(+id);
   }
 
-  @Put('update')
-  update(@Session() request:Record<string, any>, @Body() updateSizeDto: UpdateImageDto) {
-    return this.imagesService.update(request, updateSizeDto);
+  @Put('updateProduct')
+  update_product(@Session() request:Record<string, any>, @Body() updateSizeDto: UpdateImageDto) {
+    return this.imagesService.update_product(request, updateSizeDto);
+  }
+  @Put('updateCategory')
+  update_category(@Session() request:Record<string, any>, @Body() updateSizeDto: UpdateImageCategoryDto) {
+    return this.imagesService.update_category(request, updateSizeDto);
   }
 
-  @Delete('remove')
-  remove(@Session() request:Record<string, any>, @Body() removeSizeDto: RemoveImageDto) {
-    return this.imagesService.remove(request, removeSizeDto);
+  @Delete('removeProduct')
+  remove_product(@Session() request:Record<string, any>, @Body() removeSizeDto: RemoveImageDto) {
+    return this.imagesService.remove_product(request, removeSizeDto);
+  }
+  @Delete('removeCategory')
+  remove_category(@Session() request:Record<string, any>, @Body() removeSizeDto: RemoveImageDto) {
+    return this.imagesService.remove_category(request, removeSizeDto);
   }
 }

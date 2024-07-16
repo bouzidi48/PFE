@@ -1,4 +1,4 @@
-import { Body, HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
+import { Body, forwardRef, HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateProductLikeDto } from './dto/create-product-like.dto';
 
 import { ProductLikeRepository } from './product-like.repository';
@@ -17,8 +17,9 @@ import { UserController } from 'src/user/user.controller';
 export class ProductLikeService {
   productLikedService: any;
   constructor(
-    @Inject(ProductController) private readonly productService:ProductController,
-    @Inject(UserController) private readonly userService:UserController,
+    @Inject(forwardRef(() => ProductService))
+    private readonly productService:ProductService,
+     private readonly userService:UserService,
     @InjectRepository(ProductLikeEntity) private readonly productLikeRepository:ProductLikeRepository
   ){}
 
@@ -120,7 +121,7 @@ export class ProductLikeService {
         }
       } 
       return {
-        message: list1,
+        data: list1,
         statusCode: HttpStatus.OK,
       };
     }
@@ -150,7 +151,7 @@ export class ProductLikeService {
     }
   
     return {
-      message: list1,
+      data: list1,
       statusCode: HttpStatus.OK,
     };
   }

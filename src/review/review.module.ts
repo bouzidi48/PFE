@@ -14,7 +14,7 @@ import { ProductController } from 'src/product/product.controller';
 @Module({
   imports:[TypeOrmModule.forFeature([ReviewEntity,ReviewRepository]),UserModule,ProductModule ],
   controllers: [ReviewController],
-  providers: [ReviewService,UserController,ProductController],
+  providers: [ReviewService],
   exports:[ReviewService]
 })
 export class ReviewModule {}

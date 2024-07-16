@@ -1,6 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateCouleurDto } from './create-couleur.dto';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { RemoveImageDto } from 'src/images/dto/remove-image.dto';
+import { RemoveSizeDto } from 'src/size/dto/remove-size.dto';
 
 export class RemoveCouleurDto{
     @IsNotEmpty({message:'nameCouleur can not be empty'})
@@ -8,5 +11,11 @@ export class RemoveCouleurDto{
     
     nameCouleur:string;
 
-    
+    @Type(()=>RemoveImageDto)
+    @ValidateNested({ each: true })
+    listeimage:RemoveImageDto[];
+
+    @Type(()=>RemoveSizeDto)
+    @ValidateNested({ each: true })
+    listesize:RemoveSizeDto[];
 }

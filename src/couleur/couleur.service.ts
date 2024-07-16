@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateCouleurDto } from './dto/create-couleur.dto';
 import { UpdateCouleurDto } from './dto/update-couleur.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,12 +13,17 @@ import { FindByCouleurDto } from './dto/find-by-couleur.dto';
 import { FindByIdNameDto } from './dto/find-by-Id-Name.dto';
 import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
+import { SizeService } from 'src/size/size.service';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class CouleurService {
   constructor(@InjectRepository(Couleur) private readonly couleurRepository:CouleurRepository,
-  @Inject(UserController) private readonly userService:UserController,
-  @Inject(ProductController) private readonly productService:ProductController,
+   private readonly userService:UserService,
+    private readonly productService:ProductService,
+    private readonly sizeService:SizeService,
+    @Inject(forwardRef(() => ImagesService))
+    private readonly imageService:ImagesService
   ){}
   async create(@Session() request:Record<string, any>,createCouleurDto: CreateCouleurDto) {
     const idAdmin=request.idUser
@@ -58,6 +63,12 @@ export class CouleurService {
     couleur.createdate=new Date();
     couleur.product=product.data;
     this.couleurRepository.save(couleur);
+    for(let image of createCouleurDto.listeimage) {
+      await this.imageService.create_product(request,image)
+    }
+    for(let size of createCouleurDto.listesize) {
+      await this.sizeService.create(request,size)
+    }
     return await {
       message: 'couleur ajoute avec succes',
       statusCode: HttpStatus.OK,
@@ -80,7 +91,7 @@ export class CouleurService {
   }
 
   async findByNameCouleur(nameCouleur:FindByCouleurDto) {
-    const couleur =  await this.couleurRepository.find({where : {nameCouleur:nameCouleur.nameCouleur}});
+    const couleur =  await this.couleurRepository.find({where : {nameCouleur:nameCouleur.nameCouleur},relations:['images','sizes']});
     if(couleur.length==0) {
       return await{
         data:null,
@@ -200,6 +211,12 @@ export class CouleurService {
     couleur.updatedate = new Date();
     couleur.product = product.data;
     this.couleurRepository.save(couleur)
+    for(let image of updateCouleurDto.listeimage) {
+      await this.imageService.update_product(request,image)
+    }
+    for(let size of updateCouleurDto.listesize) {
+      await this.sizeService.update(request,size)
+    }
     return await {
       message:couleur,
       statusCode:HttpStatus.OK,
@@ -228,6 +245,12 @@ export class CouleurService {
         message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
+    }
+    for(let image of removeCouleurDto.listeimage) {
+      await this.imageService.remove_product(request,image)
+    }
+    for(let size of removeCouleurDto.listesize) {
+      await this.sizeService.remove(request,size)
     }
     await this.couleurRepository.remove(couleur)
     return await {

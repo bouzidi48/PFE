@@ -16,6 +16,6 @@ import { ProductLikeController } from 'src/product-like/product-like.controller'
 @Module({
   imports:[UserModule,ProductModule,ProductLikeModule],
   controllers: [AuthentificationController],
-  providers: [AuthentificationService,UserController,ProductController,ProductLikeController],
+  providers: [AuthentificationService],
 })
 export class AuthentificationModule {}

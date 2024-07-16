@@ -8,11 +8,17 @@ import { CouleurModule } from 'src/couleur/couleur.module';
 import { Images } from './entities/image.entity';
 import { UserController } from 'src/user/user.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
+import { CategoriesModule } from 'src/categories/categories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Images,ImageRepository]),UserModule,forwardRef(() => CouleurModule)],
+  imports: [
+    TypeOrmModule.forFeature([Images, ImageRepository]),
+    UserModule,
+    forwardRef(() => CouleurModule),
+    forwardRef(() => CategoriesModule),
+  ],
   controllers: [ImagesController],
-  providers: [ImagesService,UserController,CouleurController],
+  providers: [ImagesService],
   exports: [ImagesService],
 })
 export class ImagesModule {}

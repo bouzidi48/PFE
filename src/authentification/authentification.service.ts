@@ -23,11 +23,11 @@ import { ProductLikeController } from 'src/product-like/product-like.controller'
 @Injectable()
 export class AuthentificationService {
   constructor(
-    @Inject(UserController)
-    private readonly userService: UserController,
+    
+    private readonly userService: UserService,
     private readonly mailerService:MailerService,
-    private readonly productService:ProductController,
-    private readonly productLikedService:ProductLikeController,
+    private readonly productService:ProductService,
+    private readonly productLikedService:ProductLikeService,
   ) {}
 
 

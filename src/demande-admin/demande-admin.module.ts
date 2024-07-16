@@ -10,6 +10,7 @@ import { DemandeAdminRepository } from './demande-admin.repositoty';
 @Module({
   imports: [TypeOrmModule.forFeature([DemandeAdmin,DemandeAdminRepository]), UserModule],
   controllers: [DemandeAdminController],
-  providers: [DemandeAdminService,UserController],
+  providers: [DemandeAdminService],
+  exports:[DemandeAdminService]
 })
 export class DemandeAdminModule {}

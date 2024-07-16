@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,14 +13,21 @@ import { RemoveImageDto } from './dto/remove-image.dto';
 import { Images } from './entities/image.entity';
 import { UserController } from 'src/user/user.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
+import { CreateImageCategoryDto } from './dto/create-image-category.dto';
+import { CategoriesService } from 'src/categories/categories.service';
+
+import { UpdateImageCategoryDto } from './dto/update-image-category.dto';
+import { FindByCategorieDto } from './dto/find-by-category.dto';
 
 @Injectable()
 export class ImagesService {
   constructor(@InjectRepository(Images) private readonly imageRepository:ImageRepository,
-  @Inject(UserController) private readonly userService:UserController,
-  @Inject(CouleurController) private readonly couleurService:CouleurController,
+  private readonly userService:UserService,
+   private readonly couleurService:CouleurService,
+   @Inject(forwardRef(() => CategoriesService))
+   private readonly categoryService:CategoriesService
   ){}
-  async create(@Session() request:Record<string, any>,createImageDto: CreateImageDto) {
+  async create_product(@Session() request:Record<string, any>,createImageDto: CreateImageDto) {
     const idAdmin=request.idUser
     console.log(idAdmin)
     if(!idAdmin){
@@ -45,7 +52,7 @@ export class ImagesService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:createImageDto.nameCouleur})
+    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createImageDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -59,7 +66,52 @@ export class ImagesService {
     image.couleur=couleur.data;
     this.imageRepository.save(image);
     return await {
-      message: 'couleur ajoute avec succes',
+      data: image,
+      statusCode: HttpStatus.OK,
+    }
+  }
+
+  async create_category(@Session() request:Record<string, any>,createImageDto: CreateImageCategoryDto) {
+    const idAdmin=request.idUser
+    console.log(idAdmin)
+    if(!idAdmin){
+      return await {
+        message: 'vous devez vous connecter pour ajouter une image',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin= await this.userService.findById(idAdmin)
+    if(!admin || admin.data.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const image1=await this.imageRepository.findOne({where : {UrlImage:createImageDto.UrlImage,category:{nameCategory:createImageDto.nameCategorie}}});
+    console.log(image1)
+    if(image1) {
+      return await{
+        message:'cette image existe deja dans se produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    const categorie =await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:createImageDto.nameCategorie})
+    if(!categorie) {
+      return await{
+        message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    const image=await this.imageRepository.create(createImageDto);
+    image.addedBy=admin.data;
+    image.createdate=new Date();
+    image.category=categorie.data;
+    await this.imageRepository.save(image);
+  
+    return await {
+      data: image,
       statusCode: HttpStatus.OK,
     }
   }
@@ -92,8 +144,29 @@ export class ImagesService {
     }
   }
 
+  async findByCategory(nameCategory:FindByCategorieDto) {
+    const category =  await this.categoryService.findByName({nameCategory:nameCategory.nameCategory});
+    if(!category) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    const images = await this.imageRepository.find( { where: { category: { id: category.data.id } }});
+    if(images.length==0) {
+      return await{
+        data:null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      message:images,
+      statusCode:HttpStatus.OK,
+    }
+  }
+
   async findByCouleur(nameCategory:FindByCouleurDto) {
-    const couleur = await this.couleurService.findByCouleur({nameCouleur:nameCategory.nameCouleur})
+    const couleur = await this.couleurService.findByNameCouleur({nameCouleur:nameCategory.nameCouleur})
     if(!couleur) {
       return await{
         data:null,
@@ -142,7 +215,7 @@ export class ImagesService {
     }
   }
 
-  async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateImageDto) {
+  async update_product(@Session() request:Record<string, any>, updateCouleurDto: UpdateImageDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  
       return await {
@@ -165,7 +238,7 @@ export class ImagesService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
+    const couleur = await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
@@ -191,8 +264,86 @@ export class ImagesService {
       statusCode:HttpStatus.OK,
     }
   }
+  async update_category(@Session() request:Record<string, any>, updateCouleurDto: UpdateImageCategoryDto) {
+    const idAdmin = request.idUser
+    if(!idAdmin){  
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin = await this.userService.findById(idAdmin)
+    if(!admin || admin.data.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const image = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage,addedBy:idAdmin}});
+    if(!image) {
+      return await{
+        message:'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    const categorie = await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:updateCouleurDto.nomCategorie})
+    if(!categorie) {
+      return await{
+        message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    if(updateCouleurDto.urlImage) {
+      const ima = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage}});
+      if(ima) {
+        return await{
+          message:'cette couleur existe deja',
+          statusCode:HttpStatus.BAD_REQUEST,
+        }
+      }
+    }
+    image.UrlImage = updateCouleurDto.urlImage;
+    image.addedBy = admin.data;
+    image.updatedate = new Date();
+    image.category = categorie.data;
+    this.imageRepository.save(image)
+    return await {
+      message:image,
+      statusCode:HttpStatus.OK,
+    }
+  }
 
-  async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveImageDto) {
+  async remove_category(@Session() request:Record<string, any>, removeCouleurDto: RemoveImageDto) {
+    const idAdmin = request.idUser
+    if(!idAdmin){  
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const admin = await this.userService.findById(idAdmin)
+    if(!admin || admin.data.role!=Roles.ADMIN) {
+      return await{
+        message:'vous devez etre un admin',
+        statusCode:HttpStatus.BAD_REQUEST,
+      
+      }
+    }
+    const image = await this.imageRepository.findOne({where : {UrlImage:removeCouleurDto.urlImage,addedBy:idAdmin}});
+    if(!image) {
+      return await{
+        message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    await this.imageRepository.remove(image)
+    return await {
+      message:'la couleur a bien ete supprimer',
+      statusCode:HttpStatus.OK,
+    }
+  }
+  async remove_product(@Session() request:Record<string, any>, removeCouleurDto: RemoveImageDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  
       return await {

@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,17 +27,23 @@ import { CouleurController } from 'src/couleur/couleur.controller';
 import { SizeController } from 'src/size/size.controller';
 import { ProductController } from './product.controller';
 import { OrderStatus } from 'src/enum/order-status.enum';
+import { CouleurService } from 'src/couleur/couleur.service';
+import { ProductLikeService } from 'src/product-like/product-like.service';
 
 @Injectable()
 export class ProductService {
  
  
   constructor(
-    @Inject(CategoriesController) private readonly categoryService:CategoriesController,
-    @Inject(UserController) private readonly userService:UserController,
-    @InjectRepository(Couleur) private readonly couleurRepository:CouleurRepository,
+    @Inject(forwardRef(() => CategoriesService))
+     private readonly categoryService:CategoriesService,
+     @Inject(forwardRef(() => UserService))
+     private readonly userService:UserService,
+     @Inject(forwardRef(() => CouleurService))
+     private readonly couleurService:CouleurService,
     @InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-    @InjectRepository(Product) private readonly productRepository:ProductRepository, 
+    @InjectRepository(Product) private readonly productRepository:ProductRepository,
+    private readonly productLikeService:ProductLikeService, 
   ){}
   async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
     const idAdmin=request.idUser
@@ -76,6 +82,9 @@ export class ProductService {
     product.category=category.data;
     product.createdate=new Date();
     this.productRepository.save(product)
+    for(let couleur of createProductDto.listeCouleur) {
+      await this.couleurService.create(request,couleur)
+    }
     return await {
       message:'produit ajoute avec succes',
       statusCode:HttpStatus.OK,
@@ -99,7 +108,8 @@ export class ProductService {
     }
   }
   async findByNameProduct(nameProduct:FindByNameProductDto) {
-    const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct}});
+    const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct},relations:['colours','colours.images', 'colours.sizes']});
+    console.log(product)
     if(!product){
       return  {
         data: null,
@@ -187,6 +197,9 @@ export class ProductService {
         }
       }
     }
+    for(let couleur of updateProductDto.listeCouleur) {
+      await this.couleurService.update(request,couleur)
+    }
     product.nameProduct = updateProductDto.nameProduct;
     product.description = updateProductDto.description;
     product.price = updateProductDto.price;
@@ -220,6 +233,9 @@ export class ProductService {
         message:'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
+    }
+    for( let couleur of removeProductDto.listeCouleur ) {
+      await this.couleurService.remove(request,couleur)
     }
     await this.productRepository.remove(product)
     return await {
@@ -259,8 +275,8 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurRepository.findOne({where:{id:couleurId}})
-    if(!couleur) {
+    const couleur = await this.couleurService.findOne(ajouterPanierDto.couleurId)
+    if(!couleur.data) {
       return await{
         message:'ce couleur n\'existe pas',
         statusCode:HttpStatus.BAD_REQUEST,
@@ -339,7 +355,7 @@ export class ProductService {
   }
   async updateStock(sizeId: number, couleurId:number, productId: number, quantity: number, status: string){
     let product=await this.findById(productId);
-    let couleur=await this.couleurRepository.findOne({where:{id:couleurId,product:{id:productId}}});
+    let couleur=await this.couleurService.findByIdCouleurIdProduct(productId,couleurId)
     let size=await this.sizeRepository.findOne({where:{id:sizeId,couleur:{id:couleurId}}});
     if(!product.data || !couleur || !size){
       return await {
@@ -354,9 +370,8 @@ export class ProductService {
     }else{
       size.stockQuantity+=quantity;
     }
-    await this.productRepository.save(product.data);
     await this.sizeRepository.save(size);
-    await this.couleurRepository.save(couleur);
+    
     return {
       message:'stock updated successfully',
       statusCode:HttpStatus.OK,
@@ -367,7 +382,7 @@ export class ProductService {
 
   async updateStock1(sizeId: number, couleurId:number, productId: number, quantity: number, action: string) {
     let product = await this.findById(productId);
-    let couleur = await this.couleurRepository.findOne({ where: { id: couleurId, product: { id: productId} } });
+    let couleur = await this.couleurService.findByIdCouleurIdProduct(productId,couleurId)
     let size = await this.sizeRepository.findOne({ where: { id: sizeId ,couleur:{id:couleurId}} });
 
     if (action === 'restore') {
@@ -376,12 +391,94 @@ export class ProductService {
         size.stockQuantity -= quantity;
     }
 
-    await this.productRepository.save(product.data);
+    
     await this.sizeRepository.save(size);
-    await this.couleurRepository.save(couleur);
+   
     return {
         message: 'Stock updated successfully',
         statusCode: HttpStatus.OK,
     }
 }
+  async trend() {
+    const result = await this.productRepository.query(
+      `SELECT p.id, p.nameProduct, p.description, p.price, AVG(r.ratings) as averageRating
+       FROM products p
+       JOIN review r ON p.id = r.productId
+       GROUP BY p.id, p.nameProduct, p.description, p.price
+       ORDER BY averageRating DESC
+       LIMIT 3`
+    );
+
+    if (result.length === 0) {
+      return {
+        data: [],
+        statusCode: HttpStatus.NO_CONTENT,
+      };
+    }
+
+    return {
+      data: result,
+      statusCode: HttpStatus.OK,
+    };
+  
+
+
+  }
+
+  async recomendation(@Session() request:Record<string, any>) {
+    
+    const listeLike = await this.productLikeService.findAll(request)
+    console.log(listeLike)
+    // Si l'utilisateur n'existe pas ou n'a pas liké de produits
+    if (listeLike.data.length === 0) {
+      // Retourner des produits par défaut (par exemple les plus populaires)
+      const defaultProducts = await this.productRepository
+    .createQueryBuilder('products')
+    .leftJoinAndSelect('products.colours', 'colours')
+    .leftJoinAndSelect('colours.addedBy', 'addedBy') // Inclure l'utilisateur qui a ajouté la couleur
+    .leftJoinAndSelect('colours.sizes', 'sizes') // Inclure les tailles associées à la couleur
+    .leftJoinAndSelect('colours.images', 'images') // Inclure les images associées à la couleur
+    .leftJoinAndSelect('colours.orderItems', 'orderItems') // Inclure les items de commande associés à la couleur
+    .leftJoinAndSelect('products.category', 'category')
+    .leftJoinAndSelect('products.addedBy', 'addedByProduct')
+    .leftJoinAndSelect('products.review', 'review')
+    .leftJoinAndSelect('products.likedBy', 'likedBy')
+    .leftJoinAndSelect('products.orderItems', 'orderItemsProduct')
+    .orderBy('products.createdate', 'DESC')
+    .limit(5)
+    .getMany();
+
+    return {
+      data: defaultProducts,
+      statusCode: HttpStatus.OK,
+    };
+
+    }
+
+    
+
+    // Recherchez d'autres produits similaires aux produits likés
+    const recommendedProducts = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('products.colours', 'colours')
+      .leftJoinAndSelect('colours.addedBy', 'addedBy') // Inclure l'utilisateur qui a ajouté la couleur
+      .leftJoinAndSelect('colours.sizes', 'sizes') // Inclure les tailles associées à la couleur
+      .leftJoinAndSelect('colours.images', 'images') // Inclure les images associées à la couleur
+      .leftJoinAndSelect('colours.orderItems', 'orderItems') // Inclure les items de commande associés à la couleur
+      .leftJoinAndSelect('products.category', 'category')
+      .leftJoinAndSelect('products.addedBy', 'addedByProduct')
+      .leftJoinAndSelect('products.review', 'review')
+      .leftJoinAndSelect('products.likedBy', 'likedBy')
+      .leftJoinAndSelect('products.orderItems', 'orderItemsProduct')
+      .where('product.id IN (:...likedProducts)', { likedProducts: listeLike.data.map(p => p.id) })
+      .orWhere('product.categoryId IN (:...categories)', { categories: listeLike.data.map(p => p.category.id) })
+      .limit(5) // Limitez à 5 produits par exemple
+      .getMany();
+
+    return await {
+      data: recommendedProducts,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
 }

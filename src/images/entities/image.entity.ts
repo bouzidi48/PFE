@@ -4,7 +4,7 @@ import { Roles } from "src/enum/user_enum";
 import { Product } from "src/product/entities/product.entity";
 import { Size } from "src/size/entities/size.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('images')
 
@@ -27,6 +27,8 @@ export class Images {
     @ManyToOne(()=>User,(user)=>user.couleurs)
     addedBy:User;
 
-    
+    @OneToOne(() => CategoryEntity, category => category.image)
+    @JoinColumn()
+    category: CategoryEntity;
 
 }

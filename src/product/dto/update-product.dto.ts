@@ -1,4 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
+import { UpdateCouleurDto } from "src/couleur/dto/update-couleur.dto";
 
 export class UpdateProductDto {
     @IsOptional()
@@ -26,4 +28,8 @@ export class UpdateProductDto {
     @IsNotEmpty({message:'nomProduct can not be empty'})
     @IsString({message:'nomProduct should be string '})
     ancienProduct:string;
+
+    @Type(()=>UpdateCouleurDto)
+    @ValidateNested({ each: true })
+    listeCouleur:UpdateCouleurDto[];
 }

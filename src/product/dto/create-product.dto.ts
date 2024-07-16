@@ -1,4 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
+import { CreateCouleurDto } from "src/couleur/dto/create-couleur.dto";
 
 export class CreateProductDto {
     @IsNotEmpty({message:'title can not be empty'})
@@ -14,4 +16,8 @@ export class CreateProductDto {
 
     @IsNotEmpty({message:'nomCategory can not be empty'})
     nomCategory:string;
+
+    @Type(()=>CreateCouleurDto)
+    @ValidateNested({ each: true })
+    listeCouleur:CreateCouleurDto[];
 }
