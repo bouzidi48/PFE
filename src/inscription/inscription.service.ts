@@ -14,7 +14,7 @@ import { UserController } from 'src/user/user.controller';
 @Injectable()
 export class InscriptionService {
   constructor(
-    @Inject(UserController) private readonly userService: UserController,
+    private readonly userService: UserService,
     private readonly mailerService:MailerService,
   ) {}
 

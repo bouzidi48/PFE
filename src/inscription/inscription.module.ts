@@ -11,6 +11,6 @@ import { UserController } from 'src/user/user.controller';
 @Module({
   imports:[UserModule],
   controllers: [InscriptionController],
-  providers: [InscriptionService,UserController],
+  providers: [InscriptionService],
 })
 export class InscriptionModule {}

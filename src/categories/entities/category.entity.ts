@@ -1,6 +1,7 @@
+import { Images } from "src/images/entities/image.entity";
 import { Product } from "src/product/entities/product.entity";
 import { User } from "src/user/entities/user.entity";
-import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 @Entity({name:'categories'})
 export class CategoryEntity {
     @PrimaryGeneratedColumn()
@@ -29,4 +30,7 @@ export class CategoryEntity {
   
     @OneToMany(()=>Product,(product)=>product.category)
     products:Product[]
+
+    @OneToOne(() => Images, image => image.category)
+    image: Images; // Ajouter la relation One-to-One avec ImageEntity
 }

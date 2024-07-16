@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session, ParseIntPipe, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Session, ParseIntPipe, Put, Query } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -34,6 +34,11 @@ export class CategoriesController {
     return await this.categoriesService.findSubcategories(parentCategory)
   }
 
+  @Get('newCat')
+  async newCat() {
+    return await this.categoriesService.nouveauCat()
+  }
+
   @Get('all')
   async findAll() {
     return await this.categoriesService.findAll();
@@ -41,9 +46,9 @@ export class CategoriesController {
 
   
 
-  @Get('nameCategory')
-  async findByName(@Body()nameCategory:FindByNameCategoryDto){
-    return await this.categoriesService.findByName(nameCategory)
+  @Post('bynameCategory')
+  async findByName(@Body() nameCategory:FindByNameCategoryDto){
+  return await this.categoriesService.findByName(nameCategory)
   }  
 
   @Get(':id')
@@ -62,6 +67,7 @@ export class CategoriesController {
   async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
     return await this.categoriesService.remove(request,+id,deleteCategoryDto);
   }
+  
   
   
 }

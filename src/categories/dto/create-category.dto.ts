@@ -1,4 +1,7 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
+import { CreateImageCategoryDto } from "src/images/dto/create-image-category.dto";
+import { CreateImageDto } from "src/images/dto/create-image.dto";
 
 export class CreateCategoryDto {
     @IsNotEmpty({message:'title can not be empty'})
@@ -13,5 +16,9 @@ export class CreateCategoryDto {
     @IsString({message:'description should be string '})
     @IsOptional()
     NameparentCategory: string;
+
+    @Type(()=>CreateImageCategoryDto)
+    @ValidateNested()
+    image:CreateImageCategoryDto;
 
 }

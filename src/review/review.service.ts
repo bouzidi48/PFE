@@ -18,8 +18,8 @@ import { ProductController } from 'src/product/product.controller';
 export class ReviewService {
   constructor(
   
-  @Inject(UserController) private readonly userService:UserController,
-  @Inject(ProductController) private readonly productService : ProductController,
+  private readonly userService:UserService,
+  private readonly productService : ProductService,
   @InjectRepository(ReviewEntity) private readonly reviewRepository:ReviewRepository ){}
 
   async create(@Session() request:Record<string, any>,createReviewDto: CreateReviewDto)  { 

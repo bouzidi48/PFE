@@ -16,6 +16,9 @@ import { UserController } from 'src/user/user.controller';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 import { retry } from 'rxjs';
 import { FindByNameParentDto } from './dto/find-ByParentName.dto';
+import { ImageRepository } from 'src/images/image.repository';
+import { ImagesController } from 'src/images/images.controller';
+import { ImagesService } from 'src/images/images.service';
 
 
 
@@ -25,8 +28,8 @@ import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity) private readonly categoryRepository:CategoryRepository,
-    @Inject(UserController) private readonly userService:UserController,
- 
+    private readonly userService:UserService,
+     private readonly imageControleur:ImagesService
   ){}
   
    
@@ -54,11 +57,17 @@ export class CategoriesService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const category=await this.categoryRepository.create(createCategoryDto);
+    
+    
+
+    const category = this.categoryRepository.create(createCategoryDto);
     if(!createCategoryDto.NameparentCategory) {
       
       category.addedBy=admin.data;
       category.createdAt=new Date();
+      this.categoryRepository.save(category)
+      const image = await this.imageControleur.create_category(request,createCategoryDto.image);
+      category.image=image.data
       this.categoryRepository.save(category)
     }
     else {
@@ -70,12 +79,17 @@ export class CategoriesService {
 
         }
       }
+      
       category.addedBy=admin.data;
       category.createdAt=new Date();
       category.parentCategory=parent
+      const categorys=await this.categoryRepository.save(category)
+      const image = await this.imageControleur.create_category(request,createCategoryDto.image);
+      console.log(image.data)
+      categorys.image=image.data
       this.categoryRepository.save(category)
     }
-    
+    console.log(category)
     return await {
       message:category,
       statusCode:HttpStatus.OK,
@@ -135,7 +149,8 @@ export class CategoriesService {
       };
   }
   async findByName(nameCategory:FindByNameCategoryDto ) {
-    const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, select: {} });
+    const categorie = await this.categoryRepository.findOne({ where: { nameCategory: nameCategory.nameCategory }, relations:['image'] });
+    console.log(categorie)
     if(!categorie){
       return await {
         data: null,
@@ -200,6 +215,7 @@ export class CategoriesService {
     }
     
       Object.assign(category, fields);
+      await this.imageControleur.update_category(request,fields.image);
       category.updatedAt = new Date();
       await this.categoryRepository.save(category);
       return await {
@@ -231,7 +247,7 @@ export class CategoriesService {
     
     }
   }
-    Object.assign(category,fields);
+    await this.imageControleur.remove_category(request,fields.image);
     await this.categoryRepository.delete(id);
     return await {
       message: category,
@@ -240,7 +256,25 @@ export class CategoriesService {
   }
   
  
+  async nouveauCat() {
+    
+    const newcat = await this.categoryRepository
+  .createQueryBuilder('categories')
+  .leftJoinAndSelect('categories.parentCategory', 'parentCategory')
+  .leftJoinAndSelect('categories.subcategories', 'subcategories')
+  .leftJoinAndSelect('categories.addedBy', 'addedBy')
+  .leftJoinAndSelect('categories.products', 'products')
+  .leftJoinAndSelect('categories.image', 'image')
+  .orderBy('categories.createdAt', 'DESC')
+  .limit(5)
+  .getMany();
 
+console.log(newcat);
+return {
+  data: newcat,
+  statusCode: HttpStatus.OK,
+};
+  }
 
 
 

@@ -12,12 +12,13 @@ import { DemandeAdminStatus } from 'src/enum/demande-admin-status.enum';
 import { generate } from 'randomstring';
 import * as bcrypt from 'bcrypt';
 import { Roles } from 'src/enum/user_enum';
+import { UserService } from 'src/user/user.service';
 @Injectable()
 export class DemandeAdminService {
   constructor(
     @InjectRepository(DemandeAdmin) private readonly demandeAdminRepository:DemandeAdminRepository,
     private readonly mailerService:MailerService,
-    @Inject(UserController) private readonly userController:UserController,
+     private readonly userController:UserService,
  
   ){}
   async create(createDemandeAdminDto: CreateDemandeAdminDto) {
@@ -97,7 +98,7 @@ export class DemandeAdminService {
         statusCode:HttpStatus.NOT_FOUND
       }
     }
-    const user = await this.userController.findByUsernameEmail({username:demande.nom,email:demande.email});
+    const user = await this.userController.findByUsernameAndEmail({username:demande.nom,email:demande.email});
     if(!user) {
       demande.status = DemandeAdminStatus.ACCEPT;
       await this.demandeAdminRepository.save(demande);

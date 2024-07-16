@@ -7,13 +7,14 @@ import { ContactRepository } from './contact.repository';
 import { UserController } from 'src/user/user.controller';
 import { RepondreContactDto } from './dto/repondre-contact.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ContactService {
   constructor(
     @InjectRepository(Contact) private readonly contactRepository:ContactRepository,
     private readonly mailerService:MailerService,
-    @Inject(UserController) private readonly userController:UserController,
+     private readonly userController:UserService,
  
   ){}
   async create( createContactDto: CreateContactDto) {

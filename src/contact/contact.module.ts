@@ -10,6 +10,7 @@ import { UserController } from 'src/user/user.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([Contact,ContactRepository]),UserModule],
   controllers: [ContactController],
-  providers: [ContactService,UserController],
+  providers: [ContactService],
+  exports:[ContactService]
 })
 export class ContactModule {}

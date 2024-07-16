@@ -16,7 +16,7 @@ import { CouleurController } from 'src/couleur/couleur.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,forwardRef(() => CouleurModule)],
   controllers: [SizeController],
-  providers: [SizeService,UserController,CouleurController],
+  providers: [SizeService],
   exports: [SizeService],
 })
 export class SizeModule {}

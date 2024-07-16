@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,8 +17,9 @@ import { CouleurController } from 'src/couleur/couleur.controller';
 @Injectable()
 export class SizeService {
   constructor(@InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-  @Inject(UserController) private readonly userService:UserController,
-  @Inject(CouleurController) private readonly couleurService:CouleurController,
+  private readonly userService:UserService,
+  @Inject(forwardRef(() => CouleurService))
+  private readonly couleurService:CouleurService,
   ){}
   async create(@Session() request:Record<string, any>,createSizeDto: CreateSizeDto) {
     const idAdmin=request.idUser
@@ -45,7 +46,7 @@ export class SizeService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
+    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -93,7 +94,7 @@ export class SizeService {
   }
 
   async findByCouleur(nameCategory:FindByCouleurDto) {
-    const couleur = await this.couleurService.findByCouleur({nameCouleur:nameCategory.nameCouleur})
+    const couleur = await this.couleurService.findByNameCouleur({nameCouleur:nameCategory.nameCouleur})
     if(!couleur) {
       return await{
         data:null,
@@ -179,7 +180,7 @@ export class SizeService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurService.findByIdAndName({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
+    const couleur = await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
     if(!couleur) {
       return await{
         message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
