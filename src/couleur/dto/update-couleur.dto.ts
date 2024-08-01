@@ -20,10 +20,12 @@ export class UpdateCouleurDto{
     @IsString({message:'ancienNameCouleur should be string '})
     ancienNameCouleur:string;
 
+    @IsOptional()
     @Type(()=>UpdateImageDto)
     @ValidateNested({ each: true })
     listeimage:UpdateImageDto[];
-
+    
+    @IsOptional()
     @Type(()=>UpdateSizeDto)
     @ValidateNested({ each: true })
     listesize:UpdateSizeDto[];

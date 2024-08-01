@@ -28,7 +28,8 @@ export class UpdateProductDto {
     @IsNotEmpty({message:'nomProduct can not be empty'})
     @IsString({message:'nomProduct should be string '})
     ancienProduct:string;
-
+    
+    @IsOptional()
     @Type(()=>UpdateCouleurDto)
     @ValidateNested({ each: true })
     listeCouleur:UpdateCouleurDto[];
