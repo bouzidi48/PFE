@@ -183,6 +183,7 @@ export class CouleurService {
       
       }
     }
+    
     const couleur = await this.couleurRepository.findOne({where : {nameCouleur:updateCouleurDto.ancienNameCouleur,addedBy:idAdmin}});
     if(!couleur) {
       return await{
@@ -217,7 +218,7 @@ export class CouleurService {
     for(let size of updateCouleurDto.listesize) {
       await this.sizeService.update(request,size)
     }
-    return await {
+    return {
       message:couleur,
       statusCode:HttpStatus.OK,
     }
@@ -226,22 +227,23 @@ export class CouleurService {
   async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveCouleurDto) {
     const idAdmin = request.idUser
     if(!idAdmin){  
-      return await {
+      return {
         message: 'vous devez vous connecter',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const admin = await this.userService.findById(idAdmin)
     if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
+      return {
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
       
       }
     }
+    
     const couleur = await this.couleurRepository.findOne({where : {nameCouleur:removeCouleurDto.nameCouleur,addedBy:idAdmin}});
     if(!couleur) {
-      return await{
+      return {
         message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode:HttpStatus.BAD_REQUEST,
       }
@@ -253,7 +255,7 @@ export class CouleurService {
       await this.sizeService.remove(request,size)
     }
     await this.couleurRepository.remove(couleur)
-    return await {
+    return {
       message:'la couleur a bien ete supprimer',
       statusCode:HttpStatus.OK,
     }

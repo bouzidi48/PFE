@@ -163,22 +163,12 @@ export class CategoriesService {
       };
   }
   
- async  findOne(id: number):Promise<CategoryEntity> {
-    return  await this.categoryRepository.findOne(
-      {
-        where:{id:id}, 
-        relations:{addedBy:true},
-        select:{
-          addedBy:{
-            id:true,
-            username:true,
-            email:true,
-            
-
-          }
-        }
-        
-    });
+ async  findOne(id: number) {
+    const categorie= await this.categoryRepository.findOne({where:{id:id},relations:['addedBy','image']})
+    return await {
+      data:categorie,
+      statusCode: HttpStatus.OK
+    }
   }
 
 
@@ -216,8 +206,8 @@ export class CategoriesService {
     
       Object.assign(category, fields);
       await this.imageControleur.update_category(request,fields.image);
-      category.updatedAt = new Date();
-      await this.categoryRepository.save(category);
+      category.data.updatedAt = new Date();
+      await this.categoryRepository.save(category.data);
       return await {
         message: category,
         statusCode: HttpStatus.OK,

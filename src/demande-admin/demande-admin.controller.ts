@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { DemandeAdminService } from './demande-admin.service';
 import { CreateDemandeAdminDto } from './dto/create-demande-admin.dto';
 import { UpdateDemandeAdminDto } from './dto/update-demande-admin.dto';
@@ -13,14 +13,14 @@ export class DemandeAdminController {
     return this.demandeAdminService.create(createDemandeAdminDto);
   }
 
-  @Get('all')
+  @Get()
   findAll() {
     return this.demandeAdminService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.demandeAdminService.findOne(+id);
+  findOne(@Param('id',ParseIntPipe) id: number) {
+    return this.demandeAdminService.findOne(id);
   }
 
   @Post('accepter')

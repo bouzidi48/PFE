@@ -1,83 +1,80 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Put, Session } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Put, Session, ParseIntPipe, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 
-
 import { User } from './entities/user.entity';
-
 
 import { UpdatePasswordDto } from './dto/modifier-password.dto';
 import { UserNameUpdateDto } from './dto/update-username.dto';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
 import { AncienUsernameDto } from './dto/ancien-username.dto';
 import { UserCreateDto } from './dto/create-user.dto';
-import { FindById } from './dto/find-id.dto';
+
 import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
 import { FindByUsernameByEmail } from './dto/find-username-email.dto';
-
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('ancienPassword')
-  async ancienPassword(@Session() request:Record<string, any>,@Body() password:AncienPasswordDto) {
-    return await this.userService.ancienPassword(request,password)
-  } 
+  async ancienPassword(@Session() request: Record<string, any>, @Body() password: AncienPasswordDto) {
+    return await this.userService.ancienPassword(request, password);
+  }
 
   @Put('updatePassword')
-  async updatePassword(@Session() request:Record<string, any>,@Body() updatePasswordDto:UpdatePasswordDto) {
-    return await this.userService.updatePassword(request,updatePasswordDto)
+  async updatePassword(@Session() request: Record<string, any>, @Body() updatePasswordDto: UpdatePasswordDto) {
+    return await this.userService.updatePassword(request, updatePasswordDto);
   }
 
   @Post('ancienUsername')
-  async ancienUsername(@Session() request:Record<string, any>,@Body() username:AncienUsernameDto) {
-    return await this.userService.ancienUsername(request,username)
+  async ancienUsername(@Session() request: Record<string, any>, @Body() username: AncienUsernameDto) {
+    return await this.userService.ancienUsername(request, username);
   }
 
   @Put('updateUsername')
-  async updateUsername(@Session() request:Record<string, any>, @Body() updateUsername:UserNameUpdateDto) {
-    return await this.userService.updateUsername(request,updateUsername)
+  async updateUsername(@Session() request: Record<string, any>, @Body() updateUsername: UserNameUpdateDto) {
+    return await this.userService.updateUsername(request, updateUsername);
   }
 
   @Post('create')
   async create(@Body() createUserDto: UserCreateDto) {
-    return  await this.userService.create(createUserDto);
+    return await this.userService.create(createUserDto);
   }
 
   @Get('single/:id')
-  async findOne(@Param('id') id: string) {
-    return  await this.userService.findOne(+id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.findOne(id);
   }
 
-  @Get("byId")
-  async findById(@Body() id: FindById){
-    return await this.userService.findById(id)
+  @Get(':id')
+  async findById(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.findById(id);
   }
 
   @Get('byEmail')
-  async findByEmail(@Body() email:FindByEmail) {
-    return await this.userService.findByEmail(email)
+  async findByEmail(@Query() email: FindByEmail) {
+    return await this.userService.findByEmail(email);
   }
 
   @Get('byUserName')
-  async findByUserName(@Body() username:FindByUsername) {
-    return await this.userService.findByUserName(username)
+  async findByUserName(@Query() username: FindByUsername) {
+    return await this.userService.findByUserName(username);
   }
 
   @Put('update')
-  async update(@Body() user: User,updateUserDto: UserUpdateDto) {
-    return await this.userService.update(user,updateUserDto);
+  async update(@Body() user: User, @Body() updateUserDto: UserUpdateDto) {
+    return await this.userService.update(user, updateUserDto);
   }
 
   @Post('createAdmin')
   async createAdmin(@Body() createUserDto: UserCreateDto) {
-    return  await this.userService.createAdmin(createUserDto);
+    return await this.userService.createAdmin(createUserDto);
   }
 
   @Get('findbyUsernameEmail')
-  async findByUsernameEmail(@Body() usernameEmail:FindByUsernameByEmail) {
-    return await this.userService.findByUsernameAndEmail(usernameEmail)
+  async findByUsernameEmail(@Query() usernameEmail: FindByUsernameByEmail) {
+    return await this.userService.findByUsernameAndEmail(usernameEmail);
   }
 }

@@ -225,12 +225,13 @@ export class ImagesService {
     }
     const admin = await this.userService.findById(idAdmin)
     if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
+      return {
         message:'vous devez etre un admin',
         statusCode:HttpStatus.BAD_REQUEST,
       
       }
     }
+    
     const image = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage,addedBy:idAdmin}});
     if(!image) {
       return await{
@@ -280,6 +281,7 @@ export class ImagesService {
       
       }
     }
+    
     const image = await this.imageRepository.findOne({where : {UrlImage:updateCouleurDto.urlImage,addedBy:idAdmin}});
     if(!image) {
       return await{
@@ -330,6 +332,7 @@ export class ImagesService {
       
       }
     }
+    
     const image = await this.imageRepository.findOne({where : {UrlImage:removeCouleurDto.urlImage,addedBy:idAdmin}});
     if(!image) {
       return await{
@@ -359,6 +362,7 @@ export class ImagesService {
       
       }
     }
+    
     const image = await this.imageRepository.findOne({where : {UrlImage:removeCouleurDto.urlImage,addedBy:idAdmin}});
     if(!image) {
       return await{

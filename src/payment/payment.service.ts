@@ -34,7 +34,7 @@ export class PaymentService {
   }
   async createCashPayment(createCashPaymentDto: CreateCashPaymentDto) {
     const { orderId } = createCashPaymentDto;
-    const order = await this.orderService.findOnne(orderId);
+    const order = await this.orderService.findOne(orderId);
 
     if (!order) {
         return await {
@@ -44,7 +44,7 @@ export class PaymentService {
     }
 
     const payment = this.paymentRepository.create({
-        order: order,
+        order: order.data,
         payment_method: PaymentMethod.CASH,
         payment_status: PaymentStatus.PENDING,
         payment_date: new Date(),
@@ -60,7 +60,7 @@ export class PaymentService {
 }
 async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   const { orderId, cardNumber, cardExpiry, cardCvc } = createCardPaymentDto;
-  const order = await this.orderService.findOnne(orderId);
+  const order = await this.orderService.findOne(orderId);
   if (!order) {
     return await {
       message:`Order with this id :${orderId} does not exist`,
@@ -74,7 +74,7 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   const encryptedCardCvc = this.encryptCardDetails(cardCvc);
 
   const payment = this.paymentRepository.create({
-    order,
+    order:order.data,
     payment_method: PaymentMethod.CARD,
     payment_status: PaymentStatus.PENDING,
    

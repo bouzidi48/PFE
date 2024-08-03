@@ -15,7 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { AncienPasswordDto } from './dto/ancien-password.dto';
 import { AncienUsernameDto } from './dto/ancien-username.dto';
 import { UserCreateDto } from './dto/create-user.dto';
-import { FindById } from './dto/find-id.dto';
+
 import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
@@ -142,8 +142,8 @@ export class UserService {
       const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
       this.userRepository.save(user);
     }
-    async findById(find:FindById) {
-      const user = await this.userRepository.findOne({ where: { id:find.id } });
+    async findById(find:number) {
+      const user = await this.userRepository.findOne({ where: { id:find } });
       if(!user){
         return await {
           data: null,

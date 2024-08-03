@@ -95,7 +95,7 @@ export class ProductService {
 
 
   async findAll() {
-    const products = await this.productRepository.find();
+    const products = await this.productRepository.find({relations:['colours','colours.images', 'colours.sizes']});
     if(!products){
       return await {
         data: null,

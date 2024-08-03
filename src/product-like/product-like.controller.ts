@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Session } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session, ParseIntPipe } from '@nestjs/common';
 import { ProductLikeService } from './product-like.service';
 import { CreateProductLikeDto } from './dto/create-product-like.dto';
 import { UpdateProductLikeDto } from './dto/update-product-like.dto';
@@ -18,23 +18,23 @@ export class ProductLikeController {
     return this.productLikeService.unlikeProduct(request,productId);
   }
  
-  @Get('findall')
+  @Get()
   findAll(@Session() request: Record<string, any>) {
     return this.productLikeService.findAll(request)
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productLikeService.findOne(+id);
+  findOne(@Param('id',ParseIntPipe) id: number) {
+    return this.productLikeService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductLikeDto: UpdateProductLikeDto) {
-    return this.productLikeService.update(+id, updateProductLikeDto);
+  update(@Param('id',ParseIntPipe) id: number, @Body() updateProductLikeDto: UpdateProductLikeDto) {
+    return this.productLikeService.update(id, updateProductLikeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productLikeService.remove(+id);
+  remove(@Param('id',ParseIntPipe) id: number) {
+    return this.productLikeService.remove(id);
   }
 }

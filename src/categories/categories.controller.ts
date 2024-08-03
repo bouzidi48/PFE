@@ -13,67 +13,52 @@ import { CategoryEntity } from './entities/category.entity';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
 import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 
-
-
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
-  @Post('creat')
- async create(@Session() request:Record<string, any>,@Body() createCategoryDto: CreateCategoryDto ) {
-    return  await this.categoriesService.create(request,createCategoryDto);
-    
+
+  @Post('create')
+  async create(@Session() request: Record<string, any>, @Body() createCategoryDto: CreateCategoryDto) {
+    return await this.categoriesService.create(request, createCategoryDto);
   }
 
   @Get('findByIdAndName')
-  async findByIdAndName(@Body() createCategoryDto: FindByIdAndNameDto ) {
-    return  await this.categoriesService.findByIdAndName(createCategoryDto);
+  async findByIdAndName(@Query() findByIdAndNameDto: FindByIdAndNameDto) {
+    return await this.categoriesService.findByIdAndName(findByIdAndNameDto);
   }
-  
+
   @Get('Subcategories')
-  async findSubcategories(@Body()parentCategory:FindByNameParentDto){
-    return await this.categoriesService.findSubcategories(parentCategory)
+  async findSubcategories(@Query() parentCategory: FindByNameParentDto) {
+    return await this.categoriesService.findSubcategories(parentCategory);
   }
 
   @Get('newCat')
   async newCat() {
-    return await this.categoriesService.nouveauCat()
+    return await this.categoriesService.nouveauCat();
   }
 
-  @Get('all')
+  @Get()
   async findAll() {
     return await this.categoriesService.findAll();
   }
 
-  
-
   @Post('bynameCategory')
-  async findByName(@Body() nameCategory:FindByNameCategoryDto){
-  return await this.categoriesService.findByName(nameCategory)
-  }  
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(+id);
+  async findByName(@Body() nameCategory: FindByNameCategoryDto) {
+    return await this.categoriesService.findByName(nameCategory);
   }
 
-  
-  
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.findOne(id);
+  }
+
   @Put(':id')
-  async update(@Session() request:Record<string, any>,@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return await this.categoriesService.update(request,+id,updateCategoryDto);
+  async update(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return await this.categoriesService.update(request, id, updateCategoryDto);
   }
 
   @Delete(':id')
-  async remove(@Session() request:Record<string, any>,@Param('id') id: string,@Body() deleteCategoryDto:DeleteCategoryDto) {
-    return await this.categoriesService.remove(request,+id,deleteCategoryDto);
+  async remove(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number, @Body() deleteCategoryDto: DeleteCategoryDto) {
+    return await this.categoriesService.remove(request, id, deleteCategoryDto);
   }
-  
-  
-  
 }
-
-
-
-
-
-

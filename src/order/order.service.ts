@@ -14,7 +14,6 @@ import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { SizeController } from 'src/size/size.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
-import { FindOrderById } from './dto/find-by-id.dto';
 import { FindOptionsRelations } from 'typeorm/find-options/FindOptionsRelations';
 import { Roles } from 'src/enum/user_enum';
 import { updateOrderStatusDto } from './dto/update-order-status.dto';
@@ -128,7 +127,7 @@ export class OrderService {
   }
 
  async findOne(findbyid:number) {
-    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid}})
+    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid},relations:{shipping_address:true,user:true,orderItems:{product:true}},})
     if(!orderid){
       return await {
         data:null,
@@ -142,17 +141,7 @@ export class OrderService {
       }
     }
 
-    async findOnne(id:number):Promise<Order>{
-      return await this.orderRespoitory.findOne({
-        where: { id },
-        relations:{
-          shipping_address:true,
-          user:true,
-          orderItems:{product:true}
-          
-        },
-      });
-    }
+    
   
 
   async update(@Session() request:Record<string, any>,id: number, updateOrderStatusDto: updateOrderStatusDto) {
@@ -317,7 +306,7 @@ export class OrderService {
     
     }
   }
-    let order =await this.findOnne(id);
+    let order =await this.findOne(id);
     if(!order){
       return await {
         message:"la commande n'existe pas",
@@ -325,18 +314,18 @@ export class OrderService {
       }
     }
 // deja annulee alors sans modifier
-    if(order.status===OrderStatus.CENCELLED){
+    if(order.data.status===OrderStatus.CENCELLED){
       return await {
         data:order,
         statusCode:HttpStatus.OK,
       }
     }
 //La fonction met à jour le statut de la commande à CENCELLED
-    order.status= OrderStatus.CENCELLED;
-    order.orderUpdateBy= request.idUser;
-    order=await this.orderRespoitory.save(order);
+    order.data.status= OrderStatus.CENCELLED;
+    order.data.orderUpdateBy= request.idUser;
+    order.data=await this.orderRespoitory.save(order.data);
 //pour mettre à jour le stock des produits dans la commande + -
-    await this.stockUpdate(order,OrderStatus.CENCELLED);
+    await this.stockUpdate(order.data,OrderStatus.CENCELLED);
     return await {
       data:order,
       statusCode:HttpStatus.OK,
@@ -395,7 +384,7 @@ export class OrderService {
         }
     }
 
-    let order = await this.findOnne(id);
+    let order = await this.findOne(id);
     if (!order) {
         return await {
           message: 'Commande non trouvée.',
@@ -404,7 +393,7 @@ export class OrderService {
     }
 
     // Vérifiez que l'utilisateur est bien celui qui a passé la commande
-    if (order.user.id !== idUser) {
+    if (order.data.user.id !== idUser) {
         return await {
           message: 'Vous n\'avez pas la permission de supprimer cette commande.',
           statusCode: HttpStatus.BAD_REQUEST,
@@ -412,7 +401,7 @@ export class OrderService {
     }
 
     // Vérifiez que la commande n'a pas été expédiée ou livrée
-    if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
+    if (order.data.status === OrderStatus.SHIPPED || order.data.status === OrderStatus.DELIVERED) {
         return await {
           message: 'Impossible de supprimer une commande expédiée ou livrée.',
           statusCode: HttpStatus.BAD_REQUEST,
@@ -420,10 +409,10 @@ export class OrderService {
     }
 
     // Restaurez les stocks des produits
-    await this.restoreStock(order);
+    await this.restoreStock(order.data);
 
     // Supprimez la commande
-    await this.orderRespoitory.remove(order);
+    await this.orderRespoitory.remove(order.data);
 
     return {
         message: 'Commande supprimée avec succès',
