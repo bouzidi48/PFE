@@ -6,6 +6,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import { OrderService } from './order/order.service';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -39,6 +40,7 @@ async function bootstrap() {
 
   // Use validation pipe
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
 
   // Start server
   await app.listen(3002);

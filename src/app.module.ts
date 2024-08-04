@@ -23,12 +23,16 @@ import { ProductLikeModule } from './product-like/product-like.module';
 import { SizeModule } from './size/size.module';
 import { Order } from './order/entities/order.entity';
 import { OrderModule } from './order/order.module';
+import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
     UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // Rendre les variables d'environnement accessibles globalement
+    }),
     MailerModule.forRoot({
       transport:{
         host: process.env.EMAIL_HOST,

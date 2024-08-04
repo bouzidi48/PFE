@@ -18,19 +18,25 @@ import { Roles } from 'src/enum/user_enum';
 import { UserService } from 'src/user/user.service';
 import { UpdateCardPaymentDto } from './dto/update-card-payment.dto';
 import { UserController } from 'src/user/user.controller';
+import Stripe from 'stripe';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class PaymentService {
+  public stripe: Stripe;
   private readonly encryptionKey: string;
   constructor(
     @InjectRepository
     (Payment) private readonly paymentRepository: PaymentRepository,
     @Inject(forwardRef(() => OrderService))
     private readonly orderService:OrderService,
-    private readonly userService:UserService
-
+    private readonly userService:UserService,
+    private configService: ConfigService
     
 
   ){    this.encryptionKey = process.env.ENCRYPTION_KEY;
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-06-20',
+    });
   }
   async createCashPayment(createCashPaymentDto: CreateCashPaymentDto) {
     const { orderId } = createCashPaymentDto;
@@ -73,6 +79,13 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   const encryptedCardExpiry = this.encryptCardDetails(cardExpiry);
   const encryptedCardCvc = this.encryptCardDetails(cardCvc);
 
+  const paymentIntent = await this.stripe.paymentIntents.create({
+    amount: order.data.total_amount * 100, // Le montant en centimes
+    currency: 'usd',
+    payment_method_types: ['card'],
+    metadata: { orderId: orderId.toString() },
+  });
+
   const payment = this.paymentRepository.create({
     order:order.data,
     payment_method: PaymentMethod.CARD,
@@ -89,7 +102,19 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
 
   return await {
     data:payment,
+    client_secret: paymentIntent.client_secret,
     statusCode: HttpStatus.OK,
+  }
+}
+async handleWebhook(event: Stripe.Event) {
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      // Traitez le paiement réussi ici
+      break;
+    // Gérez d'autres types d'événements Stripe ici
+    default:
+      console.log(`Unhandled event type ${event.type}`);
   }
 }
 /* private encryptCardDetails(cardDetail: string): string {
