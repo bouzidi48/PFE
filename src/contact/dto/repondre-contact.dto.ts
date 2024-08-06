@@ -13,8 +13,4 @@ export class RepondreContactDto {
     @IsString({message:'message should be string '})
     message: string;
 
-    @IsNotEmpty({message:'subject can not be empty'})
-    @IsString({message:'subject should be string '})
-    subject: string;
-
 }

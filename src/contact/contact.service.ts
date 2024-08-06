@@ -59,7 +59,7 @@ export class ContactService {
     await this.mailerService.sendMail({
       to: repondreContactDto.email,
       from:process.env.EMAIL_HOST_USER,
-      subject: repondreContactDto.subject,
+      subject: 'Repondre a un contact',
       text:repondreContactDto.message,
     });
     return await {
