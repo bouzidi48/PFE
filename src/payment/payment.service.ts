@@ -79,12 +79,26 @@ async createCardPayment(createCardPaymentDto: CreateCardPaymentDto){
   const encryptedCardExpiry = this.encryptCardDetails(cardExpiry);
   const encryptedCardCvc = this.encryptCardDetails(cardCvc);
 
+  
+    const paymentMethod = await this.stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: cardNumber,
+        exp_year: parseInt(cardExpiry.split('/')[0]),
+        exp_month:parseInt(`20${cardExpiry.split('/')[1]}`),
+        cvc: encryptedCardCvc,
+      },
+    });
+  
+
   const paymentIntent = await this.stripe.paymentIntents.create({
     amount: order.data.total_amount * 100, // Le montant en centimes
     currency: 'usd',
     payment_method_types: ['card'],
+    payment_method: paymentMethod.id,
     metadata: { orderId: orderId.toString() },
   });
+  
 
   const payment = this.paymentRepository.create({
     order:order.data,
