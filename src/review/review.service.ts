@@ -17,120 +17,120 @@ import { ProductController } from 'src/product/product.controller';
 @Injectable()
 export class ReviewService {
   constructor(
-  
-  private readonly userService:UserService,
-  private readonly productService : ProductService,
-  @InjectRepository(ReviewEntity) private readonly reviewRepository:ReviewRepository ){}
 
-  async create(@Session() request:Record<string, any>,createReviewDto: CreateReviewDto)  { 
-    const idAdmin=request.idUser 
-    if(!idAdmin){
+    private readonly userService: UserService,
+    private readonly productService: ProductService,
+    @InjectRepository(ReviewEntity) private readonly reviewRepository: ReviewRepository) { }
+
+  async create(@Session() request: Record<string, any>, createReviewDto: CreateReviewDto) {
+    const idUser = request.idUser
+    if (!idUser) {
       return await {
         message: 'vous devez vous connecter pour ajouter un review',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userService.findById(idAdmin)
-    if(!admin || (admin.data.role!=Roles.ADMIN &&  admin.data.role!=Roles.USER) ) {
-      return await{
-        message:'vous devez etre appartient a cette application',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
-      }
-    }
-    const product = await this.productService.findByNameProduct({nameProduct:createReviewDto.nameProduct});
-
-    if(!product) {
-      return await{
-        message:'ce produit n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-
-    let review = await this.findOneByUserAndProduct(idAdmin);
-    if(!review){
-      return await{
-        message:'user no found',
-        statusCode:HttpStatus.BAD_REQUEST,
-      }
-    }
-      review=this.reviewRepository.create(createReviewDto);
-      review.user=admin.data;
-      review.product=product.data;
-      review.createdate=new Date();
-      this.reviewRepository.save(review)
+    const user = await this.userService.findById(idUser)
+    if (!user || (user.data.role != Roles.ADMIN && user.data.role != Roles.USER)) {
       return await {
-        message:'review  ajoute avec succes',
-        statusCode:HttpStatus.OK,
-      
+        message: 'vous devez etre appartient a cette application',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
+    }
+    const product = await this.productService.findByNameProduct({ nameProduct: createReviewDto.nameProduct });
+
+    if (!product) {
+      return await {
+        message: 'ce produit n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    let review = await this.findOneByUserAndProduct(idUser, product.data.id);
+    if (review) {
+      return await {
+        message: 'vous avez deja ajoute un review pour ce produit',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    review = this.reviewRepository.create(createReviewDto);
+    review.user = user.data;
+    review.product = product.data;
+    review.createdate = new Date();
+    this.reviewRepository.save(review)
+    return await {
+      message: 'review  ajoute avec succes',
+      statusCode: HttpStatus.OK,
+
+    }
   }
   async findAll() {
-    const review=await this.reviewRepository.find();
-    if(!review) return await {
-      data:null,
-      statusCode:HttpStatus.BAD_REQUEST,
+    const review = await this.reviewRepository.find({ relations: ['product', 'user'] });
+    if (!review) return await {
+      data: null,
+      statusCode: HttpStatus.BAD_REQUEST,
     }
-     return await{
-      data:review,
-      statusCode:HttpStatus.OK, 
+    return await {
+      data: review,
+      statusCode: HttpStatus.OK,
 
-     }
+    }
   }
-  
-    async findAllByProduct(nameProdct: FindByNameProductDto): Promise<ReviewEntity[]> {
-      const product = await this.productService.findByNameProduct(nameProdct);
-      if (!product) {
-        throw new NotFoundException('Product not found');
-      }
-  
-      return await this.reviewRepository.find({
-        where: { product: { id: product.data.id } },
-        relations: ['user', 'product', 'product.category'],
-      });
+
+  async findAllByProduct(nameProdct: FindByNameProductDto): Promise<ReviewEntity[]> {
+    const product = await this.productService.findByNameProduct(nameProdct);
+    if (!product) {
+      throw new NotFoundException('Product not found');
     }
 
-    async getAverageRating(nameProductDto: FindByNameProductDto){
-      const product = await this.productService.findByNameProduct(nameProductDto);
-      if (product.statusCode!=200) {
-        return await {
-          data: 0,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
-      }
-  
-      const productId = product.data.id;
-  
-      const result = await this.reviewRepository.query(
-        'SELECT AVG(ratings) as averageRating FROM review WHERE productId = ?',
-        [productId],
-      );
-  
-      if (result.length === 0 || result[0].averageRating === null) {
-        return 0; // Aucun avis, donc moyenne de 0
-      }
-  
-      return parseFloat(result[0].averageRating);
-    }
- 
+    return await this.reviewRepository.find({
+      where: { product: { id: product.data.id } },
+      relations: ['user', 'product', 'product.category'],
+    });
+  }
 
-  async findOne(id: number) :Promise<ReviewEntity>{
+  async getAverageRating(nameProductDto: FindByNameProductDto) {
+    const product = await this.productService.findByNameProduct(nameProductDto);
+    if (product.statusCode != 200) {
+      return await {
+        data: 0,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    const productId = product.data.id;
+
+    const result = await this.reviewRepository.query(
+      'SELECT AVG(ratings) as averageRating FROM review WHERE productId = ?',
+      [productId],
+    );
+
+    if (result.length === 0 || result[0].averageRating === null) {
+      return 0; // Aucun avis, donc moyenne de 0
+    }
+
+    return parseFloat(result[0].averageRating);
+  }
+
+
+  async findOne(id: number): Promise<ReviewEntity> {
     const review = await this.reviewRepository.findOne({
-      where : {id},
-      relations:{
-        user:true,
-        product:{
-          category:true
+      where: { id },
+      relations: {
+        user: true,
+        product: {
+          category: true
         }
       }
     })
-    if(!review) throw new NotFoundException('Review not Found. ')
+    if (!review) throw new NotFoundException('Review not Found. ')
 
     return review;
   }
 
   async updateReview(
-    request: Record<string, any>,
+    @Session() request: Record<string, any>,
     updateReviewDto: UpdateReviewDto
   ) {
     const idAdmin = request.idUser;
@@ -149,14 +149,14 @@ export class ReviewService {
       };
     }
 
-   /*  const product = await this.productService.findByNameProduct({ nameProduct: updateReviewDto.nameProduct });
-
-    if (! product) {
-      return {
-        message: 'ce produit n\'existe pas',
-        statusCode: HttpStatus.BAD_REQUEST,
-      };
-    } */
+    /*  const product = await this.productService.findByNameProduct({ nameProduct: updateReviewDto.nameProduct });
+ 
+     if (! product) {
+       return {
+         message: 'ce produit n\'existe pas',
+         statusCode: HttpStatus.BAD_REQUEST,
+       };
+     } */
 
     const review = await this.reviewRepository.findOne({ where: { id: updateReviewDto.id, user: { id: idAdmin } } });
     if (!review) {
@@ -177,26 +177,53 @@ export class ReviewService {
     };
   }
   async deleteReview(
-    request: Record<string, any>,
-    deleteReviewDto: DeleteReviewDto
+    @Session() request: Record<string, any>,
+    id: number
   ) {
-    const idAdmin = request.idUser;
-    if (!idAdmin) {
-      return {
-        message: 'vous devez vous connecter pour supprimer une review',
-        statusCode: HttpStatus.BAD_REQUEST,
-      };
+    const idUser = request.idUser;
+    console.log(idUser)
+    if (!idUser) {
+      const idAdmin = request.idAdmin;
+      console.log(idAdmin)
+      if (!idAdmin) {
+        return {
+          message: 'vous devez vous connecter pour supprimer un review',
+          statusCode: HttpStatus.BAD_REQUEST,
+        };
+      } else {
+        const admin = await this.userService.findById(idAdmin);
+        if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER)) {
+          return {
+            message: 'vous devez etre appartient a cette application',
+            statusCode: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const review = await this.reviewRepository.findOne({ where: { id: id } });
+        if (!review) {
+          return {
+            message: 'review non trouvé ou vous n\'êtes pas autorisé à le supprimer',
+            statusCode: HttpStatus.BAD_REQUEST,
+          };
+        }
+
+        await this.reviewRepository.remove(review);
+        return {
+          message: 'review supprimé avec succès',
+          statusCode: HttpStatus.OK,
+        };
+      }
     }
 
-    const admin = await this.userService.findById(idAdmin);
-    if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER)) {
+
+    const user = await this.userService.findById(idUser);
+    if (!user || (user.data.role != Roles.ADMIN && user.data.role != Roles.USER)) {
       return {
         message: 'vous devez être membre de cette application',
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
 
-    const review = await this.reviewRepository.findOne({ where: { id: deleteReviewDto.id, user: { id: idAdmin } } });
+    const review = await this.reviewRepository.findOne({ where: { id: id, user: { id: idUser } } });
     if (!review) {
       return {
         message: 'review non trouvé ou vous n\'êtes pas autorisé à le supprimer',
@@ -212,18 +239,21 @@ export class ReviewService {
     };
   }
 
-  async findOneByUserAndProduct(userId:number){
+  async findOneByUserAndProduct(userId: number, productId: number) {
     return await this.reviewRepository.findOne({
-      where : {
-        user : {
-          id : userId
+      where: {
+        user: {
+          id: userId
         },
-       
+        product: {
+          id: productId
+        }
+
       },
-      relations:{
-        user:true,
-        product:{
-          category:true
+      relations: {
+        user: true,
+        product: {
+          category: true
         }
       }
     })

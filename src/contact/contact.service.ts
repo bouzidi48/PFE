@@ -18,7 +18,9 @@ export class ContactService {
  
   ){}
   async create( createContactDto: CreateContactDto) {
+    console.log("hhh")
     const contact = await this.contactRepository.create(createContactDto);
+    console.log(contact)
     contact.createdAt=new Date();
     await this.contactRepository.save(contact);
     return {
@@ -69,6 +71,8 @@ export class ContactService {
   }
 
   async repondre(repondreContactDto: RepondreContactDto) {
+    console.log("hhh")
+    console.log("hadi repondre")
     console.log(repondreContactDto)
     const contact = await this.contactRepository.findOne({where : {id:repondreContactDto.id_contact}});
     if(!contact) {

@@ -8,7 +8,7 @@ import { ReviewEntity } from './entities/review.entity';
 import { FindByNameProductDto } from 'src/product/dto/find-by-name-product.dto';
 import { DeleteReviewDto } from './dto/delete-review.dto';
 
-@Controller('review')
+@Controller('reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
@@ -43,8 +43,8 @@ export class ReviewController {
     return this.reviewService.updateReview(request, updateReviewDto);
   }
 
-  @Delete('deleteReview')
-  async deleteReview(@Session() request: Record<string, any>, @Body() deleteReviewDto: DeleteReviewDto) {
-    return this.reviewService.deleteReview(request, deleteReviewDto);
+  @Delete('deleteReview/:id')
+  async deleteReview(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number) {
+    return this.reviewService.deleteReview(request, id);
   }
 }

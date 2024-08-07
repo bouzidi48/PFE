@@ -24,6 +24,7 @@ import { SizeModule } from './size/size.module';
 import { Order } from './order/entities/order.entity';
 import { OrderModule } from './order/order.module';
 import { ConfigModule } from '@nestjs/config';
+import { ContactModule } from './contact/contact.module';
 
 
 @Module({
@@ -46,7 +47,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     
     CategoriesModule,
-
+    ContactModule,
     CouleurModule,
     ReviewModule,
     InscriptionModule,

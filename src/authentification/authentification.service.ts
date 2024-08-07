@@ -20,6 +20,7 @@ import { ProductLikeService } from 'src/product-like/product-like.service';
 import { UserController } from 'src/user/user.controller';
 import { ProductController } from 'src/product/product.controller';
 import { ProductLikeController } from 'src/product-like/product-like.controller';
+import { Roles } from 'src/enum/user_enum';
 @Injectable()
 export class AuthentificationService {
   constructor(
@@ -59,7 +60,7 @@ export class AuthentificationService {
  
   async login(@Session() request:Record<string, any>, userLoginDto: UserLoginDto) {
     const user = await this.userService.findByUserName({username:userLoginDto.username});
-    console.log(typeof(user))
+    console.log(user)
     if (!user) {
       return await {
         message: 'username incorrect',
@@ -75,8 +76,15 @@ export class AuthentificationService {
         };
       }
     }
-     request.idUser = user.data.id
+    if(user.data.role === Roles.ADMIN) {
+      request.idAdmin = user.data.id
+    }
+    else{
+      request.idUser = user.data.id
+    }
+     
     console.log(request.idUser)
+    console.log(request.idAdmin)
     if (request.likes && request.likes.length > 0) {
       for (const productId of request.likes) {
         const product = await this.productService.findById(productId);
@@ -88,6 +96,7 @@ export class AuthentificationService {
     } 
     return await {
       message: 'Bienvenue dans notre application',
+      data: user.data.id,
       statusCode: HttpStatus.OK,
     };
   }
