@@ -34,8 +34,8 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:3000', // Remplacez par l'URL de votre frontend
-    credentials: true
+    origin: 'http://localhost:3000', // Replace with your frontend URL
+    credentials: true,
   });
 
   // Use validation pipe

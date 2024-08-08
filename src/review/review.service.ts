@@ -24,6 +24,7 @@ export class ReviewService {
 
   async create(@Session() request: Record<string, any>, createReviewDto: CreateReviewDto) {
     const idUser = request.idUser
+    console.log(idUser)
     if (!idUser) {
       return await {
         message: 'vous devez vous connecter pour ajouter un review',
