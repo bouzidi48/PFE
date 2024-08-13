@@ -98,16 +98,28 @@ export class DemandeAdminService {
         statusCode:HttpStatus.NOT_FOUND
       }
     }
+    if(demande.status === DemandeAdminStatus.ACCEPT) {
+      return await {
+        message: 'la demande est deja acceptée',
+        statusCode:HttpStatus.CONFLICT
+      }
+    }
+    else if(demande.status === DemandeAdminStatus.REFUSE) {
+      return await {
+        message: 'la demande est refusee',
+        statusCode:HttpStatus.CONFLICT
+      }
+    }
     const user = await this.userController.findByUsernameAndEmail({username:demande.nom,email:demande.email});
-    if(!user) {
+    if(user) {
       demande.status = DemandeAdminStatus.ACCEPT;
       await this.demandeAdminRepository.save(demande);
-      user.data.role = Roles.ADMIN;
+      await this.userController.updateRole({id:user.data.id,role:Roles.ADMIN});
       return await this.sendEmailAccepter(demande.email,demande.nom,user.data.password);
     }
     const usernameExist = await this.userController.findByUserName({username:demande.nom});
     const emailExist = await this.userController.findByEmail({email:demande.email});
-    if(usernameExist && emailExist) {
+    if(usernameExist || emailExist) {
       return await {
         message: 'l\'utilisateur avec ce nom d\'utilisateur ou ce courriel existe',
         statusCode:HttpStatus.NOT_FOUND
@@ -159,6 +171,18 @@ Cordialement,
       return await {
         message: 'aucune demande',
         statusCode:HttpStatus.NOT_FOUND
+      }
+    }
+    if(demande.status === DemandeAdminStatus.REFUSE) {
+      return await {
+        message: 'la demande est deja refusee',
+        statusCode:HttpStatus.CONFLICT
+      }
+    }
+    else if(demande.status === DemandeAdminStatus.ACCEPT) {
+      return await {
+        message: 'la demande est acceptée',
+        statusCode:HttpStatus.CONFLICT
       }
     }
     demande.status = DemandeAdminStatus.REFUSE;

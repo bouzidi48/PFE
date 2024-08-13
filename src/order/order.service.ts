@@ -113,7 +113,7 @@ export class OrderService {
   }
 
   async findAll() {
-    const order=await this.orderRespoitory.find();
+    const order=await this.orderRespoitory.find({relations: ['shipping_address', 'orderItems', 'orderItems.product', 'orderItems.couleur', 'orderItems.size','user']});
     if(!order){
       return await  {
         data : null,
@@ -146,7 +146,7 @@ export class OrderService {
 
   async update(@Session() request:Record<string, any>,id: number, updateOrderStatusDto: updateOrderStatusDto) {
      
-    const idAdmin=request.idUser
+    const idAdmin=request.idAdmin
     console.log('salut')
     if(!idAdmin) {
       return await {
@@ -155,6 +155,7 @@ export class OrderService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
+    console.log(admin.data.role===Roles.ADMIN)
   if(!admin || admin.data.role!=Roles.ADMIN) {
     return await{
       message:'vous devez etre un admin',
@@ -215,6 +216,7 @@ export class OrderService {
   
   }
   order.orderUpdateBy= order.user;
+  await this.stockUpdate(order,OrderStatus.SHIPPED)
   order= await this.orderRespoitory.save(order);
   return await {
     data:order,
@@ -231,7 +233,8 @@ export class OrderService {
     console.log(op.couleur)
     console.log(op.product)
     console.log(op.size)
-    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status);
+    
+    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status,order);
 
   }
 
@@ -320,12 +323,28 @@ export class OrderService {
         statusCode:HttpStatus.OK,
       }
     }
+    else if(order.data.status===OrderStatus.DELIVERED){
+      return await {
+        message:"la commande est livrée",
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    else if(order.data.status===OrderStatus.SHIPPED){
+      await this.stockUpdate(order.data,OrderStatus.CENCELLED);
+      if(order.data.payment.payment_method===PaymentMethod.CASH){
+        await this.paymentService.updatePaymentCash({paymentId:order.data.payment.id});
+      }
+      else if(order.data.payment.payment_method===PaymentMethod.CARD){
+        await this.paymentService.updatePaymentCard({paymentId:order.data.payment.id});
+      }
+    }
+    
 //La fonction met à jour le statut de la commande à CENCELLED
     order.data.status= OrderStatus.CENCELLED;
     order.data.orderUpdateBy= request.idUser;
     order.data=await this.orderRespoitory.save(order.data);
 //pour mettre à jour le stock des produits dans la commande + -
-    await this.stockUpdate(order.data,OrderStatus.CENCELLED);
+    
     return await {
       data:order,
       statusCode:HttpStatus.OK,

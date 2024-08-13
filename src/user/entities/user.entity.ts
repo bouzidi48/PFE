@@ -2,6 +2,7 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Couleur } from "src/couleur/entities/couleur.entity";
 import { Roles } from "src/enum/user_enum";
+import { Images } from "src/images/entities/image.entity";
 import { Order } from "src/order/entities/order.entity";
 import { ProductLikeEntity } from "src/product-like/entities/product-like.entity";
 import { Product } from "src/product/entities/product.entity";
@@ -42,13 +43,17 @@ export class User {
     categories:CategoryEntity[];
 
     @OneToMany(()=>Couleur,(coul)=>coul.addedBy)
-    couleurs:CategoryEntity[];
+    couleurs:Couleur[];
 
     @OneToMany(()=>Product,(product)=>product.addedBy)
     products:Product[];
 
     @OneToMany(()=>Size,(size)=>size.addedBy)
     sizes:Size[];
+
+    @OneToMany(()=>Images,(image)=>image.addedBy)
+    images:Images[];
+
 
     @OneToMany(() => ReviewEntity, (rev) => rev.user)
     review: ReviewEntity[]; 

@@ -5,7 +5,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 
 import { updateOrderStatusDto } from './dto/update-order-status.dto';
 
-@Controller('order')
+@Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -26,7 +26,7 @@ export class OrderController {
 
   
 
-  @Put(':id')
+  @Put('update/:id')
   update(@Session() request:Record<string, any>,@Param('id',ParseIntPipe) id: number, @Body() updateOrderStatusDto: updateOrderStatusDto) {
     return this.orderService.update(request,id, updateOrderStatusDto);
   }

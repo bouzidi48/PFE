@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 import getRawBody from 'raw-body';
 import { Request, Response } from 'express';
 
-@Controller('payment')
+@Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
@@ -19,7 +19,7 @@ export class PaymentController {
   async createCashPayment(@Body() createCashPaymentDto: CreateCashPaymentDto) {
     return await this.paymentService.createCashPayment(createCashPaymentDto);
   }
-  @Post('Card')
+  @Post('card')
   async createCardPayment(@Body() createCardPaymentDto: CreateCardPaymentDto) {
     return await this.paymentService.createCardPayment(createCardPaymentDto);
   }
@@ -54,12 +54,10 @@ export class PaymentController {
     let event: Stripe.Event;
 
     try {
-      // Lire le corps brut de la requête
-     
       event = this.paymentService.stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET
+        process.env.STRIPE_WEBHOOK_SECRET,
       );
     } catch (err) {
       console.error(`⚠️  Webhook signature verification failed.`, err.message);
@@ -69,6 +67,5 @@ export class PaymentController {
     await this.paymentService.handleWebhook(event);
     res.status(HttpStatus.OK).send('Received');
   }
- 
-  
+
 }

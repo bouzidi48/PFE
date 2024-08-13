@@ -24,7 +24,7 @@ export class Images {
     @Column()
     updatedate: Date;
 
-    @ManyToOne(()=>User,(user)=>user.couleurs)
+    @ManyToOne(()=>User,(user)=>user.images)
     addedBy:User;
 
     @OneToOne(() => CategoryEntity, category => category.image)

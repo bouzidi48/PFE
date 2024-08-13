@@ -29,6 +29,7 @@ import { ProductController } from './product.controller';
 import { OrderStatus } from 'src/enum/order-status.enum';
 import { CouleurService } from 'src/couleur/couleur.service';
 import { ProductLikeService } from 'src/product-like/product-like.service';
+import { Order } from 'src/order/entities/order.entity';
 
 @Injectable()
 export class ProductService {
@@ -291,6 +292,12 @@ export class ProductService {
     }
     for(let i=0;i<request.panier.list.length;i++) {
       if(request.panier.list[i].productId==productId && request.panier.list[i].couleurId==couleurId && request.panier.list[i].sizeId==sizeId) {
+        if(request.panier.list[i].quantity+quantity>size.stockQuantity) {
+          return await {
+            data:null,
+            statusCode:HttpStatus.BAD_REQUEST,
+          }
+        }
         request.panier.list[i].quantity = request.panier.list[i].quantity+quantity
         request.panier.total = request.panier.total-request.panier.list[i].price
         request.panier.list[i].price = request.panier.list[i].quantity*product.price
@@ -353,7 +360,7 @@ export class ProductService {
 
     } 
   }
-  async updateStock(sizeId: number, couleurId:number, productId: number, quantity: number, status: string){
+  async updateStock(sizeId: number, couleurId:number, productId: number, quantity: number, status: string,order:Order){
     let product=await this.findById(productId);
     let couleur=await this.couleurService.findByIdCouleurIdProduct(productId,couleurId)
     let size=await this.sizeRepository.findOne({where:{id:sizeId,couleur:{id:couleurId}}});
@@ -363,12 +370,13 @@ export class ProductService {
         statusCode:HttpStatus.BAD_REQUEST,
       }
     }
-    if(status===OrderStatus.DELIVERED){
+    if(status===OrderStatus.SHIPPED&&order.status===OrderStatus.PROCESSING){
       size.stockQuantity-=quantity
       size.updatedate=new Date()
 
-    }else{
+    }else if(order.status===OrderStatus.SHIPPED&&status===OrderStatus.CENCELLED){
       size.stockQuantity+=quantity;
+      size.updatedate=new Date()
     }
     await this.sizeRepository.save(size);
     

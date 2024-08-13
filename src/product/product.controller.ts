@@ -8,6 +8,7 @@ import { RemoveProductDto } from './dto/remove-product.dto';
 import { FindByNameAndIdProductDto } from './dto/find-by-name-id-product.dto';
 import { AjouetrPanierDto } from './dto/ajouter-panier.dto';
 import { RemovePanierDto } from './dto/remove-panier.to';
+import { Order } from 'src/order/entities/order.entity';
 
 @Controller('product')
 export class ProductController {
@@ -69,9 +70,9 @@ export class ProductController {
   }
 
   @Patch(':id/stock')
-  async updateStock(@Param('id', ParseIntPipe) id: number, @Body() { sizeId, couleurId, productId, stock, status }: { sizeId: number, couleurId: number, productId: number, stock: number, status: string }) {
+  async updateStock(@Param('id', ParseIntPipe) id: number, @Body() { sizeId, couleurId, productId, stock, status,order }: { sizeId: number, couleurId: number, productId: number, stock: number, status: string,order:Order }) {
     try {
-      const updatedProduct = await this.productService.updateStock(sizeId, couleurId, productId, stock, status);
+      const updatedProduct = await this.productService.updateStock(sizeId, couleurId, productId, stock, status,order);
       return {
         data: updatedProduct,
         statusCode: HttpStatus.OK,

@@ -28,7 +28,8 @@ export class Payment {
     })
     payment_status: PaymentStatus;
   
-    
+    @Column({ nullable: true })
+    stripePaymentIntentId: string;
   
     @Column({ nullable: true })
     cardNumber: string;

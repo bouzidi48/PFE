@@ -13,6 +13,8 @@ import { FindByEmail } from './dto/find-email.dto';
 import { FindByUsername } from './dto/find-username.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
 import { FindByUsernameByEmail } from './dto/find-username-email.dto';
+import { Roles } from 'src/enum/user_enum';
+import { RoleUpdateDto } from './dto/updaterole.dto';
 
 @Controller('users')
 export class UserController {
@@ -76,5 +78,18 @@ export class UserController {
   @Get('findbyUsernameEmail')
   async findByUsernameEmail(@Query() usernameEmail: FindByUsernameByEmail) {
     return await this.userService.findByUsernameAndEmail(usernameEmail);
+  }
+
+  @Put('updateAdmin')
+  async updateAdmin(@Body() updateRole: RoleUpdateDto) {
+    return await this.userService.updateRole(updateRole);
+  }
+  @Get()
+  async findAll() {
+    return await this.userService.findAll();
+  }
+  @Delete('/delete/:id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.delete(id);
   }
 }

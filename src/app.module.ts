@@ -25,6 +25,7 @@ import { Order } from './order/entities/order.entity';
 import { OrderModule } from './order/order.module';
 import { ConfigModule } from '@nestjs/config';
 import { ContactModule } from './contact/contact.module';
+import { DemandeAdminModule } from './demande-admin/demande-admin.module';
 
 
 @Module({
@@ -51,7 +52,7 @@ import { ContactModule } from './contact/contact.module';
     CouleurModule,
     ReviewModule,
     InscriptionModule,
-    
+    DemandeAdminModule,
     AuthentificationModule,
     OrderModule,
     ProductModule,

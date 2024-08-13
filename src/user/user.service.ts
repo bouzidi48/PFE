@@ -22,6 +22,8 @@ import { UserUpdateDto } from './dto/update-user.dto';
 
 import { Roles } from 'src/enum/user_enum';
 import { FindByUsernameByEmail } from './dto/find-username-email.dto';
+import dataSource from 'db/data_source';
+import { RoleUpdateDto } from './dto/updaterole.dto';
 
 
 
@@ -204,6 +206,56 @@ export class UserService {
           statusCode: HttpStatus.BAD_REQUEST,
         }
       }
+        return await {
+          data: user,
+          statusCode: HttpStatus.OK
+        };
+    }
+    async updateRole(updateRole:RoleUpdateDto) {
+      console.log(updateRole)
+      const user1 = await this.userRepository.findOne({ where: { id: updateRole.id } });
+      if(!user1){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      if(updateRole.role === Roles.ADMIN){
+          user1.role = Roles.ADMIN;
+      }
+      else if(updateRole.role === Roles.USER){
+        user1.role = Roles.USER;
+      }
+      
+      user1.updatedate = new Date();
+      this.userRepository.save(user1);
+      return {
+        data: user1,
+        statusCode: HttpStatus.OK
+      }
+    }
+    async findAll() {
+      const users =  await this.userRepository.find();
+      if(!users){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+        return await {
+          data: users,
+          statusCode: HttpStatus.OK
+        };
+    }
+    async delete(id: number) {
+      const user = await this.userRepository.findOne({ where: { id: id } });
+      if(!user){
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+        await this.userRepository.remove(user);
         return await {
           data: user,
           statusCode: HttpStatus.OK
