@@ -24,6 +24,8 @@ import { Roles } from 'src/enum/user_enum';
 import { FindByUsernameByEmail } from './dto/find-username-email.dto';
 import dataSource from 'db/data_source';
 import { RoleUpdateDto } from './dto/updaterole.dto';
+import { ReviewEntity } from 'src/review/entities/review.entity';
+import { ReviewRepository } from 'src/review/review.repository';
 
 
 
@@ -31,6 +33,7 @@ import { RoleUpdateDto } from './dto/updaterole.dto';
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository:UserRepository,
+    @InjectRepository(ReviewEntity) private reviewRepository:ReviewRepository,
   ) {}
 
   async ancienPassword(@Session() request:Record<string, any>,password:AncienPasswordDto) {
@@ -247,17 +250,35 @@ export class UserService {
           statusCode: HttpStatus.OK
         };
     }
-    async delete(id: number) {
-      const user = await this.userRepository.findOne({ where: { id: id } });
+    async delete(@Session() request:Record<string, any>,id: number) {
+      const idAdmin = request.idAdmin;
+      console.log(idAdmin)
+
+      if(!idAdmin) {
+        console.log("slaut")
+        return await {
+          data: null,
+          message : "vous devez vous connecter pour supprimer un user",
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      const user = await this.userRepository.findOne({ where: { id: id },relations:['review'] });
       if(!user){
         return await {
           data: null,
+          message : "user introuvable",
           statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      if(user.review.length>0){
+        for(const review of user.review){
+          await this.reviewRepository.remove(review)
         }
       }
         await this.userRepository.remove(user);
         return await {
           data: user,
+          message : "user supprime avec succes",
           statusCode: HttpStatus.OK
         };
     }

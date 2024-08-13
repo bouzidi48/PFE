@@ -89,7 +89,7 @@ export class UserController {
     return await this.userService.findAll();
   }
   @Delete('/delete/:id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.delete(id);
+  async remove(@Session() request: Record<string, any>,@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.delete(request,id);
   }
 }
