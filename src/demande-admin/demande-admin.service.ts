@@ -180,6 +180,20 @@ Cordialement,
 
   async Refuser(@Session() request: Record<string, any>,refuserDto: AccepterDto) {
     console.log(refuserDto)
+    const idAdmin=request.idUser
+    if(!idAdmin) {
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode:HttpStatus.UNAUTHORIZED
+      }
+    }
+    const admin = await this.userController.findById(idAdmin);
+    if(!admin || admin.data.role !== Roles.ADMIN) {
+      return await {
+        message: 'vous devez etre administrateur',
+        statusCode:HttpStatus.UNAUTHORIZED
+      }
+    }
     const demande = await this.demandeAdminRepository.findOne({where : {id:refuserDto.id}});
     if(!demande) {
       return await {
