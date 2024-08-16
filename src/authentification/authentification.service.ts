@@ -76,15 +76,10 @@ export class AuthentificationService {
         };
       }
     }
-    if(user.data.role === Roles.ADMIN) {
-      request.idAdmin = user.data.id
-    }
-    else{
-      request.idUser = user.data.id
-    }
+
+    request.idUser = user.data.id;
      
     console.log(request.idUser)
-    console.log(request.idAdmin)
     if (request.likes && request.likes.length > 0) {
       for (const productId of request.likes) {
         const product = await this.productService.findById(productId);

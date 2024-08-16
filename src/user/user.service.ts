@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session } from '@nestjs/common';
 
 import { User } from './entities/user.entity';
 
@@ -26,6 +26,12 @@ import dataSource from 'db/data_source';
 import { RoleUpdateDto } from './dto/updaterole.dto';
 import { ReviewEntity } from 'src/review/entities/review.entity';
 import { ReviewRepository } from 'src/review/review.repository';
+import { Order } from 'src/order/entities/order.entity';
+import { OrderRepository } from 'src/order/order.repository';
+import { OrderService } from 'src/order/order.service';
+import { CouleurService } from 'src/couleur/couleur.service';
+import { ProductService } from 'src/product/product.service';
+import { CategoriesService } from 'src/categories/categories.service';
 
 
 
@@ -34,6 +40,11 @@ export class UserService {
   constructor(
     @InjectRepository(User) private userRepository:UserRepository,
     @InjectRepository(ReviewEntity) private reviewRepository:ReviewRepository,
+    private readonly couleurService:CouleurService,
+    @Inject(forwardRef(() => OrderService))
+     private readonly orderService:OrderService,
+     private readonly productService:ProductService,
+     private readonly categoryService:CategoriesService,
   ) {}
 
   async ancienPassword(@Session() request:Record<string, any>,password:AncienPasswordDto) {
@@ -251,7 +262,7 @@ export class UserService {
         };
     }
     async delete(@Session() request:Record<string, any>,id: number) {
-      const idAdmin = request.idAdmin;
+      const idAdmin = request.idUser;
       console.log(idAdmin)
 
       if(!idAdmin) {
@@ -262,7 +273,16 @@ export class UserService {
           statusCode: HttpStatus.BAD_REQUEST,
         }
       }
-      const user = await this.userRepository.findOne({ where: { id: id },relations:['review'] });
+      const admin=await this.userRepository.findOne({where:{id:idAdmin}})
+      if(!admin || admin.role!=Roles.SUPERADMIN) {
+        return await{
+          data: null,
+          message : "vous devez etre un superadmin",
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      const user = await this.userRepository.findOne({ where: { id: id },relations:['review','orders','products','categories'] });
+      console.log(user)
       if(!user){
         return await {
           data: null,
@@ -273,6 +293,53 @@ export class UserService {
       if(user.review.length>0){
         for(const review of user.review){
           await this.reviewRepository.remove(review)
+        }
+      }
+      if(user.orders.length>0){
+        for(const order of user.orders){
+          await this.orderService.deleteOrder(request,order.id)
+        }
+      }
+      if(user.products.length>0){
+        for(const product of user.products){
+          const product1 = await this.productService.findById(product.id)
+          const couleurs = []
+          for(const couleur of product1.data.colours){
+            const couleur1 = await this.couleurService.findOne(couleur.id)
+            console.log("salut")
+            console.log(couleur1.data)
+            const listeimages=couleur1.data.images
+            const listsizes = couleur1.data.sizes
+            console.log(listeimages)
+            console.log(listsizes)
+            const listeimage =[]
+            const listsize =[]
+            if(listeimages.length>0){
+              for(const image of listeimages){
+                listeimage.push({urlImage:image.UrlImage,nomCategorie:null,nameCouleur:couleur.nameCouleur})
+             }
+            } 
+            if(listsizes.length>0){
+              for(const size of listsizes){
+                listsize.push({typeSize:size.typeSize,nameCouleur:couleur.nameCouleur})
+              }
+            }
+            couleurs.push({nameCouleur:couleur.nameCouleur,listeimage:listeimage,listesize:listsize,nameProduct:couleur1.data.product.nameProduct})
+        }
+        const supprimer = await this.productService.remove(request,{nameProduct:product.nameProduct,listeCouleur:couleurs})
+        console.log("salut1")
+        console.log(supprimer)
+        }
+      }
+      if(user.categories.length>0){
+        for(const category of user.categories){
+          const category1 = await this.categoryService.findOne(category.id)
+          if(category1.data.image){
+          await this.categoryService.remove(request,category1.data.id,{image:{urlImage:category1.data.image.UrlImage,nomCategorie:category.nameCategory,nameCouleur:null}})
+          }
+          else{
+            await this.categoryService.remove(request,category1.data.id,{image:null})
+          }
         }
       }
         await this.userRepository.remove(user);

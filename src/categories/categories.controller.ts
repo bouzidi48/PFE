@@ -52,12 +52,12 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   async update(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(request, id, updateCategoryDto);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async remove(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number, @Body() deleteCategoryDto: DeleteCategoryDto) {
     return await this.categoriesService.remove(request, id, deleteCategoryDto);
   }

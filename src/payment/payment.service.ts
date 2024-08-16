@@ -31,6 +31,7 @@ export class PaymentService {
       (Payment) private readonly paymentRepository: PaymentRepository,
     @Inject(forwardRef(() => OrderService))
     private readonly orderService: OrderService,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private configService: ConfigService
 

@@ -11,7 +11,7 @@ import { ProductController } from 'src/product/product.controller';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductLikeEntity,ProductLikeRepository]),UserModule,forwardRef(() => ProductModule),],
+  imports: [TypeOrmModule.forFeature([ProductLikeEntity,ProductLikeRepository]),forwardRef(() => UserModule),forwardRef(() => ProductModule),],
   controllers: [ProductLikeController],
   providers: [ProductLikeService],
   exports:[ProductLikeService]

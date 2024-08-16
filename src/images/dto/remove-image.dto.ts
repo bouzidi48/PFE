@@ -10,11 +10,12 @@ export class RemoveImageDto{
     
     urlImage:string;
 
-    @Type(()=>RemoveImageDto)
-    @ValidateNested({ each: true })
-    listeimage:RemoveImageDto[];
-
-    @Type(()=>RemoveSizeDto)
-    @ValidateNested({ each: true })
-    listesize:RemoveSizeDto[];
+    @IsOptional()
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nomCategorie:string;
+    @IsOptional()
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nameCouleur:string;
 }

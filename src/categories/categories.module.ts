@@ -12,7 +12,7 @@ import { ImagesController } from 'src/images/images.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CategoryEntity, CategoryRepository]),
-    UserModule,
+    forwardRef(() => UserModule),
     forwardRef(() => ImagesModule),
   ],
   controllers: [CategoriesController],

@@ -13,7 +13,7 @@ import { ImagesModule } from 'src/images/images.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Couleur, CouleurRepository]),
-    UserModule,
+    forwardRef(() => UserModule),
     forwardRef(() => ProductModule),
     forwardRef(() => CategoriesModule),
     forwardRef(() => SizeModule),

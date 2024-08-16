@@ -17,5 +17,7 @@ export class UpdateImageCategoryDto{
     @IsNotEmpty({message:'ancienNameCouleur can not be empty'})
     @IsString({message:'ancienNameCouleur should be string '})
     ancienUrl:string;
+
+    
 }
 

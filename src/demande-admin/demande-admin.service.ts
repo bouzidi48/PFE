@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Session } from '@nestjs/common';
 import { CreateDemandeAdminDto } from './dto/create-demande-admin.dto';
 import { UpdateDemandeAdminDto } from './dto/update-demande-admin.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -89,8 +89,22 @@ export class DemandeAdminService {
     };
   }
 
-  async Accpeter(accepterDto: AccepterDto) {
+  async Accpeter(@Session() request: Record<string, any>,accepterDto: AccepterDto) {
     console.log(accepterDto)
+    const idAdmin=request.idUser
+    if(!idAdmin) {
+      return await {
+        message: 'vous devez vous connecter',
+        statusCode:HttpStatus.UNAUTHORIZED
+      }
+    }
+    const admin = await this.userController.findById(idAdmin);
+    if(!admin || admin.data.role !== Roles.ADMIN) {
+      return await {
+        message: 'vous devez etre administrateur',
+        statusCode:HttpStatus.UNAUTHORIZED
+      }
+    }
     const demande = await this.demandeAdminRepository.findOne({where : {id:accepterDto.id}});
     if(!demande) {
       return await {
@@ -164,7 +178,7 @@ Cordialement,
     };
   }
 
-  async Refuser(refuserDto: AccepterDto) {
+  async Refuser(@Session() request: Record<string, any>,refuserDto: AccepterDto) {
     console.log(refuserDto)
     const demande = await this.demandeAdminRepository.findOne({where : {id:refuserDto.id}});
     if(!demande) {

@@ -14,7 +14,7 @@ import { UserController } from 'src/user/user.controller';
 import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Size,SizeRepository]),UserModule,forwardRef(() => CouleurModule)],
+  imports: [TypeOrmModule.forFeature([Size,SizeRepository]),forwardRef(() => UserModule),forwardRef(() => CouleurModule)],
   controllers: [SizeController],
   providers: [SizeService],
   exports: [SizeService],

@@ -8,5 +8,9 @@ export class RemoveSizeDto{
     
     typeSize:string;
 
+    @IsOptional()
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nameCouleur:string;
     
 }

@@ -33,6 +33,7 @@ export class OrderService {
     @InjectRepository(Shipping) private readonly shippingRepository:ShippingRepository,
     private readonly mailerService:MailerService,
     @InjectRepository(OrderItems) private readonly orderItemsRepository:OrderItemsRepository,
+    @Inject(forwardRef(() => UserService))
       private readonly userService:UserService,
       private readonly productservice:ProductService,
       private readonly sizeService:SizeService,
@@ -396,14 +397,15 @@ export class OrderService {
 
   async deleteOrder(@Session() request: Record<string, any>, id: number) {
     const idUser = request.idUser;
-    if (!idUser) {
+    const idAdmin = request.idAdmin;
+    if (!idUser && !idAdmin) {
         return await {
           message: 'Vous devez vous connecter pour supprimer une commande',
           statusCode: HttpStatus.BAD_REQUEST,
         }
     }
 
-    let order = await this.findOne(id);
+    let order = await this.orderRespoitory.findOne({ where: { id: id },relations:['user','orderItems','shipping_address'] });
     if (!order) {
         return await {
           message: 'Commande non trouvée.',
@@ -412,7 +414,7 @@ export class OrderService {
     }
 
     // Vérifiez que l'utilisateur est bien celui qui a passé la commande
-    if (order.data.user.id !== idUser) {
+    if (order.user.id !== idUser && !idAdmin) {
         return await {
           message: 'Vous n\'avez pas la permission de supprimer cette commande.',
           statusCode: HttpStatus.BAD_REQUEST,
@@ -420,18 +422,40 @@ export class OrderService {
     }
 
     // Vérifiez que la commande n'a pas été expédiée ou livrée
-    if (order.data.status === OrderStatus.SHIPPED || order.data.status === OrderStatus.DELIVERED) {
-        return await {
-          message: 'Impossible de supprimer une commande expédiée ou livrée.',
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+    if ((order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED)&&idAdmin) {
+      for(const orderItem of order.orderItems) {
+        await this.orderItemsRepository.remove(orderItem);
+      }
+      console.log(order)
+      await this.orderRespoitory.remove(order);
+      await this.shippingRepository.remove(order.shipping_address);
+  
+      // Supprimez la commande
+      
+  
+      return {
+          message: 'Commande supprimée avec succès',
+          statusCode: HttpStatus.OK,
+      };
     }
-
+    else if((order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) && idUser){
+      return await {
+        message: 'La commande est livrée. Vous ne pouvez pas la supprimer.',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    console.log(order)
     // Restaurez les stocks des produits
-    await this.restoreStock(order.data);
+    await this.restoreStock(order);
+    for(const orderItem of order.orderItems) {
+      await this.orderItemsRepository.remove(orderItem);
+    }
+    console.log(order)
+    await this.orderRespoitory.remove(order);
+    await this.shippingRepository.remove(order.shipping_address);
 
     // Supprimez la commande
-    await this.orderRespoitory.remove(order.data);
+    
 
     return {
         message: 'Commande supprimée avec succès',
@@ -440,7 +464,9 @@ export class OrderService {
 }
 
 async restoreStock(order: Order) {
-    for (const orderItem of order.orderItems) {
+  const orderItems = await this.orderItemsRepository.find({where:{order:{id:order.id}},relations: ['product', 'couleur', 'size']})
+    for (const orderItem of orderItems) {
+        console.log(orderItem)
         await this.productservice.updateStock1(
             orderItem.size.id,
             orderItem.couleur.id,

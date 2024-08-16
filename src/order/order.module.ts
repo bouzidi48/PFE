@@ -19,7 +19,7 @@ import { PaymentController } from 'src/payment/payment.controller';
 import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),UserModule,ProductModule,CouleurModule,SizeModule,forwardRef(() => PaymentModule)],
+  imports: [TypeOrmModule.forFeature([Order,OrderRepository,OrderItems,Shipping,]),forwardRef(() => UserModule),forwardRef(() => ProductModule),CouleurModule,SizeModule,forwardRef(() => PaymentModule)],
   controllers: [OrderController],
   providers: [OrderService],
   exports:[OrderService]

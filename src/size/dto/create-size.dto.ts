@@ -12,4 +12,8 @@ export class CreateSizeDto {
     @IsNotEmpty({message:'namecouleur can not be empty'})
     @IsString({message:'namecouleur should be string '})
     nameCouleur:string;
+
+    @IsNotEmpty({message:'namecouleur can not be empty'})
+    @IsString({message:'namecouleur should be string '})
+    nameProduct:string;
 }

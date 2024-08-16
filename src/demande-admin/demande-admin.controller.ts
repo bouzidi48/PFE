@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Session } from '@nestjs/common';
 import { DemandeAdminService } from './demande-admin.service';
 import { CreateDemandeAdminDto } from './dto/create-demande-admin.dto';
 import { UpdateDemandeAdminDto } from './dto/update-demande-admin.dto';
@@ -24,11 +24,11 @@ export class DemandeAdminController {
   }
 
   @Post('accepter')
-  accepter(@Body() accepterDto:AccepterDto) {
-    return this.demandeAdminService.Accpeter(accepterDto);
+  accepter(@Session() request: Record<string, any>,@Body() accepterDto:AccepterDto) {
+    return this.demandeAdminService.Accpeter(request,accepterDto);
   }
   @Post('refuser')
-  refuser(@Body() accepterDto:AccepterDto) {
-    return this.demandeAdminService.Refuser(accepterDto);
+  refuser(@Session() request: Record<string, any>,@Body() accepterDto:AccepterDto) {
+    return this.demandeAdminService.Refuser(request,accepterDto);
   }
 }

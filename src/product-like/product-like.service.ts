@@ -19,6 +19,7 @@ export class ProductLikeService {
   constructor(
     @Inject(forwardRef(() => ProductService))
     private readonly productService:ProductService,
+    @Inject(forwardRef(() => UserService))
      private readonly userService:UserService,
     @InjectRepository(ProductLikeEntity) private readonly productLikeRepository:ProductLikeRepository
   ){}

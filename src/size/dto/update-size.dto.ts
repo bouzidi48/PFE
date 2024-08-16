@@ -17,6 +17,10 @@ export class UpdateSizeDto{
     @IsNotEmpty({message:'nameproduct can not be empty'})
     @IsString({message:'nameproduct should be string '})
     nameCouleur:string;
+    @IsOptional()
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nameProduct:string;
 
     @IsNotEmpty({message:'ancienNameCouleur can not be empty'})
     @IsString({message:'ancienNameCouleur should be string '})

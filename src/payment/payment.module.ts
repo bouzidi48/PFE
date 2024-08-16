@@ -10,7 +10,7 @@ import { UserModule } from 'src/user/user.module';
 import { UserController } from 'src/user/user.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment,PaymentRepository]),forwardRef(() => OrderModule),UserModule],
+  imports: [TypeOrmModule.forFeature([Payment,PaymentRepository]),forwardRef(() => OrderModule),forwardRef(() => UserModule)],
   controllers: [PaymentController],
   providers: [PaymentService],
   exports: [PaymentService],

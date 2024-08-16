@@ -32,7 +32,7 @@ export class ReviewService {
       }
     }
     const user = await this.userService.findById(idUser)
-    if (!user || (user.data.role != Roles.ADMIN && user.data.role != Roles.USER)) {
+    if (!user || (user.data.role != Roles.ADMIN && user.data.role != Roles.USER && user.data.role != Roles.SUPERADMIN)) {
       return await {
         message: 'vous devez etre appartient a cette application',
         statusCode: HttpStatus.BAD_REQUEST,
@@ -143,13 +143,18 @@ export class ReviewService {
     }
 
     const admin = await this.userService.findById(idAdmin);
-    if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER)) {
+    if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER && admin.data.role != Roles.SUPERADMIN)) {
       return {
         message: 'vous devez etre appartient a cette application',
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
-
+    if (admin.data.role != Roles.USER) {
+      return {
+        message: 'review non trouvé ou vous n\'êtes pas autorisé à le mettre à jour',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
     /*  const product = await this.productService.findByNameProduct({ nameProduct: updateReviewDto.nameProduct });
  
      if (! product) {
@@ -184,22 +189,21 @@ export class ReviewService {
     const idUser = request.idUser;
     console.log(idUser)
     if (!idUser) {
-      const idAdmin = request.idAdmin;
-      console.log(idAdmin)
-      if (!idAdmin) {
+
+      return {
+        message: 'vous devez vous connecter pour supprimer un review',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    } else {
+      const admin = await this.userService.findById(idUser);
+      if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER && admin.data.role != Roles.SUPERADMIN)) {
         return {
-          message: 'vous devez vous connecter pour supprimer un review',
+          message: 'vous devez etre appartient a cette application',
           statusCode: HttpStatus.BAD_REQUEST,
         };
-      } else {
-        const admin = await this.userService.findById(idAdmin);
-        if (!admin || (admin.data.role != Roles.ADMIN && admin.data.role != Roles.USER)) {
-          return {
-            message: 'vous devez etre appartient a cette application',
-            statusCode: HttpStatus.BAD_REQUEST,
-          };
-        }
-        const review = await this.reviewRepository.findOne({ where: { id: id } });
+      }
+      if (admin.data.role != Roles.USER) {
+        const review = await this.reviewRepository.findOne({ where: { id: id, user: { id: idUser } } });
         if (!review) {
           return {
             message: 'review non trouvé ou vous n\'êtes pas autorisé à le supprimer',
@@ -213,50 +217,41 @@ export class ReviewService {
           statusCode: HttpStatus.OK,
         };
       }
-    }
+      const review = await this.reviewRepository.findOne({ where: { id: id } });
+      if (!review) {
+        return {
+          message: 'review non trouvé ou vous n\'êtes pas autorisé à le supprimer',
+          statusCode: HttpStatus.BAD_REQUEST,
+        };
+      }
 
-
-    const user = await this.userService.findById(idUser);
-    if (!user || (user.data.role != Roles.ADMIN && user.data.role != Roles.USER)) {
+      await this.reviewRepository.remove(review);
       return {
-        message: 'vous devez être membre de cette application',
-        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'review supprimé avec succès',
+        statusCode: HttpStatus.OK,
       };
     }
-
-    const review = await this.reviewRepository.findOne({ where: { id: id, user: { id: idUser } } });
-    if (!review) {
-      return {
-        message: 'review non trouvé ou vous n\'êtes pas autorisé à le supprimer',
-        statusCode: HttpStatus.BAD_REQUEST,
-      };
-    }
-
-    await this.reviewRepository.remove(review);
-
-    return {
-      message: 'review supprimé avec succès',
-      statusCode: HttpStatus.OK,
-    };
   }
+
+
 
   async findOneByUserAndProduct(userId: number, productId: number) {
-    return await this.reviewRepository.findOne({
-      where: {
-        user: {
-          id: userId
-        },
-        product: {
-          id: productId
-        }
-
+  return await this.reviewRepository.findOne({
+    where: {
+      user: {
+        id: userId
       },
-      relations: {
-        user: true,
-        product: {
-          category: true
-        }
+      product: {
+        id: productId
       }
-    })
-  }
+
+    },
+    relations: {
+      user: true,
+      product: {
+        category: true
+      }
+    }
+  })
+}
 }

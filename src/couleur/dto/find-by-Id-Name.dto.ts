@@ -9,5 +9,8 @@ export class FindByIdNameDto {
     @IsNotEmpty({message:'id can not be empty'})
     @IsNumber()
     id:number;
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nameProduct:string;
 
 }

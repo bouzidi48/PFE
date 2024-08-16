@@ -33,380 +33,406 @@ import { Order } from 'src/order/entities/order.entity';
 
 @Injectable()
 export class ProductService {
- 
- 
+
+
   constructor(
     @Inject(forwardRef(() => CategoriesService))
-     private readonly categoryService:CategoriesService,
-     @Inject(forwardRef(() => UserService))
-     private readonly userService:UserService,
-     @Inject(forwardRef(() => CouleurService))
-     private readonly couleurService:CouleurService,
-    @InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-    @InjectRepository(Product) private readonly productRepository:ProductRepository,
-    private readonly productLikeService:ProductLikeService, 
-  ){}
-  async create(@Session() request:Record<string, any>,createProductDto: CreateProductDto) {
-    const idAdmin=request.idUser
+    private readonly categoryService: CategoriesService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => CouleurService))
+    private readonly couleurService: CouleurService,
+    @InjectRepository(Size) private readonly sizeRepository: SizeRepository,
+    @InjectRepository(Product) private readonly productRepository: ProductRepository,
+    private readonly productLikeService: ProductLikeService,
+  ) { }
+  async create(@Session() request: Record<string, any>, createProductDto: CreateProductDto) {
+    const idAdmin = request.idUser
     console.log(idAdmin)
-    if(!idAdmin){
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter pour ajouter un produit',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    const admin = await this.userService.findById(idAdmin)
+    if (!admin || admin.data.role === Roles.USER) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const pro = await this.productRepository.findOne({where : {nameProduct:createProductDto.nameProduct}});
-    if(pro) {
-      return await{
-        message:'ce produit existe deja',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const pro = await this.productRepository.findOne({ where: { nameProduct: createProductDto.nameProduct } });
+    if (pro) {
+      return await {
+        message: 'ce produit existe deja',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const category=await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:createProductDto.nomCategory})
-    if(!category) {
-      return await{
-        message:'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const category = await this.categoryService.findByIdAndName({ id: idAdmin, nameCategory: createProductDto.nomCategory })
+    if (!category) {
+      return await {
+        message: 'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
 
-    const product=await this.productRepository.create(createProductDto);
-    product.addedBy=admin.data;
-    product.category=category.data;
-    product.createdate=new Date();
+    const product = await this.productRepository.create(createProductDto);
+    product.addedBy = admin.data;
+    product.category = category.data;
+    product.createdate = new Date();
     this.productRepository.save(product)
-    for(let couleur of createProductDto.listeCouleur) {
-      await this.couleurService.create(request,couleur)
+    for (let couleur of createProductDto.listeCouleur) {
+      await this.couleurService.create(request, couleur)
     }
     return await {
-      message:'produit ajoute avec succes',
-      statusCode:HttpStatus.OK,
-    
+      message: 'produit ajoute avec succes',
+      statusCode: HttpStatus.OK,
+
     }
   }
-  
+
 
 
   async findAll() {
-    const products = await this.productRepository.find({relations:['colours','colours.images', 'colours.sizes']});
-    if(!products){
-      return await {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
-      return await {
-        data:products,
-        statusCode:HttpStatus.OK,
-    }
-  }
-  async findByNameProduct(nameProduct:FindByNameProductDto) {
-    const product = await this.productRepository.findOne({where : {nameProduct:nameProduct.nameProduct},relations:['colours','colours.images', 'colours.sizes']});
-    console.log(product)
-    if(!product){
-      return  {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
-      return  {
-        data:product,
-        statusCode:HttpStatus.OK,
-    }
-  }
-  async findByNameAndIdProduct(nameProduct:FindByNameAndIdProductDto) {
-    const product = await this.productRepository.findOne( { where: { nameProduct: nameProduct.nameProduct,addedBy: { id: nameProduct.id} } });
-    if(!product){
-      return await {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
-      return await {
-        data:product,
-        statusCode:HttpStatus.OK,
-    }
-  }
-  async findByCategory(nameCategory:FindByCategorieDto) {
-    const categorie = await this.categoryService.findByName({nameCategory:nameCategory.nameCategory})
-    if(!categorie){
-      return await {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
-    
-    const products = await this.productRepository.find( { where: { category: { id: categorie.data.id } }});
-    if(!products){
+    const products = await this.productRepository.find({ relations: ['colours', 'colours.images', 'colours.sizes'] });
+    if (!products) {
       return await {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:products,
-      statusCode:HttpStatus.OK,
+      data: products,
+      statusCode: HttpStatus.OK,
     }
   }
-    
+  async findByNameProduct(nameProduct: FindByNameProductDto) {
+    const product = await this.productRepository.findOne({ where: { nameProduct: nameProduct.nameProduct }, relations: ['colours', 'colours.images', 'colours.sizes'] });
+    console.log(product)
+    if (!product) {
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return {
+      data: product,
+      statusCode: HttpStatus.OK,
+    }
+  }
+  async findByNameAndIdProduct(nameProduct: FindByNameAndIdProductDto) {
+    const user = await this.userService.findById(nameProduct.id)
+    if (!user) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (user.data.role === Roles.USER) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (user.data.role === Roles.SUPERADMIN) {
+      const product = await this.productRepository.findOne({ where: { nameProduct: nameProduct.nameProduct } });
+      if (!product) {
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      return await {
+        data: product,
+        statusCode: HttpStatus.OK,
+      }
+    }
+    const product = await this.productRepository.findOne({ where: { nameProduct: nameProduct.nameProduct, addedBy: { id: nameProduct.id } } });
+    if (!product) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: product,
+      statusCode: HttpStatus.OK,
+    }
+  }
+  async findByCategory(nameCategory: FindByCategorieDto) {
+    const categorie = await this.categoryService.findByName({ nameCategory: nameCategory.nameCategory })
+    if (!categorie) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    const products = await this.productRepository.find({ where: { category: { id: categorie.data.id } } });
+    if (!products) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: products,
+      statusCode: HttpStatus.OK,
+    }
+  }
 
 
-  async update(@Session() request:Record<string, any>, updateProductDto: UpdateProductDto) {
+
+  async update(@Session() request: Record<string, any>, updateProductDto: UpdateProductDto) {
     const idAdmin = request.idUser
-    if(!idAdmin){  
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    if (!admin || admin.data.role != Roles.ADMIN) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const product = await this.productRepository.findOne({where : {nameProduct:updateProductDto.ancienProduct,addedBy:idAdmin}});
-    if(!product) {
-      return await{
-        message:'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const product = await this.findByNameAndIdProduct({ nameProduct: updateProductDto.ancienProduct, id: idAdmin });
+    if (!product.data) {
+      return await {
+        message: 'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const category = await this.categoryService.findByIdAndName({id:idAdmin,nameCategory:updateProductDto.nomCategory})
-    if(!category) {
-      return await{
-        message:'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const category = await this.categoryService.findByIdAndName({ id: idAdmin, nameCategory: updateProductDto.nomCategory })
+    if (!category.data) {
+      return await {
+        message: 'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    if(updateProductDto.nameProduct) {
-      const pro = await this.productRepository.findOne({where : {nameProduct:updateProductDto.nameProduct}});
-      if(pro) {
-        return await{
-          message:'ce produit existe deja',
-          statusCode:HttpStatus.BAD_REQUEST,
+    if (updateProductDto.nameProduct) {
+      const pro = await this.productRepository.findOne({ where: { nameProduct: updateProductDto.nameProduct } });
+      if (pro) {
+        return await {
+          message: 'ce produit existe deja',
+          statusCode: HttpStatus.BAD_REQUEST,
         }
       }
     }
-    for(let couleur of updateProductDto.listeCouleur) {
-      await this.couleurService.update(request,couleur)
+    for (let couleur of updateProductDto.listeCouleur) {
+      await this.couleurService.update(request, couleur)
     }
-    product.nameProduct = updateProductDto.nameProduct;
-    product.description = updateProductDto.description;
-    product.price = updateProductDto.price;
-    product.category = category.data;
-    product.updatedate = new Date();
-    this.productRepository.save(product)
+    product.data.nameProduct = updateProductDto.nameProduct;
+    product.data.description = updateProductDto.description;
+    product.data.price = updateProductDto.price;
+    product.data.category = category.data;
+    product.data.updatedate = new Date();
+    this.productRepository.save(product.data)
     return await {
-      message:product,
-      statusCode:HttpStatus.OK,
+      message: product,
+      statusCode: HttpStatus.OK,
     }
   }
-  async remove(@Session() request:Record<string, any>, removeProductDto: RemoveProductDto) {
+  async remove(@Session() request: Record<string, any>, removeProductDto: RemoveProductDto) {
     const idAdmin = request.idUser
-    if(!idAdmin){  
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    if (!admin || admin.data.role === Roles.USER) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const product = await this.productRepository.findOne({where : {nameProduct:removeProductDto.nameProduct,addedBy:idAdmin}});
-    if(!product) {
-      return await{
-        message:'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const product = await this.findByNameAndIdProduct({ nameProduct: removeProductDto.nameProduct, id: idAdmin });
+    if (!product.data) {
+      return await {
+        message: 'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    for( let couleur of removeProductDto.listeCouleur ) {
-      await this.couleurService.remove(request,couleur)
+    for (let couleur of removeProductDto.listeCouleur) {
+      await this.couleurService.remove(request, couleur)
     }
-    await this.productRepository.remove(product)
+    await this.productRepository.remove(product.data)
     return await {
-      message:'le produit a bien ete supprimer',
-      statusCode:HttpStatus.OK,
+      message: 'le produit a bien ete supprimer',
+      statusCode: HttpStatus.OK,
     }
   }
-  async findById(id:number){
-    const product = await this.productRepository.findOne({where:{id:id}});
-    if(!product){
+  async findById(id: number) {
+    const product = await this.productRepository.findOne({ where: { id: id },relations:['colours'] });
+    if (!product) {
       return await {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:product,
-      statusCode:HttpStatus.OK,
+      data: product,
+      statusCode: HttpStatus.OK,
     }
   }
-  async ajouterPanier(@Session() request:Record<string, any>, ajouterPanierDto: AjouetrPanierDto) {
+  async ajouterPanier(@Session() request: Record<string, any>, ajouterPanierDto: AjouetrPanierDto) {
     const productId = ajouterPanierDto.productId
     const couleurId = ajouterPanierDto.couleurId
     const sizeId = ajouterPanierDto.sizeId
     const quantity = ajouterPanierDto.quantity
-    if(!request.panier) {
-      request.panier ={
-        list:[],
-        total:0,
-        totalAvecReduction:0
+    if (!request.panier) {
+      request.panier = {
+        list: [],
+        total: 0,
+        totalAvecReduction: 0
       }
     }
-    const product = await this.productRepository.findOne({where:{id:productId}})
-    if(!product) {
-      return await{
-        message:'ce produit n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const product = await this.productRepository.findOne({ where: { id: productId } })
+    if (!product) {
+      return await {
+        message: 'ce produit n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const couleur = await this.couleurService.findOne(ajouterPanierDto.couleurId)
-    if(!couleur.data) {
-      return await{
-        message:'ce couleur n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
+    if (!couleur.data) {
+      return await {
+        message: 'ce couleur n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const size = await this.sizeRepository.findOne({where:{id:sizeId}})
-    if(!size) {
-      return await{
-        message:'ce taille n\'existe pas',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const size = await this.sizeRepository.findOne({ where: { id: sizeId } })
+    if (!size) {
+      return await {
+        message: 'ce taille n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    for(let i=0;i<request.panier.list.length;i++) {
-      if(request.panier.list[i].productId==productId && request.panier.list[i].couleurId==couleurId && request.panier.list[i].sizeId==sizeId) {
-        if(request.panier.list[i].quantity+quantity>size.stockQuantity) {
+    for (let i = 0; i < request.panier.list.length; i++) {
+      if (request.panier.list[i].productId == productId && request.panier.list[i].couleurId == couleurId && request.panier.list[i].sizeId == sizeId) {
+        if (request.panier.list[i].quantity + quantity > size.stockQuantity) {
           return await {
-            data:null,
-            statusCode:HttpStatus.BAD_REQUEST,
+            data: null,
+            statusCode: HttpStatus.BAD_REQUEST,
           }
         }
-        request.panier.list[i].quantity = request.panier.list[i].quantity+quantity
-        request.panier.total = request.panier.total-request.panier.list[i].price
-        request.panier.list[i].price = request.panier.list[i].quantity*product.price
-        request.panier.total = request.panier.total+(request.panier.list[i].quantity*product.price)
-        if(request.panier.total>3000) {
-          request.panier.totalAvecReduction = request.panier.total*0.15
+        request.panier.list[i].quantity = request.panier.list[i].quantity + quantity
+        request.panier.total = request.panier.total - request.panier.list[i].price
+        request.panier.list[i].price = request.panier.list[i].quantity * product.price
+        request.panier.total = request.panier.total + (request.panier.list[i].quantity * product.price)
+        if (request.panier.total > 3000) {
+          request.panier.totalAvecReduction = request.panier.total * 0.15
         }
         return await {
-          data:request.panier,
-          statusCode:HttpStatus.OK,
+          data: request.panier,
+          statusCode: HttpStatus.OK,
         }
       }
     }
-    
-      request.panier.list.push({
-        productId:productId,
-        couleurId:couleurId,
-        sizeId:sizeId,
-        quantity:quantity,
-        price:quantity*product.price
-      })
-      request.panier.total = request.panier.total+(quantity*product.price)
-      if(request.panier.total>3000) {
-        request.panier.totalAvecReduction = request.panier.total-request.panier.total*0.15
-      }
+
+    request.panier.list.push({
+      productId: productId,
+      couleurId: couleurId,
+      sizeId: sizeId,
+      quantity: quantity,
+      price: quantity * product.price
+    })
+    request.panier.total = request.panier.total + (quantity * product.price)
+    if (request.panier.total > 3000) {
+      request.panier.totalAvecReduction = request.panier.total - request.panier.total * 0.15
+    }
     return await {
-      data:request.panier,
-      statusCode:HttpStatus.OK,
-    
+      data: request.panier,
+      statusCode: HttpStatus.OK,
+
 
     }
   }
-  async listePanier(@Session() request:Record<string, any>) {
-    if(!request.panier) {
+  async listePanier(@Session() request: Record<string, any>) {
+    if (!request.panier) {
       return await {
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:request.panier,
-      statusCode:HttpStatus.OK,
+      data: request.panier,
+      statusCode: HttpStatus.OK,
     }
   }
 
 
-  async removePanier(@Session() request:Record<string, any>, removePanierDto: RemovePanierDto) {
-    for(let i=0;i<request.panier.length;i++) {
-      if(request.panier[i].productId==removePanierDto.productId && request.panier[i].couleurId==removePanierDto.couleurId && request.panier[i].sizeId==removePanierDto.sizeId) {
+  async removePanier(@Session() request: Record<string, any>, removePanierDto: RemovePanierDto) {
+    for (let i = 0; i < request.panier.length; i++) {
+      if (request.panier[i].productId == removePanierDto.productId && request.panier[i].couleurId == removePanierDto.couleurId && request.panier[i].sizeId == removePanierDto.sizeId) {
         request.panier.remove(i)
         return await {
-          message:request.panier,
-          statusCode:HttpStatus.OK,
+          message: request.panier,
+          statusCode: HttpStatus.OK,
         }
       }
     }
     return await {
-      data:request.panier,
-      statusCode:HttpStatus.OK,
+      data: request.panier,
+      statusCode: HttpStatus.OK,
 
-    } 
+    }
   }
-  async updateStock(sizeId: number, couleurId:number, productId: number, quantity: number, status: string,order:Order){
-    let product=await this.findById(productId);
-    let couleur=await this.couleurService.findByIdCouleurIdProduct(productId,couleurId)
-    let size=await this.sizeRepository.findOne({where:{id:sizeId,couleur:{id:couleurId}}});
-    if(!product.data || !couleur || !size){
+  async updateStock(sizeId: number, couleurId: number, productId: number, quantity: number, status: string, order: Order) {
+    let product = await this.findById(productId);
+    let couleur = await this.couleurService.findByIdCouleurIdProduct(productId, couleurId)
+    let size = await this.sizeRepository.findOne({ where: { id: sizeId, couleur: { id: couleurId } } });
+    if (!product.data || !couleur || !size) {
       return await {
-        message:'product not found',
-        statusCode:HttpStatus.BAD_REQUEST,
+        message: 'product not found',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    if(status===OrderStatus.SHIPPED&&order.status===OrderStatus.PROCESSING){
-      size.stockQuantity-=quantity
-      size.updatedate=new Date()
+    if (status === OrderStatus.SHIPPED && order.status === OrderStatus.PROCESSING) {
+      size.stockQuantity -= quantity
+      size.updatedate = new Date()
 
-    }else if(order.status===OrderStatus.SHIPPED&&status===OrderStatus.CENCELLED){
-      size.stockQuantity+=quantity;
-      size.updatedate=new Date()
+    } else if (order.status === OrderStatus.SHIPPED && status === OrderStatus.CENCELLED) {
+      size.stockQuantity += quantity;
+      size.updatedate = new Date()
     }
     await this.sizeRepository.save(size);
-    
+
     return {
-      message:'stock updated successfully',
-      statusCode:HttpStatus.OK,
+      message: 'stock updated successfully',
+      statusCode: HttpStatus.OK,
     }
 
 
   }
 
-  async updateStock1(sizeId: number, couleurId:number, productId: number, quantity: number, action: string) {
+  async updateStock1(sizeId: number, couleurId: number, productId: number, quantity: number, action: string) {
     let product = await this.findById(productId);
-    let couleur = await this.couleurService.findByIdCouleurIdProduct(productId,couleurId)
-    let size = await this.sizeRepository.findOne({ where: { id: sizeId ,couleur:{id:couleurId}} });
+    let couleur = await this.couleurService.findByIdCouleurIdProduct(productId, couleurId)
+    let size = await this.sizeRepository.findOne({ where: { id: sizeId, couleur: { id: couleurId } } });
 
     if (action === 'restore') {
-        size.stockQuantity += quantity;
+      size.stockQuantity += quantity;
     } else if (action === 'deduct') {
-        size.stockQuantity -= quantity;
+      size.stockQuantity -= quantity;
     }
 
-    
+
     await this.sizeRepository.save(size);
-   
+
     return {
-        message: 'Stock updated successfully',
-        statusCode: HttpStatus.OK,
+      message: 'Stock updated successfully',
+      statusCode: HttpStatus.OK,
     }
-}
+  }
   async trend() {
     const result = await this.productRepository.query(
       `SELECT p.id, p.nameProduct, p.description, p.price, AVG(r.ratings) as averageRating
@@ -428,42 +454,42 @@ export class ProductService {
       data: result,
       statusCode: HttpStatus.OK,
     };
-  
+
 
 
   }
 
-  async recomendation(@Session() request:Record<string, any>) {
-    
+  async recomendation(@Session() request: Record<string, any>) {
+
     const listeLike = await this.productLikeService.findAll(request)
     console.log(listeLike)
     // Si l'utilisateur n'existe pas ou n'a pas liké de produits
     if (listeLike.data.length === 0) {
       // Retourner des produits par défaut (par exemple les plus populaires)
       const defaultProducts = await this.productRepository
-    .createQueryBuilder('products')
-    .leftJoinAndSelect('products.colours', 'colours')
-    .leftJoinAndSelect('colours.addedBy', 'addedBy') // Inclure l'utilisateur qui a ajouté la couleur
-    .leftJoinAndSelect('colours.sizes', 'sizes') // Inclure les tailles associées à la couleur
-    .leftJoinAndSelect('colours.images', 'images') // Inclure les images associées à la couleur
-    .leftJoinAndSelect('colours.orderItems', 'orderItems') // Inclure les items de commande associés à la couleur
-    .leftJoinAndSelect('products.category', 'category')
-    .leftJoinAndSelect('products.addedBy', 'addedByProduct')
-    .leftJoinAndSelect('products.review', 'review')
-    .leftJoinAndSelect('products.likedBy', 'likedBy')
-    .leftJoinAndSelect('products.orderItems', 'orderItemsProduct')
-    .orderBy('products.createdate', 'DESC')
-    .limit(5)
-    .getMany();
+        .createQueryBuilder('products')
+        .leftJoinAndSelect('products.colours', 'colours')
+        .leftJoinAndSelect('colours.addedBy', 'addedBy') // Inclure l'utilisateur qui a ajouté la couleur
+        .leftJoinAndSelect('colours.sizes', 'sizes') // Inclure les tailles associées à la couleur
+        .leftJoinAndSelect('colours.images', 'images') // Inclure les images associées à la couleur
+        .leftJoinAndSelect('colours.orderItems', 'orderItems') // Inclure les items de commande associés à la couleur
+        .leftJoinAndSelect('products.category', 'category')
+        .leftJoinAndSelect('products.addedBy', 'addedByProduct')
+        .leftJoinAndSelect('products.review', 'review')
+        .leftJoinAndSelect('products.likedBy', 'likedBy')
+        .leftJoinAndSelect('products.orderItems', 'orderItemsProduct')
+        .orderBy('products.createdate', 'DESC')
+        .limit(5)
+        .getMany();
 
-    return {
-      data: defaultProducts,
-      statusCode: HttpStatus.OK,
-    };
+      return {
+        data: defaultProducts,
+        statusCode: HttpStatus.OK,
+      };
 
     }
 
-    
+
 
     // Recherchez d'autres produits similaires aux produits likés
     const recommendedProducts = await this.productRepository

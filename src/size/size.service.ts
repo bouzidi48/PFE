@@ -16,48 +16,49 @@ import { CouleurController } from 'src/couleur/couleur.controller';
 
 @Injectable()
 export class SizeService {
-  constructor(@InjectRepository(Size) private readonly sizeRepository:SizeRepository,
-  private readonly userService:UserService,
-  @Inject(forwardRef(() => CouleurService))
-  private readonly couleurService:CouleurService,
-  ){}
-  async create(@Session() request:Record<string, any>,createSizeDto: CreateSizeDto) {
-    const idAdmin=request.idUser
+  constructor(@InjectRepository(Size) private readonly sizeRepository: SizeRepository,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => CouleurService))
+    private readonly couleurService: CouleurService,
+  ) { }
+  async create(@Session() request: Record<string, any>, createSizeDto: CreateSizeDto) {
+    const idAdmin = request.idUser
     console.log(idAdmin)
-    if(!idAdmin){
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter pour ajouter une categorie',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const admin= await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    const admin = await this.userService.findById(idAdmin)
+    if (!admin || admin.data.role === Roles.USER) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const size1=await this.sizeRepository.findOne({where : {typeSize:createSizeDto.typeSize,couleur:{nameCouleur:createSizeDto.nameCouleur}}});
+    const size1 = await this.sizeRepository.findOne({ where: { typeSize: createSizeDto.typeSize, couleur: { nameCouleur: createSizeDto.nameCouleur } } });
     console.log(size1)
-    if(size1) {
-      return await{
-        message:'cette size existe deja dans se produit',
-        statusCode:HttpStatus.BAD_REQUEST,
+    if (size1) {
+      return await {
+        message: 'cette size existe deja dans se produit',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur =await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:createSizeDto.nameCouleur})
-    if(!couleur) {
-      return await{
-        message:'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const couleur = await this.couleurService.findByNameAndId({ id: idAdmin, nameCouleur: createSizeDto.nameCouleur, nameProduct: createSizeDto.nameProduct })
+    if (!couleur.data) {
+      return await {
+        message: 'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
 
-    const size=await this.sizeRepository.create(createSizeDto);
-    size.addedBy=admin.data;
-    size.createdate=new Date();
-    size.couleur=couleur.data;
+    const size = await this.sizeRepository.create(createSizeDto);
+    size.addedBy = admin.data;
+    size.createdate = new Date();
+    size.couleur = couleur.data;
     this.sizeRepository.save(size);
     return await {
       message: 'couleur ajoute avec succes',
@@ -67,174 +68,200 @@ export class SizeService {
 
   async findAll() {
     const size = await this.sizeRepository.find();
-    if(size.length==0) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+    if (size.length == 0) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:size,
-      statusCode:HttpStatus.OK,
+      message: size,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async findByNameSize(typeSize:FindBySizeDto) {
-    const size =  await this.sizeRepository.find({where : {typeSize:typeSize.typeSize}});
-    if(size.length==0) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+  async findByNameSize(typeSize: FindBySizeDto) {
+    const size = await this.sizeRepository.find({ where: { typeSize: typeSize.typeSize } });
+    if (size.length == 0) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:size,
-      statusCode:HttpStatus.OK,
+      message: size,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async findByCouleur(nameCategory:FindByCouleurDto) {
-    const couleur = await this.couleurService.findByNameCouleur({nameCouleur:nameCategory.nameCouleur})
-    if(!couleur) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+  async findByCouleur(nameCategory: FindByCouleurDto) {
+    const couleur = await this.couleurService.findByNameCouleur({ nameCouleur: nameCategory.nameCouleur })
+    if (!couleur) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    
-    const sizes = await this.sizeRepository.find( { where: { couleur: { id: couleur.data.id } }});
-    if(!sizes) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+
+    const sizes = await this.sizeRepository.find({ where: { couleur: { id: couleur.data.id } } });
+    if (!sizes) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:sizes,
-      statusCode:HttpStatus.OK,
+      message: sizes,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async findByNameAndId(nameProduct:FindByIdNameDto) {
-    const size =  await this.sizeRepository.findOne({where : {typeSize:nameProduct.typeSize,addedBy:{id:nameProduct.id}}});
-    if(!size) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+  async findByNameAndId(nameProduct: FindByIdNameDto) {
+    const user = await this.userService.findById(nameProduct.id);
+    if (!user) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (user.data.role === Roles.USER) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (user.data.role === Roles.SUPERADMIN) {
+      const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize, couleur: { nameCouleur: nameProduct.nameCouleur} } });
+      if (!size) {
+        return await {
+          data: null,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+      return await {
+        data: size,
+        statusCode: HttpStatus.OK,
+      }
+    }
+    const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize, addedBy: { id: nameProduct.id } } });
+    if (!size) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:size,
-      statusCode:HttpStatus.OK,
+      data: size,
+      statusCode: HttpStatus.OK,
     }
   }
 
   async findOne(id: number) {
-    const size = await this.sizeRepository.findOne({where : {id:id}});
-    if(!size) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+    const size = await this.sizeRepository.findOne({ where: { id: id } });
+    if (!size) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      data:size,
-      statusCode:HttpStatus.OK,
+      data: size,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async findByIdSizeIdCouleur(idSize: number,idCouleur: number) {
-    const couleur = await this.sizeRepository.findOne({where:{id:idSize,couleur:{id:idCouleur}}});
-    if(!couleur) {
-      return await{
-        data:null,
-        statusCode:HttpStatus.BAD_REQUEST,
+  async findByIdSizeIdCouleur(idSize: number, idCouleur: number) {
+    const couleur = await this.sizeRepository.findOne({ where: { id: idSize, couleur: { id: idCouleur } } });
+    if (!couleur) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     return await {
-      message:couleur,
-      statusCode:HttpStatus.OK,
+      message: couleur,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async update(@Session() request:Record<string, any>, updateCouleurDto: UpdateSizeDto) {
+  async update(@Session() request: Record<string, any>, updateCouleurDto: UpdateSizeDto) {
     const idAdmin = request.idUser
-    if(!idAdmin){  
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    if (!admin || admin.data.role === Roles.USER) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const size = await this.sizeRepository.findOne({where : {typeSize:updateCouleurDto.typeSize,addedBy:idAdmin}});
-    if(!size) {
-      return await{
-        message:'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, typeSize: updateCouleurDto.typeSize })
+    if (!size.data) {
+      return await {
+        message: 'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const couleur = await this.couleurService.findByNameAndId({id:idAdmin,nameCouleur:updateCouleurDto.nameCouleur})
-    if(!couleur) {
-      return await{
-        message:'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const couleur = await this.couleurService.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, nameProduct: updateCouleurDto.nameProduct })
+    if (!couleur.data) {
+      return await {
+        message: 'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    if(updateCouleurDto.typeSize) {
-      const siz = await this.sizeRepository.findOne({where : {typeSize:updateCouleurDto.typeSize}});
-      if(siz) {
-        return await{
-          message:'cette couleur existe deja',
-          statusCode:HttpStatus.BAD_REQUEST,
+    if (updateCouleurDto.typeSize) {
+      const siz = await this.sizeRepository.findOne({ where: { typeSize: updateCouleurDto.typeSize } });
+      if (siz) {
+        return await {
+          message: 'cette couleur existe deja',
+          statusCode: HttpStatus.BAD_REQUEST,
         }
       }
     }
-    size.typeSize = updateCouleurDto.typeSize;
-    size.addedBy = admin.data;
-    size.updatedate = new Date();
-    size.stockQuantity = updateCouleurDto.stockQuantity;
-    size.couleur = couleur.data;
-    this.sizeRepository.save(size)
+    size.data.typeSize = updateCouleurDto.typeSize;
+    size.data.addedBy = admin.data;
+    size.data.updatedate = new Date();
+    size.data.stockQuantity = updateCouleurDto.stockQuantity;
+    size.data.couleur = couleur.data;
+    this.sizeRepository.save(size.data)
     return await {
-      message:size,
-      statusCode:HttpStatus.OK,
+      message: size.data,
+      statusCode: HttpStatus.OK,
     }
   }
 
-  async remove(@Session() request:Record<string, any>, removeCouleurDto: RemoveSizeDto) {
+  async remove(@Session() request: Record<string, any>, removeCouleurDto: RemoveSizeDto) {
     const idAdmin = request.idUser
-    if(!idAdmin){  
+    if (!idAdmin) {
       return await {
         message: 'vous devez vous connecter',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if(!admin || admin.data.role!=Roles.ADMIN) {
-      return await{
-        message:'vous devez etre un admin',
-        statusCode:HttpStatus.BAD_REQUEST,
-      
+    if (!admin || admin.data.role === Roles.USER) {
+      return await {
+        message: 'vous devez etre un admin',
+        statusCode: HttpStatus.BAD_REQUEST,
+
       }
     }
-    const size = await this.sizeRepository.findOne({where : {typeSize:removeCouleurDto.typeSize,addedBy:idAdmin}});
-    if(!size) {
-      return await{
-        message:'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
-        statusCode:HttpStatus.BAD_REQUEST,
+    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: removeCouleurDto.nameCouleur, typeSize: removeCouleurDto.typeSize })
+    if (!size.data) {
+      return await {
+        message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    await this.sizeRepository.remove(size)
+    await this.sizeRepository.remove(size.data)
     return await {
-      message:'la couleur a bien ete supprimer',
-      statusCode:HttpStatus.OK,
+      message: 'la couleur a bien ete supprimer',
+      statusCode: HttpStatus.OK,
     }
   }
 }

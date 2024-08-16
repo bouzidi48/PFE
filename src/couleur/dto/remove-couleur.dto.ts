@@ -10,6 +10,10 @@ export class RemoveCouleurDto{
     @IsString({message:'nameCouleur should be string '})
     
     nameCouleur:string;
+    @IsOptional()
+    @IsNotEmpty({message:'nameproduct can not be empty'})
+    @IsString({message:'nameproduct should be string '})
+    nameProduct:string;
 
     @Type(()=>RemoveImageDto)
     @ValidateNested({ each: true })
