@@ -227,6 +227,9 @@ export class ProductService {
     for (let couleur of updateProductDto.listeCouleur) {
       await this.couleurService.update(request, couleur)
     }
+    for(let couleur of updateProductDto.listeAjouterCouleur) {
+      await this.couleurService.create(request, couleur)
+    }
     product.data.nameProduct = updateProductDto.nameProduct;
     product.data.description = updateProductDto.description;
     product.data.price = updateProductDto.price;

@@ -247,6 +247,12 @@ export class CouleurService {
     for (let size of updateCouleurDto.listesize) {
       await this.sizeService.update(request, size)
     }
+    for(let image of updateCouleurDto.listeAjouterimage) {
+      await this.imageService.create_product(request, image)
+    }
+    for(let size of updateCouleurDto.listeAjoutersize) {
+      await this.sizeService.create(request, size)
+    }
     return {
       message: couleur.data,
       statusCode: HttpStatus.OK,

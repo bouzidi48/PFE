@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
+import { CreateCouleurDto } from "src/couleur/dto/create-couleur.dto";
 import { UpdateCouleurDto } from "src/couleur/dto/update-couleur.dto";
 
 export class UpdateProductDto {
@@ -33,4 +34,9 @@ export class UpdateProductDto {
     @Type(()=>UpdateCouleurDto)
     @ValidateNested({ each: true })
     listeCouleur:UpdateCouleurDto[];
+
+    @IsOptional()
+    @Type(()=>CreateCouleurDto)
+    @ValidateNested({ each: true })
+    listeAjouterCouleur:CreateCouleurDto[];
 }

@@ -4,6 +4,8 @@ import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validato
 import { Type } from 'class-transformer';
 import { UpdateImageDto } from 'src/images/dto/update-image.dto';
 import { UpdateSizeDto } from 'src/size/dto/update-size.dto';
+import { CreateSizeDto } from 'src/size/dto/create-size.dto';
+import { CreateImageDto } from 'src/images/dto/create-image.dto';
 
 export class UpdateCouleurDto{
     @IsNotEmpty({message:'nameCouleur can not be empty'})
@@ -29,4 +31,14 @@ export class UpdateCouleurDto{
     @Type(()=>UpdateSizeDto)
     @ValidateNested({ each: true })
     listesize:UpdateSizeDto[];
+
+    @IsOptional()
+    @Type(()=>CreateImageDto)
+    @ValidateNested({ each: true })
+    listeAjouterimage:CreateImageDto[];
+    
+    @IsOptional()
+    @Type(()=>CreateSizeDto)
+    @ValidateNested({ each: true })
+    listeAjoutersize:CreateSizeDto[];
 }
