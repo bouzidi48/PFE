@@ -48,6 +48,7 @@ export class ProductService {
   ) { }
   async create(@Session() request: Record<string, any>, createProductDto: CreateProductDto) {
     const idAdmin = request.idUser
+    console.log(createProductDto)
     console.log(idAdmin)
     if (!idAdmin) {
       return await {
@@ -56,6 +57,7 @@ export class ProductService {
       }
     }
     const admin = await this.userService.findById(idAdmin)
+    console.log(idAdmin)
     if (!admin || admin.data.role === Roles.USER) {
       return await {
         message: 'vous devez etre un admin',
@@ -63,6 +65,7 @@ export class ProductService {
 
       }
     }
+    console.log(idAdmin)
     const pro = await this.productRepository.findOne({ where: { nameProduct: createProductDto.nameProduct } });
     if (pro) {
       return await {
@@ -70,33 +73,34 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log(idAdmin)
     const category = await this.categoryService.findByIdAndName({ id: idAdmin, nameCategory: createProductDto.nomCategory })
-    if (!category) {
+    if (!category.data) {
       return await {
         message: 'la categorie que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de cette categorie',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-
+    console.log(category.data)
     const product = await this.productRepository.create(createProductDto);
     product.addedBy = admin.data;
     product.category = category.data;
     product.createdate = new Date();
     this.productRepository.save(product)
+    console.log(product)
     for (let couleur of createProductDto.listeCouleur) {
       await this.couleurService.create(request, couleur)
     }
     return await {
       message: 'produit ajoute avec succes',
       statusCode: HttpStatus.OK,
-
     }
   }
 
 
 
   async findAll() {
-    const products = await this.productRepository.find({ relations: ['colours', 'colours.images', 'colours.sizes'] });
+    const products = await this.productRepository.find({ relations: ['colours', 'colours.images', 'colours.sizes','category'] });
     if (!products) {
       return await {
         data: null,
@@ -274,7 +278,7 @@ export class ProductService {
     }
   }
   async findById(id: number) {
-    const product = await this.productRepository.findOne({ where: { id: id },relations:['colours'] });
+    const product = await this.productRepository.findOne({ where: { id: id },relations: ['colours', 'colours.images', 'colours.sizes','category','review'] });
     if (!product) {
       return await {
         data: null,

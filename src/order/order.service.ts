@@ -303,7 +303,7 @@ export class OrderService {
       }
     }
     const admin= await this.userService.findById(idAdmin)
-  if(!admin || admin.data.role!=Roles.ADMIN) {
+  if(!admin || admin.data.role===Roles.USER) {
     return await{
       message:'vous devez etre un admin',
       statusCode:HttpStatus.BAD_REQUEST,
