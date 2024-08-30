@@ -326,7 +326,7 @@ export class UserService {
             }
             couleurs.push({nameCouleur:couleur.nameCouleur,listeimage:listeimage,listesize:listsize,nameProduct:couleur1.data.product.nameProduct})
         }
-        const supprimer = await this.productService.remove(request,{nameProduct:product.nameProduct,listeCouleur:couleurs})
+        const supprimer = await this.productService.remove(request,{id:product.id,listeCouleur:couleurs})
         console.log("salut1")
         console.log(supprimer)
         }
@@ -335,10 +335,10 @@ export class UserService {
         for(const category of user.categories){
           const category1 = await this.categoryService.findOne(category.id)
           if(category1.data.image){
-          await this.categoryService.remove(request,category1.data.id,{image:{urlImage:category1.data.image.UrlImage,nomCategorie:category.nameCategory,nameCouleur:null}})
+          await this.categoryService.remove(request,category1.data.id)
           }
           else{
-            await this.categoryService.remove(request,category1.data.id,{image:null})
+            await this.categoryService.remove(request,category1.data.id)
           }
         }
       }

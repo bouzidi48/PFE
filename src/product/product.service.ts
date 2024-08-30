@@ -30,6 +30,7 @@ import { OrderStatus } from 'src/enum/order-status.enum';
 import { CouleurService } from 'src/couleur/couleur.service';
 import { ProductLikeService } from 'src/product-like/product-like.service';
 import { Order } from 'src/order/entities/order.entity';
+import { where } from 'sequelize';
 
 @Injectable()
 export class ProductService {
@@ -86,13 +87,16 @@ export class ProductService {
     product.addedBy = admin.data;
     product.category = category.data;
     product.createdate = new Date();
-    this.productRepository.save(product)
+    await this.productRepository.save(product)
     console.log(product)
     for (let couleur of createProductDto.listeCouleur) {
       await this.couleurService.create(request, couleur)
     }
+    const products = await this.productRepository.findOne({where:{id:product.id},relations:['colours','colours.images','colours.sizes','category']})
+    console.log(products)
     return await {
       message: 'produit ajoute avec succes',
+      data: products,
       statusCode: HttpStatus.OK,
     }
   }
@@ -197,21 +201,32 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("admin")
     const admin = await this.userService.findById(idAdmin)
-    if (!admin || admin.data.role != Roles.ADMIN) {
+    if (!admin || admin.data.role === Roles.USER) {
       return await {
         message: 'vous devez etre un admin',
         statusCode: HttpStatus.BAD_REQUEST,
 
       }
     }
-    const product = await this.findByNameAndIdProduct({ nameProduct: updateProductDto.ancienProduct, id: idAdmin });
+    console.log("produt1")
+    const product1 = await this.productRepository.findOne({where:{id:updateProductDto.id}})
+    if(!product1){
+      return await {
+        message: 'ce produit n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    console.log("produt")
+    const product = await this.findByNameAndIdProduct({ nameProduct: product1.nameProduct, id: idAdmin });
     if (!product.data) {
       return await {
         message: 'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("category")
     const category = await this.categoryService.findByIdAndName({ id: idAdmin, nameCategory: updateProductDto.nomCategory })
     if (!category.data) {
       return await {
@@ -220,6 +235,8 @@ export class ProductService {
       }
     }
     if (updateProductDto.nameProduct) {
+      console.log(updateProductDto.nameProduct)
+      console.log("pro")
       const pro = await this.productRepository.findOne({ where: { nameProduct: updateProductDto.nameProduct } });
       if (pro) {
         return await {
@@ -228,20 +245,36 @@ export class ProductService {
         }
       }
     }
-    for (let couleur of updateProductDto.listeCouleur) {
-      await this.couleurService.update(request, couleur)
+    
+    if(updateProductDto.nameProduct){
+      product.data.nameProduct = updateProductDto.nameProduct;
     }
-    for(let couleur of updateProductDto.listeAjouterCouleur) {
-      await this.couleurService.create(request, couleur)
-    }
-    product.data.nameProduct = updateProductDto.nameProduct;
     product.data.description = updateProductDto.description;
     product.data.price = updateProductDto.price;
     product.data.category = category.data;
     product.data.updatedate = new Date();
-    this.productRepository.save(product.data)
+    await this.productRepository.save(product.data)
+    console.log("listeCouleur")
+    console.log(updateProductDto.listeCouleur)
+    for (let couleur of updateProductDto.listeCouleur) {
+      const couleur1 = await this.couleurService.update(request, couleur)
+      console.log(couleur1)
+    }
+    console.log("listeAjouterCouleur")
+    for(let couleur of updateProductDto.listeAjouterCouleur) {
+      const couleur1 = await this.couleurService.create(request, couleur)
+      console.log(couleur1)
+    }
+    console.log("listeSupprimerCouleur")
+    console.log(updateProductDto.listeSupprimerCouleur)
+    for(let couleur of updateProductDto.listeSupprimerCouleur) {
+      const couleur1 = await this.couleurService.remove(request, couleur)
+      console.log(couleur1)
+    }
+    const products = await this.productRepository.findOne({where:{id:updateProductDto.id}, relations: ['colours', 'colours.images', 'colours.sizes','category'] });
+    console.log(products)
     return await {
-      message: product,
+      data: products,
       statusCode: HttpStatus.OK,
     }
   }
@@ -261,7 +294,14 @@ export class ProductService {
 
       }
     }
-    const product = await this.findByNameAndIdProduct({ nameProduct: removeProductDto.nameProduct, id: idAdmin });
+    const product1 = await this.productRepository.findOne({where:{id:removeProductDto.id}})
+    if(!product1){
+      return await {
+        message: 'ce produit n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const product = await this.findByNameAndIdProduct({ nameProduct: product1.nameProduct, id: idAdmin });
     if (!product.data) {
       return await {
         message: 'aucun produit avec ce nom ou vous n\'etes pas l\'admin de ce produit',
@@ -271,7 +311,8 @@ export class ProductService {
     for (let couleur of removeProductDto.listeCouleur) {
       await this.couleurService.remove(request, couleur)
     }
-    await this.productRepository.remove(product.data)
+    const product2 = await this.productRepository.findOne({ where: { id: removeProductDto.id } });
+    await this.productRepository.remove(product2)
     return await {
       message: 'le produit a bien ete supprimer',
       statusCode: HttpStatus.OK,

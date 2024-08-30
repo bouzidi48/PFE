@@ -59,7 +59,7 @@ export class SizeService {
     size.addedBy = admin.data;
     size.createdate = new Date();
     size.couleur = couleur.data;
-    this.sizeRepository.save(size);
+    await this.sizeRepository.save(size);
     return await {
       message: 'couleur ajoute avec succes',
       statusCode: HttpStatus.OK,
@@ -200,7 +200,14 @@ export class SizeService {
 
       }
     }
-    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, typeSize: updateCouleurDto.typeSize })
+    const size1 = await this.sizeRepository.findOne({ where: { id: updateCouleurDto.id } });
+    if (size1) {
+      return await {
+        message: 'cette size existe deja',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, typeSize: size1.typeSize })
     if (!size.data) {
       return await {
         message: 'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
@@ -223,7 +230,10 @@ export class SizeService {
         }
       }
     }
-    size.data.typeSize = updateCouleurDto.typeSize;
+    if(updateCouleurDto.typeSize){
+      size.data.typeSize = updateCouleurDto.typeSize;
+    }
+    
     size.data.addedBy = admin.data;
     size.data.updatedate = new Date();
     size.data.stockQuantity = updateCouleurDto.stockQuantity;
@@ -251,7 +261,14 @@ export class SizeService {
 
       }
     }
-    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: removeCouleurDto.nameCouleur, typeSize: removeCouleurDto.typeSize })
+    const size1 = await this.sizeRepository.findOne({ where: { id: removeCouleurDto.id } });
+    if(!size1){
+      return await {
+        message: 'cette size n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: removeCouleurDto.nameCouleur, typeSize: size1.typeSize })
     if (!size.data) {
       return await {
         message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',

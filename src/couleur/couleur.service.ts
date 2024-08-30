@@ -53,6 +53,7 @@ export class CouleurService {
       }
     }
     const product = await this.productService.findByNameAndIdProduct({ id: idAdmin, nameProduct: createCouleurDto.nameProduct })
+    console.log(product.data)
     if (!product.data) {
       return await {
         message: 'ce produit n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -64,10 +65,11 @@ export class CouleurService {
     couleur.addedBy = admin.data;
     couleur.createdate = new Date();
     couleur.product = product.data;
-    this.couleurRepository.save(couleur);
+    await this.couleurRepository.save(couleur);
     for (let image of createCouleurDto.listeimage) {
       await this.imageService.create_product(request, image)
     }
+    console.log("listesize")
     for (let size of createCouleurDto.listesize) {
       await this.sizeService.create(request, size)
     }
@@ -211,8 +213,14 @@ export class CouleurService {
 
       }
     }
-
-    const couleur = await this.findByNameAndId({ id: idAdmin, nameProduct: updateCouleurDto.nameProduct, nameCouleur: updateCouleurDto.ancienNameCouleur })
+    const couleur1 = await this.couleurRepository.findOne({where:{id:updateCouleurDto.id}})
+    if(!couleur1){
+      return await {
+        message: 'cette couleur n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const couleur = await this.findByNameAndId({ id: idAdmin, nameCouleur: couleur1.nameCouleur,nameProduct:updateCouleurDto.nameProduct })
     if (!couleur.data) {
       return await {
         message: 'aucun couleur avec ce nom ou vous n\'etes pas l\'admin de cette couleur',
@@ -236,22 +244,43 @@ export class CouleurService {
         }
       }
     }
-    couleur.data.nameCouleur = updateCouleurDto.nameCouleur;
+    if(updateCouleurDto.nameCouleur){
+      couleur.data.nameCouleur = updateCouleurDto.nameCouleur;
+    }
     couleur.data.addedBy = admin.data;
     couleur.data.updatedate = new Date();
     couleur.data.product = product.data;
     this.couleurRepository.save(couleur.data)
+    console.log("listeColeur.listeimage")
     for (let image of updateCouleurDto.listeimage) {
-      await this.imageService.update_product(request, image)
+      const image1 =await this.imageService.update_product(request, image)
+      console.log(image1)
     }
+    console.log("listeColeur.listesize")
     for (let size of updateCouleurDto.listesize) {
-      await this.sizeService.update(request, size)
+      const size1 =await this.sizeService.update(request, size)
+      console.log(size1)
     }
-    for(let image of updateCouleurDto.listeAjouterimage) {
-      await this.imageService.create_product(request, image)
+    console.log("listeColeur.listeAjouterImage")
+    for(let image of updateCouleurDto.listeAjouterImage){
+      const image1 =await this.imageService.create_product(request, image)
+      console.log(image1)
     }
-    for(let size of updateCouleurDto.listeAjoutersize) {
-      await this.sizeService.create(request, size)
+    console.log("listeColeur.listeAjouterSize")
+    console.log(updateCouleurDto.listeAjouterSize)
+    for(let size of updateCouleurDto.listeAjouterSize){
+      const size1 =await this.sizeService.create(request, size)
+      console.log(size1)
+    }
+    console.log("listeColeur.listeSupprimerImage")
+    for(let image of updateCouleurDto.listeSupprimerImage){
+      const image1 =await this.imageService.remove_product(request, image)
+      console.log(image1)
+    }
+    console.log("listeColeur.listeSupprimerSize")
+    for(let size of updateCouleurDto.listeSupprimerSize){
+      const size1 =await this.sizeService.remove(request, size)
+      console.log(size1)
     }
     return {
       message: couleur.data,
@@ -275,8 +304,14 @@ export class CouleurService {
 
       }
     }
-
-    const couleur = await this.findByNameAndId({ id: idAdmin, nameProduct: removeCouleurDto.nameProduct, nameCouleur: removeCouleurDto.nameCouleur })
+    const couleur1 = await this.couleurRepository.findOne({where:{id:removeCouleurDto.id}})
+    if(!couleur1){
+      return await {
+        message: 'cette couleur n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const couleur = await this.findByNameAndId({ id: idAdmin, nameProduct: removeCouleurDto.nameProduct, nameCouleur: couleur1.nameCouleur })
     if (!couleur) {
       return {
         message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',

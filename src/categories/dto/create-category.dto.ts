@@ -12,7 +12,6 @@ export class CreateCategoryDto {
     @IsString({message:'description should be string '})
     description:string;
 
-    @IsNotEmpty({message:'description can not be empty'})
     @IsString({message:'description should be string '})
     @IsOptional()
     NameparentCategory: string;

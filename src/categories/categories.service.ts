@@ -10,7 +10,7 @@ import { UserService } from 'src/user/user.service';
 
 import { CategoryRepository } from './category.repository';
 import { Roles } from 'src/enum/user_enum';
-import { DeleteCategoryDto } from './dto/delete-category.dto';
+
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { UserController } from 'src/user/user.controller';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
@@ -19,6 +19,8 @@ import { FindByNameParentDto } from './dto/find-ByParentName.dto';
 import { ImageRepository } from 'src/images/image.repository';
 import { ImagesController } from 'src/images/images.controller';
 import { ImagesService } from 'src/images/images.service';
+import { ProductService } from 'src/product/product.service';
+import { RemoveProductDto } from 'src/product/dto/remove-product.dto';
 
 
 
@@ -30,7 +32,9 @@ export class CategoriesService {
     @InjectRepository(CategoryEntity) private readonly categoryRepository: CategoryRepository,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
-    private readonly imageControleur: ImagesService
+    private readonly imageControleur: ImagesService,
+    @Inject(forwardRef(() => ProductService))
+    private readonly productService: ProductService
   ) { }
 
 
@@ -69,7 +73,7 @@ export class CategoriesService {
       this.categoryRepository.save(category)
       const image = await this.imageControleur.create_category(request, createCategoryDto.image);
       category.image = image.data
-      this.categoryRepository.save(category)
+      await this.categoryRepository.save(category)
     }
     else {
       const parent = await this.categoryRepository.findOne({ where: { nameCategory: createCategoryDto.NameparentCategory } })
@@ -88,11 +92,12 @@ export class CategoriesService {
       const image = await this.imageControleur.create_category(request, createCategoryDto.image);
       console.log(image.data)
       categorys.image = image.data
-      this.categoryRepository.save(category)
+      await this.categoryRepository.save(category)
     }
     console.log(category)
+    const categories = await this.categoryRepository.findOne({ where: { nameCategory: createCategoryDto.nameCategory }, relations: ['image', 'parentCategory'] });
     return await {
-      message: category,
+      data: categories,
       statusCode: HttpStatus.OK,
 
     }
@@ -140,7 +145,7 @@ export class CategoriesService {
 
 
   async findSubcategories(parentCategoryName: FindByNameParentDto) {
-    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameParentCategory } });
+    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameParentCategory }, relations: ['addedBy', 'image', 'products', 'subcategories'] });
     if (!category) {
       return await {
         data: null,
@@ -149,8 +154,8 @@ export class CategoriesService {
     }
 
 
-    const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } } , relations: ['addedBy', 'image','products']});
-    if (!subcategories) {
+    const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } }, relations: ['addedBy', 'image', 'products', 'subcategories'] });
+    if (subcategories.length === 0) {
       return await {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -163,7 +168,7 @@ export class CategoriesService {
   }
 
   async findAll() {
-    const categories = await this.categoryRepository.find();
+    const categories = await this.categoryRepository.find({ relations: ["image", "parentCategory"] });
     if (!categories) {
       return await {
         data: null,
@@ -191,7 +196,7 @@ export class CategoriesService {
   }
 
   async findOne(id: number) {
-    const categorie = await this.categoryRepository.findOne({ where: { id: id }, relations: ['addedBy', 'image','products'] })
+    const categorie = await this.categoryRepository.findOne({ where: { id: id }, relations: ['addedBy', 'image', 'products', 'products.colours', 'products.colours.images', 'products.colours.sizes', 'subcategories', 'parentCategory'] })
     return await {
       data: categorie,
       statusCode: HttpStatus.OK
@@ -209,6 +214,7 @@ export class CategoriesService {
 
   async update(@Session() request: Record<string, any>, id: number, fields: Partial<UpdateCategoryDto>) {
     const category = await this.findOne(id);
+    console.log(category)
     if (!category) {
       return await {
         message: 'Category not found.',
@@ -230,20 +236,70 @@ export class CategoriesService {
 
       }
     }
+    if (fields.NameparentCategory) {
+      const parentCategory = await this.categoryRepository.findOne({ where: { nameCategory: fields.NameparentCategory } });
+      if (!parentCategory) {
+        return await {
+          message: 'Parent Category not found.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      } if (fields.nameCategory) {
+        const nameCategory = await this.categoryRepository.findOne({ where: { nameCategory: fields.nameCategory } });
+        if (nameCategory) {
+          return await {
+            message: 'Name Category existe deja.',
+            statusCode: HttpStatus.BAD_REQUEST,
+          }
+        }
+      }
+      if (fields.nameCategory) {
+        category.data.nameCategory = fields.nameCategory
+      }
+      category.data.parentCategory = parentCategory;
+      category.data.description = fields.description;
+      category.data.updatedAt = new Date();
+      await this.categoryRepository.save(category.data);
+      await this.imageControleur.update_category(request, fields.image);
 
-    Object.assign(category, fields);
-    await this.imageControleur.update_category(request, fields.image);
+
+      const categorie = await this.categoryRepository.findOne({ where: { id: id }, relations: ['addedBy', 'image', 'products', 'parentCategory'] })
+      console.log(categorie)
+      return await {
+        data: categorie,
+        statusCode: HttpStatus.OK,
+      }
+    }
+    if (fields.nameCategory) {
+      const nameCategory = await this.categoryRepository.findOne({ where: { nameCategory: fields.nameCategory } });
+      if (nameCategory) {
+        return await {
+          message: 'Name Category existe deja.',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+    }
+    category.data.description = fields.description;
+    if (fields.nameCategory) {
+      category.data.nameCategory = fields.nameCategory
+    }
     category.data.updatedAt = new Date();
+    console.log("Categorie")
     await this.categoryRepository.save(category.data);
+    console.log(category.data)
+    const image = await this.imageControleur.update_category(request, fields.image);
+    console.log(image)
+    const categorie = await this.categoryRepository.findOne({ where: { id: id }, relations: ['addedBy', 'image', 'products', 'parentCategory'] })
     return await {
-      message: category,
+      data: categorie,
       statusCode: HttpStatus.OK,
     }
   }
 
-  async remove(@Session() request: Record<string, any>, id: number, fields: Partial<DeleteCategoryDto>) {
+  async remove(@Session() request: Record<string, any>, id: number) {
     const category = await this.findOne(id);
-    if (!category) {
+    console.log("category", category)
+    console.log("produts", category.data.products)
+    if (!category.data) {
       return {
         message: 'Category not found.',
         statusCode: HttpStatus.BAD_REQUEST,
@@ -268,32 +324,59 @@ export class CategoriesService {
 
     // Supprimer les sous-catégories dépendantes
     const subcategories = await this.findSubcategories({ nameParentCategory: category.data.nameCategory });
-    console.log(subcategories)
-    if(subcategories && subcategories.data.length > 0) {
+    console.log("subcategories", subcategories)
+    if (subcategories.data && subcategories.data.length > 0) {
       for (const subcategory of subcategories.data) {
-        if(subcategory && subcategory.image){
-          await this.remove(request, subcategory.id, {image:{urlImage:subcategory.image.UrlImage,nomCategorie:subcategory.nameCategory,nameCouleur:null}});
-        }
-        else{
-          await this.remove(request, subcategory.id, {image:null});
-        }
+        const image = await this.remove(request, subcategory.id);
+        console.log(image)
       }
     }
-    
+    if (category.data.image) {
+      console.log("image", category.data.image)
+      const deleteImage = {
+        id: category.data.image.id,
+        nomCategorie: category.data.nameCategory,
+        nameCouleur: null,
+      }
+      // Supprimer les images liées, si applicable
+      if (category.data && category.data.image) {
+        const image = await this.imageControleur.remove_category(request, deleteImage);
+        console.log(image)
+      }
+    }
 
-    // Supprimer les images liées, si applicable
-    if (fields.image!=null) {
-      await this.imageControleur.remove_category(request, fields.image);
+
+    if (category.data.products.length > 0) {
+      for (const product of category.data.products) {
+        const removeProductDto: RemoveProductDto = {
+          id: product.id,
+          listeCouleur: product.colours ? product.colours.map(couleur => ({
+            id: couleur.id,
+            nameProduct: product.nameProduct,
+            listeimage: couleur.images.map(image => ({
+              id: image.id,
+              nomCategorie: null,
+              nameCouleur: couleur.nameCouleur,
+            })),
+            listesize: couleur.sizes.map(size => ({
+              id: size.id,
+              nameCouleur: couleur.nameCouleur,
+            })),
+          })) : [],
+        };
+        await this.productService.remove(request, removeProductDto);
+      }
     }
 
     // Supprimer la catégorie principale
-    await this.categoryRepository.remove(category.data);
-    
-    return {
-      message: 'Category deleted successfully',
+    const categories = await this.categoryRepository.findOne({ where: { id: id } });
+    console.log(categories)
+    await this.categoryRepository.remove(categories);
+    return await {
+      data: categories,
       statusCode: HttpStatus.OK,
     }
-}
+  }
 
 
 

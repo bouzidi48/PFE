@@ -65,7 +65,7 @@ export class ImagesService {
     image.addedBy = admin.data;
     image.createdate = new Date();
     image.couleur = couleur.data;
-    this.imageRepository.save(image);
+    await this.imageRepository.save(image);
     return await {
       data: image,
       statusCode: HttpStatus.OK,
@@ -269,15 +269,21 @@ export class ImagesService {
       }
     }
     const admin = await this.userService.findById(idAdmin)
-    if (!admin || admin.data.role != Roles.ADMIN) {
+    if (!admin || admin.data.role === Roles.USER) {
       return {
         message: 'vous devez etre un admin',
         statusCode: HttpStatus.BAD_REQUEST,
 
       }
     }
-
-    const image = await this.findByNameAndId({ id: idAdmin, urlImage: updateCouleurDto.urlImage, nameCouleur: updateCouleurDto.nameCouleur, nomCategorie:null })
+    const image1 = await this.imageRepository.findOne({ where: { id: updateCouleurDto.id } });
+    if(!image1){
+      return await {
+        message: 'cette image n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const image = await this.findByNameAndId({ id: idAdmin, urlImage: image1.UrlImage, nameCouleur: updateCouleurDto.nameCouleur, nomCategorie:null })
     if (!image.data) {
       return await {
         message: 'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
@@ -300,11 +306,12 @@ export class ImagesService {
         }
       }
     }
-    image.data.UrlImage = updateCouleurDto.urlImage;
-    image.data.addedBy = admin.data;
+    if(updateCouleurDto.urlImage){
+      image.data.UrlImage = updateCouleurDto.urlImage;
+    }
     image.data.updatedate = new Date();
     image.data.couleur = couleur.data;
-    this.imageRepository.save(image.data)
+    await this.imageRepository.save(image.data)
     return await {
       message: image.data,
       statusCode: HttpStatus.OK,
@@ -326,8 +333,15 @@ export class ImagesService {
 
       }
     }
-
-    const image = await this.findByNameAndId({ id: idAdmin, urlImage: updateCouleurDto.urlImage, nomCategorie: updateCouleurDto.nomCategorie, nameCouleur:null })
+    const image1 = await this.imageRepository.findOne({ where: { id: updateCouleurDto.id } });
+    if(!image1){
+      return await {
+        message: 'cette image n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    } 
+    const image = await this.findByNameAndId({ id: idAdmin, urlImage: image1.UrlImage, nomCategorie: updateCouleurDto.nomCategorie, nameCouleur:null })
+    console.log(image)
     if (!image.data) {
       return await {
         message: 'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
@@ -341,8 +355,8 @@ export class ImagesService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    if (updateCouleurDto.urlImage) {
-      const ima = await this.imageRepository.findOne({ where: { UrlImage: updateCouleurDto.urlImage } });
+    if (updateCouleurDto.UrlImage) {
+      const ima = await this.imageRepository.findOne({ where: { UrlImage: updateCouleurDto.UrlImage } });
       if (ima) {
         return await {
           message: 'cette couleur existe deja',
@@ -350,13 +364,15 @@ export class ImagesService {
         }
       }
     }
-    image.data.UrlImage = updateCouleurDto.urlImage;
-    image.data.addedBy = admin.data;
+    if(updateCouleurDto.UrlImage){
+      image.data.UrlImage = updateCouleurDto.UrlImage;
+    }
+    
     image.data.updatedate = new Date();
-    image.data.category = categorie.data;
-    this.imageRepository.save(image.data)
+    await this.imageRepository.save(image.data)
+    console.log(image.data)
     return await {
-      message: image,
+      message: image.data,
       statusCode: HttpStatus.OK,
     }
   }
@@ -377,14 +393,23 @@ export class ImagesService {
 
       }
     }
-
-    const image = await this.findByNameAndId({ id: idAdmin, urlImage: removeCouleurDto.urlImage, nomCategorie: removeCouleurDto.nomCategorie, nameCouleur:null })
+    const image1 = await this.imageRepository.findOne({ where: { id: removeCouleurDto.id } });
+    console.log(image1)
+    if(!image1){
+      return await {
+        message: 'cette image n\'existe pas',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const image = await this.findByNameAndId({ id: idAdmin, urlImage: image1.UrlImage, nomCategorie: removeCouleurDto.nomCategorie, nameCouleur:null })
+    console.log(image)
     if (!image.data) {
       return await {
         message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log(image.data)
     await this.imageRepository.remove(image.data)
     return await {
       message: 'la couleur a bien ete supprimer',
@@ -407,8 +432,15 @@ export class ImagesService {
 
       }
     }
-
-    const image = await this.findByNameAndId({ id: idAdmin, urlImage: removeCouleurDto.urlImage, nomCategorie: null, nameCouleur:removeCouleurDto.nameCouleur })
+    const image1 = await this.imageRepository.findOne({ where: { id: removeCouleurDto.id } });
+    if(!image1)
+      {
+        return await {
+          message: 'cette image n\'existe pas',
+          statusCode: HttpStatus.BAD_REQUEST,
+        }
+      }
+    const image = await this.findByNameAndId({ id: idAdmin, urlImage: image1.UrlImage, nomCategorie: null, nameCouleur:removeCouleurDto.nameCouleur })
     if (!image.data) {
       return await {
         message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',

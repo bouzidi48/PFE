@@ -6,6 +6,8 @@ import { UpdateImageDto } from 'src/images/dto/update-image.dto';
 import { UpdateSizeDto } from 'src/size/dto/update-size.dto';
 import { CreateSizeDto } from 'src/size/dto/create-size.dto';
 import { CreateImageDto } from 'src/images/dto/create-image.dto';
+import { RemoveImageDto } from 'src/images/dto/remove-image.dto';
+import { RemoveSizeDto } from 'src/size/dto/remove-size.dto';
 
 export class UpdateCouleurDto{
     @IsNotEmpty({message:'nameCouleur can not be empty'})
@@ -19,8 +21,7 @@ export class UpdateCouleurDto{
     nameProduct:string;
 
     @IsNotEmpty({message:'ancienNameCouleur can not be empty'})
-    @IsString({message:'ancienNameCouleur should be string '})
-    ancienNameCouleur:string;
+    id:number;
 
     @IsOptional()
     @Type(()=>UpdateImageDto)
@@ -35,10 +36,21 @@ export class UpdateCouleurDto{
     @IsOptional()
     @Type(()=>CreateImageDto)
     @ValidateNested({ each: true })
-    listeAjouterimage:CreateImageDto[];
-    
+    listeAjouterImage:CreateImageDto[];
+
     @IsOptional()
     @Type(()=>CreateSizeDto)
     @ValidateNested({ each: true })
-    listeAjoutersize:CreateSizeDto[];
+    listeAjouterSize:CreateSizeDto[];
+
+    @IsOptional()
+    @Type(()=>RemoveImageDto)
+    @ValidateNested({ each: true })
+    listeSupprimerImage:RemoveImageDto[];
+
+    @IsOptional()
+    @Type(()=>RemoveSizeDto)
+    @ValidateNested({ each: true })
+    listeSupprimerSize:RemoveSizeDto[];
+    
 }

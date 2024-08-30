@@ -7,7 +7,7 @@ import { Roles } from 'src/enum/user_enum';
 import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
 import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
-import { DeleteCategoryDto } from './dto/delete-category.dto';
+
 import { FindByNameCategoryDto } from './dto/find-ByName.dto';
 import { CategoryEntity } from './entities/category.entity';
 import { FindByIdAndNameDto } from './dto/find-ById-Name.dto';
@@ -58,7 +58,7 @@ export class CategoriesController {
   }
 
   @Delete('delete/:id')
-  async remove(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number, @Body() deleteCategoryDto: DeleteCategoryDto) {
-    return await this.categoriesService.remove(request, id, deleteCategoryDto);
+  async remove(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number) {
+    return await this.categoriesService.remove(request, id);
   }
 }

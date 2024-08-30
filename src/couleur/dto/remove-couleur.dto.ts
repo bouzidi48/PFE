@@ -7,18 +7,20 @@ import { RemoveSizeDto } from 'src/size/dto/remove-size.dto';
 
 export class RemoveCouleurDto{
     @IsNotEmpty({message:'nameCouleur can not be empty'})
-    @IsString({message:'nameCouleur should be string '})
     
-    nameCouleur:string;
-    @IsOptional()
+    
+    id:number;
+
     @IsNotEmpty({message:'nameproduct can not be empty'})
     @IsString({message:'nameproduct should be string '})
     nameProduct:string;
-
+    
+    @IsOptional()
     @Type(()=>RemoveImageDto)
     @ValidateNested({ each: true })
     listeimage:RemoveImageDto[];
-
+    
+    @IsOptional()
     @Type(()=>RemoveSizeDto)
     @ValidateNested({ each: true })
     listesize:RemoveSizeDto[];
