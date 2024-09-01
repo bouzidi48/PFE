@@ -128,7 +128,7 @@ export class OrderService {
   }
 
  async findOne(findbyid:number) {
-    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid},relations:{shipping_address:true,user:true,orderItems:{product:true}},})
+    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid},relations:{shipping_address:true,user:true,orderItems:{product:true},payment:true}})
     if(!orderid){
       return await {
         data:null,
@@ -147,7 +147,7 @@ export class OrderService {
 
   async update(@Session() request:Record<string, any>,id: number, updateOrderStatusDto: updateOrderStatusDto) {
      
-    const idAdmin=request.idAdmin
+    const idAdmin=request.idUser
     console.log('salut')
     if(!idAdmin) {
       return await {
@@ -157,7 +157,7 @@ export class OrderService {
     }
     const admin= await this.userService.findById(idAdmin)
     console.log(admin.data.role===Roles.ADMIN)
-  if(!admin || admin.data.role!=Roles.ADMIN) {
+  if(!admin || admin.data.role===Roles.USER) {
     return await{
       message:'vous devez etre un admin',
       statusCode:HttpStatus.BAD_REQUEST,
@@ -165,6 +165,7 @@ export class OrderService {
     }
   }
   let order =await this.orderRespoitory.findOne({where:{id:id},relations:['orderItems','shipping_address','user','payment']});
+  console.log(order)
   if(!order){
     return await {
       message:"la commande n'existe pas",
@@ -199,7 +200,7 @@ export class OrderService {
    order.updated_at= new Date();
    order.ShippeAt = new Date();
    order.delivered = new Date(order.ShippeAt.getTime());
-   order.delivered.setDate(order.delivered.getDate()+7);
+   order.delivered.setDate(order.delivered.getDate());
    console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
    console.log(order.payment)
@@ -338,6 +339,15 @@ export class OrderService {
       else if(order.data.payment.payment_method===PaymentMethod.CARD){
         await this.paymentService.updatePaymentCard({paymentId:order.data.payment.id});
       }
+    }
+    else if(order.data.status===OrderStatus.PROCESSING) {
+      if(order.data.payment.payment_method===PaymentMethod.CASH){
+        await this.paymentService.updatePaymentCash({paymentId:order.data.payment.id});
+      }
+      else if(order.data.payment.payment_method===PaymentMethod.CARD){
+        await this.paymentService.updatePaymentCard({paymentId:order.data.payment.id});
+      }
+
     }
     
 //La fonction met à jour le statut de la commande à CENCELLED
@@ -487,7 +497,7 @@ private async checkDeliveredOrders() {
 private async setupScheduledTask() {
   
   const cron = require('node-cron');
-  const task = await cron.schedule('0 10 * * *', async () => {
+  const task = await cron.schedule('20 13 * * *', async () => {
     await this.checkDeliveredOrders();
   });
   if (task) {

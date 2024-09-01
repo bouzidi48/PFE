@@ -261,6 +261,7 @@ export class PaymentService {
               console.log("sallut3")
               payment.payment_status = PaymentStatus.AUTHORIZED; // Mettre à jour le statut en "AUTHORIZED"
               payment.payment_date = new Date(); // Date de l'autorisation
+              this.paymentRepository.save(payment);
             } else {
               console.log("sallut4")
               return {
@@ -272,6 +273,7 @@ export class PaymentService {
             console.log("sallut5")
             payment.payment_status = PaymentStatus.AUTHORIZED; // Statut déjà autorisé
             payment.payment_date = new Date(); // Date de l'autorisation
+            this.paymentRepository.save(payment);
           }
         } catch (error) {
           console.log(error)
@@ -281,11 +283,14 @@ export class PaymentService {
           };
         }
       }
+
     } else
       if (order.data.status === OrderStatus.DELIVERED) {
 
         payment.payment_status = PaymentStatus.COMPLETED;
         payment.updated_at = new Date();
+
+        this.paymentRepository.save(payment);
       }
       else if (order.data.status === OrderStatus.SHIPPED) {
         try {
@@ -294,6 +299,7 @@ export class PaymentService {
           if (canceledPayment.status === 'canceled') {
             payment.payment_status = PaymentStatus.FAILED;
             payment.updated_at = new Date();
+            this.paymentRepository.save(payment);
           } else {
             return {
               message: `Échec de l'annulation du paiement`,
@@ -314,10 +320,84 @@ export class PaymentService {
           data: payment,
         };
       }
-    }
-    remove(id: number) {
-      return `This action removes a #${id} payment`;
-    }
-
-
   }
+  async canceledPayment(id: number) {
+
+    const payment = await this.paymentRepository.findOne({ where: { id: id }, relations: ['order'] });
+    if (!payment) {
+      return await {
+        message: `Le paiement ${id} n'existe pas`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+
+    const order = await this.orderService.findOne(payment.order.id);
+
+    if (!order) {
+      return await {
+        message: `La commande ${payment.order.id} n'existe pas`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+
+    }
+    if (order.data.status === OrderStatus.DELIVERED) {
+      return await {
+        message: "la commande est livrée",
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (order.data.status === OrderStatus.SHIPPED) {
+      if (payment.payment_status === PaymentStatus.AUTHORIZED) {
+        const refund = await this.stripe.refunds.create({
+          payment_intent: payment.stripePaymentIntentId,
+          amount: order.data.total_amount, // Montant à rembourser, en centimes (ou dans la plus petite unité de votre devise)
+        });
+
+        // Vérifier le statut du remboursement
+        if (refund.status === 'succeeded') {
+          console.log("Remboursement réussi.");
+          payment.payment_status = PaymentStatus.REFUNDED; // Mettre à jour le statut du paiement en "REFUNDED"
+          this.paymentRepository.save(payment);
+        } else {
+          console.log("Erreur lors du remboursement:", refund.status);
+          // Gérer les erreurs de remboursement
+        }
+
+      }
+    }
+    else if (order.data.status === OrderStatus.PROCESSING) {
+      if (payment.payment_status === PaymentStatus.PENDING) {
+        try {
+          // Cancel the payment in Stripe
+          const canceledPayment = await this.stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
+          if (canceledPayment.status === 'canceled') {
+            payment.payment_status = PaymentStatus.FAILED;
+            payment.updated_at = new Date();
+            this.paymentRepository.save(payment);
+          } else {
+            return {
+              message: `Échec de l'annulation du paiement`,
+              statusCode: HttpStatus.BAD_REQUEST,
+            };
+          }
+        } catch (error) {
+          return {
+            message: `Erreur lors de l'annulation du paiement: ${error.message}`,
+            statusCode: HttpStatus.BAD_REQUEST,
+          };
+        }
+      }
+    }
+    this.paymentRepository.save(payment);
+    return {
+      message: 'Le statut du paiement a été mis à jour avec succès',
+      statusCode: HttpStatus.OK,
+      data: payment,
+    };
+  }
+  remove(id: number) {
+    return `This action removes a #${id} payment`;
+  }
+
+
+}
