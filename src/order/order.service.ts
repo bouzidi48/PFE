@@ -334,18 +334,18 @@ export class OrderService {
     else if(order.data.status===OrderStatus.SHIPPED){
       await this.stockUpdate(order.data,OrderStatus.CENCELLED);
       if(order.data.payment.payment_method===PaymentMethod.CASH){
-        await this.paymentService.updatePaymentCash({paymentId:order.data.payment.id});
+        await this.paymentService.canceledPaymentCash(order.data.payment.id);
       }
       else if(order.data.payment.payment_method===PaymentMethod.CARD){
-        await this.paymentService.updatePaymentCard({paymentId:order.data.payment.id});
+        await this.paymentService.canceledPayment(order.data.payment.id);
       }
     }
     else if(order.data.status===OrderStatus.PROCESSING) {
       if(order.data.payment.payment_method===PaymentMethod.CASH){
-        await this.paymentService.updatePaymentCash({paymentId:order.data.payment.id});
+        await this.paymentService.canceledPaymentCash(order.data.payment.id);
       }
       else if(order.data.payment.payment_method===PaymentMethod.CARD){
-        await this.paymentService.updatePaymentCard({paymentId:order.data.payment.id});
+        await this.paymentService.canceledPayment(order.data.payment.id);
       }
 
     }
