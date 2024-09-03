@@ -42,8 +42,8 @@ export class CategoriesController {
     return await this.categoriesService.findAll();
   }
 
-  @Post('bynameCategory')
-  async findByName(@Body() nameCategory: FindByNameCategoryDto) {
+  @Get('bynameCategory')
+  async findByName(@Query() nameCategory: FindByNameCategoryDto) {
     return await this.categoriesService.findByName(nameCategory);
   }
 

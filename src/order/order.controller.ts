@@ -37,8 +37,12 @@ export class OrderController {
    return await this.orderService.cancelled(request,id)
   }
 
-  @Delete('/delete/:id')
+  @Delete('delete/:id')
   remove(@Session() request: Record<string, any>,@Param('id',ParseIntPipe) id: number) {
     return this.orderService.deleteOrder(request,id);
+  }
+  @Get('byUser/:idUser')
+  findbyUser(@Param('idUser',ParseIntPipe) id: number) {
+    return this.orderService.findbyUser(id);
   }
 }

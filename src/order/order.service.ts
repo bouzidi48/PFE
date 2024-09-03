@@ -200,7 +200,7 @@ export class OrderService {
    order.updated_at= new Date();
    order.ShippeAt = new Date();
    order.delivered = new Date(order.ShippeAt.getTime());
-   order.delivered.setDate(order.delivered.getDate());
+   order.delivered.setDate(order.delivered.getDate()+7);
    console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
    console.log(order.payment)
@@ -497,7 +497,7 @@ private async checkDeliveredOrders() {
 private async setupScheduledTask() {
   
   const cron = require('node-cron');
-  const task = await cron.schedule('20 13 * * *', async () => {
+  const task = await cron.schedule('0 10 * * *', async () => {
     await this.checkDeliveredOrders();
   });
   if (task) {
@@ -510,6 +510,21 @@ private async setupScheduledTask() {
 public async startScheduledTask() {
   await this.setupScheduledTask();
 }
+
+async findbyUser(findbyid:number) {
+  const orderid = await this.orderRespoitory.findOne({where:{user:{id:findbyid}},relations:{shipping_address:true,user:true,orderItems:{product:true},payment:true}})
+  if(!orderid){
+    return await {
+      data:null,
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
+
+    }
+    return await {
+      data:orderid,
+      statusCode:HttpStatus.BAD_REQUEST,
+    }
+  }
 }
 
 
