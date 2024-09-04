@@ -3,6 +3,7 @@ import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException, Session 
 import { User } from './entities/user.entity';
 
 import { InjectRepository } from '@nestjs/typeorm';
+import { startOfMonth, startOfWeek, subWeeks } from 'date-fns';
 
 
 
@@ -38,16 +39,185 @@ import { CategoriesService } from 'src/categories/categories.service';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private userRepository:UserRepository,
-    @InjectRepository(ReviewEntity) private reviewRepository:ReviewRepository,
-    private readonly couleurService:CouleurService,
+    @InjectRepository(User) private userRepository: UserRepository,
+    @InjectRepository(ReviewEntity) private reviewRepository: ReviewRepository,
+    private readonly couleurService: CouleurService,
     @Inject(forwardRef(() => OrderService))
-     private readonly orderService:OrderService,
-     private readonly productService:ProductService,
-     private readonly categoryService:CategoriesService,
-  ) {}
+    private readonly orderService: OrderService,
+    private readonly productService: ProductService,
+    private readonly categoryService: CategoriesService,
+  ) { }
 
-  async ancienPassword(@Session() request:Record<string, any>,password:AncienPasswordDto) {
+  async nbUser(@Session() request: Record<string, any>) {
+    const idUser = request.idUser;
+    console.log(idUser)
+
+    if (!idUser) {
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: idUser } });
+    console.log(user)
+    if (!user || user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN) {
+      return {
+        data: null,
+        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      };
+    }
+
+    // Compter le nombre total d'utilisateurs
+    const userCount = await this.userRepository.count({
+      where: [
+        { role: Roles.USER },
+        { role: Roles.ADMIN },
+        { role: Roles.SUPERADMIN },
+      ],
+    });
+    console.log(userCount)
+    return {
+      data: userCount,
+      statusCode: HttpStatus.OK,
+    };
+  }
+  async nbUserParYear(@Session() request: Record<string, any>) {
+    const idUser = request.idUser;
+    console.log(idUser);
+
+    if (!idUser) {
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: idUser } });
+    console.log(user);
+    if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
+      return {
+        data: null,
+        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      };
+    }
+
+    // Regrouper les utilisateurs par année de création et les compter
+    const userCountsByYear = await this.userRepository
+      .createQueryBuilder("user")
+      .select("EXTRACT(YEAR FROM user.createdate) AS year")
+      .addSelect("COUNT(user.id)", "count")
+      .where("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
+      .groupBy("year")
+      .orderBy("year", "ASC")
+      .getRawMany();
+
+    console.log(userCountsByYear);
+    return {
+      data: userCountsByYear,
+      statusCode: HttpStatus.OK,
+    };
+  }
+  async nbUserParMonth(@Session() request: Record<string, any>) {
+    const idUser = request.idUser;
+    console.log(idUser);
+
+    if (!idUser) {
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: idUser } });
+    console.log(user);
+    if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
+      return {
+        data: null,
+        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      };
+    }
+
+    // Créer une date spécifique pour tester
+    const testDate = new Date(); // Vous pouvez ajuster cette date selon vos besoins
+    const testYear = testDate.getFullYear(); // Extraire l'année de la date
+
+    // Regrouper les utilisateurs par mois pour l'année spécifiée
+    const userCountsByMonth = await this.userRepository
+      .createQueryBuilder("user")
+      .select("EXTRACT(MONTH FROM user.createdate) AS month")
+      .addSelect("COUNT(user.id)", "count")
+      .where("EXTRACT(YEAR FROM user.createdate) = :year", { year: testYear })
+      .andWhere("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
+      .groupBy("month")
+      .orderBy("month", "ASC")
+      .getRawMany();
+
+    console.log(userCountsByMonth);
+    return {
+      data: userCountsByMonth,
+      statusCode: HttpStatus.OK,
+    };
+  }
+  async nbUserParWeek(@Session() request: Record<string, any>) {
+    const idUser = request.idUser;
+    console.log(idUser);
+
+    if (!idUser) {
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: idUser } });
+    console.log(user);
+    if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
+      return {
+        data: null,
+        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      };
+    }
+
+    // Créer une nouvelle date et extraire l'année et le mois
+    const currentDate = new Date();
+    console.log(currentDate)
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Les mois commencent à 0 en JavaScript
+    console.log(`Current Year: ${currentYear}, Current Month: ${currentMonth}`);
+
+    // Calculer le début du mois en cours et le début des 4 semaines précédentes
+    const startOfLast4Weeks = startOfWeek(subWeeks(currentDate, 4));
+    console.log(startOfLast4Weeks)
+    // Filtrer les utilisateurs créés entre le début des 4 dernières semaines et aujourd'hui
+    const userCountsByDay = await this.userRepository
+      .createQueryBuilder("user")
+      .select("EXTRACT(YEAR FROM user.createdate) AS year")
+      .addSelect("EXTRACT(MONTH FROM user.createdate) AS month")
+      .addSelect("EXTRACT(DAY FROM user.createdate) AS day")
+      .addSelect("COUNT(user.id)", "count")
+      .where("user.createdate BETWEEN :start AND :end", {
+        start: startOfLast4Weeks,
+        end: currentDate,
+      })
+      .andWhere("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
+      .groupBy("year, month, day")
+      .orderBy("year", "ASC")
+      .addOrderBy("month", "ASC")
+      .addOrderBy("day", "ASC")
+      .getRawMany();
+
+    console.log(userCountsByDay);
+    return {
+      data: userCountsByDay,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+
+
+
+  async ancienPassword(@Session() request: Record<string, any>, password: AncienPasswordDto) {
     const id = request.idUser
     console.log(id)
     const user = await this.userRepository.findOne({ where: { id: id } });
@@ -66,7 +236,7 @@ export class UserService {
     };
   }
 
-  async updatePassword(@Session() request:Record<string, any>,updateDto:UpdatePasswordDto) {
+  async updatePassword(@Session() request: Record<string, any>, updateDto: UpdatePasswordDto) {
     const confirmpassword = updateDto.confirmpassword
     const password = updateDto.password
     const id = request.idUser
@@ -74,13 +244,13 @@ export class UserService {
     console.log(confirmpassword)
     console.log(password)
     console.log(confirmpassword == password)
-    if(confirmpassword == password) {
+    if (confirmpassword == password) {
       const user = await this.userRepository.findOne({ where: { id: id } });
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(updateDto.password, saltRounds);
-      console.log(typeof(user))
+      console.log(typeof (user))
       user.password = hashedPassword;
-      user.updatedate=new Date();
+      user.updatedate = new Date();
       this.userRepository.save(user);
       return await {
         message: 'le mot de passe modifier avec succes ,vous devez vous connecter avec votre nouveau mot de passe',
@@ -92,8 +262,8 @@ export class UserService {
       statusCode: HttpStatus.BAD_REQUEST,
     };
   }
-  
-  async ancienUsername(@Session() request:Record<string, any>,username:AncienUsernameDto) {
+
+  async ancienUsername(@Session() request: Record<string, any>, username: AncienUsernameDto) {
     const id = request.idUser
     const user = await this.userRepository.findOne({ where: { id: id } });
     const validUsername = await (user.username === username.username);
@@ -109,244 +279,245 @@ export class UserService {
     };
   }
 
-  async updateUsername(@Session() request:Record<string, any>,updateUsername:UserNameUpdateDto) {
-      const user = await this.userRepository.findOne({ where : { username : updateUsername.username}});
-      console.log(user)
-      console.log(request.idUser)
-      
-      
-      if(!user) {
-        const id = request.idUser
-        if(!id) {
-          return await {
-            message: 'user not found',
-            statusCode: HttpStatus.BAD_REQUEST,
-          };
-        }
-        const currentUser = await this.userRepository.findOne({ where : { id : id}});
-        currentUser.username = updateUsername.username;
-        currentUser.updatedate=new Date();
-        console.log(currentUser)
-        this.userRepository.save(currentUser);
+  async updateUsername(@Session() request: Record<string, any>, updateUsername: UserNameUpdateDto) {
+    const user = await this.userRepository.findOne({ where: { username: updateUsername.username } });
+    console.log(user)
+    console.log(request.idUser)
+
+
+    if (!user) {
+      const id = request.idUser
+      if (!id) {
         return await {
-          message: 'Username modifier avec succés,vous devez vous connecter avec votre nouveau username',
-          statusCode: HttpStatus.OK,
+          message: 'user not found',
+          statusCode: HttpStatus.BAD_REQUEST,
         };
       }
+      const currentUser = await this.userRepository.findOne({ where: { id: id } });
+      currentUser.username = updateUsername.username;
+      currentUser.updatedate = new Date();
+      console.log(currentUser)
+      this.userRepository.save(currentUser);
       return await {
-        message: 'user deja existe',
+        message: 'Username modifier avec succés,vous devez vous connecter avec votre nouveau username',
+        statusCode: HttpStatus.OK,
+      };
+    }
+    return await {
+      message: 'user deja existe',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  }
+
+
+  async findOne(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      return await {
+        data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-  
+    return await {
+      data: user,
+      statusCode: HttpStatus.OK
+    };
+  }
 
-    async findOne(id: number){
-      const user=await this.userRepository.findOneBy({id});
-      if(!user){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+  async create(createUserDto: UserCreateDto) {
+    const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
+    this.userRepository.save(user);
+  }
+  async findById(find: number) {
+    const user = await this.userRepository.findOne({ where: { id: find } });
+    if (!user) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
-        return await {
-          data: user,
-          statusCode: HttpStatus.OK
-        };
+    }
+    return await {
+      data: user,
+      statusCode: HttpStatus.OK
+    };
+  }
+  async findByEmail(find: FindByEmail) {
+    const user = await this.userRepository.findOne({ where: { email: find.email } });
+    if (!user) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: user,
+      statusCode: HttpStatus.OK
+    };
+  }
+  async findByUserName(find: FindByUsername) {
+    const user = await this.userRepository.findOne({ where: { username: find.username } });
+    if (!user) {
+      return await {
+        message: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: user,
+      statusCode: HttpStatus.OK
+    };
+  }
+
+  async update(user: User, updateUserDto: UserUpdateDto) {
+    const user1 = await this.userRepository.findOne({ where: { id: user.id } });
+    user1.password = updateUserDto.password;
+    user1.username = updateUserDto.username;
+    user1.updatedate = new Date();
+    this.userRepository.save(user1);
+  }
+
+  async createAdmin(createUserAdminDto: UserCreateDto) {
+    const user = this.userRepository.create(createUserAdminDto);
+    user.role = Roles.ADMIN;
+    this.userRepository.save(user);
+  }
+
+  async findByUsernameAndEmail(find: FindByUsernameByEmail) {
+    const user = await this.userRepository.findOne({ where: { email: find.email, username: find.username } });
+    if (!user) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: user,
+      statusCode: HttpStatus.OK
+    };
+  }
+  async updateRole(updateRole: RoleUpdateDto) {
+    console.log(updateRole)
+    const user1 = await this.userRepository.findOne({ where: { id: updateRole.id } });
+    if (!user1) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    if (updateRole.role === Roles.ADMIN) {
+      user1.role = Roles.ADMIN;
+    }
+    else if (updateRole.role === Roles.USER) {
+      user1.role = Roles.USER;
     }
 
-    async create(createUserDto:UserCreateDto) {
-      const user = this.userRepository.create({ ...createUserDto, createdate: new Date() });
-      this.userRepository.save(user);
+    user1.updatedate = new Date();
+    this.userRepository.save(user1);
+    return {
+      data: user1,
+      statusCode: HttpStatus.OK
     }
-    async findById(find:number) {
-      const user = await this.userRepository.findOne({ where: { id:find } });
-      if(!user){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+  }
+  async findAll() {
+    const users = await this.userRepository.find();
+    if (!users) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
       }
-        return await {
-          data: user,
-          statusCode: HttpStatus.OK
-        };
     }
-    async findByEmail(find:FindByEmail) {
-      const user = await this.userRepository.findOne({ where: { email:find.email } });
-      if(!user){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
-      }
-        return await {
-          data: user,
-          statusCode: HttpStatus.OK
-        };
-    }
-    async findByUserName(find:FindByUsername) {
-      const user = await this.userRepository.findOne({ where: { username:find.username } });
-      if(!user){
-        return await {
-          message: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
-      }
-        return await {
-          data: user,
-          statusCode: HttpStatus.OK
-        };
-    }
+    return await {
+      data: users,
+      statusCode: HttpStatus.OK
+    };
+  }
+  async delete(@Session() request: Record<string, any>, id: number) {
+    const idAdmin = request.idUser;
+    console.log(idAdmin)
 
-    async update(user:User, updateUserDto: UserUpdateDto) {
-      const user1 = await this.userRepository.findOne({ where: { id: user.id } });
-      user1.password = updateUserDto.password;
-      user1.username = updateUserDto.username;
-      user1.updatedate = new Date();
-      this.userRepository.save(user1);
-    }
-
-    async createAdmin(createUserAdminDto:UserCreateDto) {
-      const user = this.userRepository.create(createUserAdminDto);
-      user.role = Roles.ADMIN;
-      this.userRepository.save(user);
-    }
-
-    async findByUsernameAndEmail(find:FindByUsernameByEmail) {
-      const user = await this.userRepository.findOne({ where: { email: find.email, username: find.username } });
-      if(!user){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
-      }
-        return await {
-          data: user,
-          statusCode: HttpStatus.OK
-        };
-    }
-    async updateRole(updateRole:RoleUpdateDto) {
-      console.log(updateRole)
-      const user1 = await this.userRepository.findOne({ where: { id: updateRole.id } });
-      if(!user1){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
-      }
-      if(updateRole.role === Roles.ADMIN){
-          user1.role = Roles.ADMIN;
-      }
-      else if(updateRole.role === Roles.USER){
-        user1.role = Roles.USER;
-      }
-      
-      user1.updatedate = new Date();
-      this.userRepository.save(user1);
-      return {
-        data: user1,
-        statusCode: HttpStatus.OK
+    if (!idAdmin) {
+      console.log("slaut")
+      return await {
+        data: null,
+        message: "vous devez vous connecter pour supprimer un user",
+        statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    async findAll() {
-      const users =  await this.userRepository.find();
-      if(!users){
-        return await {
-          data: null,
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+    const admin = await this.userRepository.findOne({ where: { id: idAdmin } })
+    if (!admin || admin.role != Roles.SUPERADMIN) {
+      return await {
+        data: null,
+        message: "vous devez etre un superadmin",
+        statusCode: HttpStatus.BAD_REQUEST,
       }
-        return await {
-          data: users,
-          statusCode: HttpStatus.OK
-        };
     }
-    async delete(@Session() request:Record<string, any>,id: number) {
-      const idAdmin = request.idUser;
-      console.log(idAdmin)
-
-      if(!idAdmin) {
-        console.log("slaut")
-        return await {
-          data: null,
-          message : "vous devez vous connecter pour supprimer un user",
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+    const user = await this.userRepository.findOne({ where: { id: id }, relations: ['review', 'orders', 'products', 'categories'] });
+    console.log(user)
+    if (!user) {
+      return await {
+        data: null,
+        message: "user introuvable",
+        statusCode: HttpStatus.BAD_REQUEST,
       }
-      const admin=await this.userRepository.findOne({where:{id:idAdmin}})
-      if(!admin || admin.role!=Roles.SUPERADMIN) {
-        return await{
-          data: null,
-          message : "vous devez etre un superadmin",
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+    }
+    if (user.review.length > 0) {
+      for (const review of user.review) {
+        await this.reviewRepository.remove(review)
       }
-      const user = await this.userRepository.findOne({ where: { id: id },relations:['review','orders','products','categories'] });
-      console.log(user)
-      if(!user){
-        return await {
-          data: null,
-          message : "user introuvable",
-          statusCode: HttpStatus.BAD_REQUEST,
-        }
+    }
+    if (user.orders.length > 0) {
+      for (const order of user.orders) {
+        await this.orderService.deleteOrder(request, order.id)
       }
-      if(user.review.length>0){
-        for(const review of user.review){
-          await this.reviewRepository.remove(review)
-        }
-      }
-      if(user.orders.length>0){
-        for(const order of user.orders){
-          await this.orderService.deleteOrder(request,order.id)
-        }
-      }
-      if(user.products.length>0){
-        for(const product of user.products){
-          const product1 = await this.productService.findById(product.id)
-          const couleurs = []
-          for(const couleur of product1.data.colours){
-            const couleur1 = await this.couleurService.findOne(couleur.id)
-            console.log("salut")
-            console.log(couleur1.data)
-            const listeimages=couleur1.data.images
-            const listsizes = couleur1.data.sizes
-            console.log(listeimages)
-            console.log(listsizes)
-            const listeimage =[]
-            const listsize =[]
-            if(listeimages.length>0){
-              for(const image of listeimages){
-                listeimage.push({urlImage:image.UrlImage,nomCategorie:null,nameCouleur:couleur.nameCouleur})
-             }
-            } 
-            if(listsizes.length>0){
-              for(const size of listsizes){
-                listsize.push({typeSize:size.typeSize,nameCouleur:couleur.nameCouleur})
-              }
+    }
+    if (user.products.length > 0) {
+      for (const product of user.products) {
+        const product1 = await this.productService.findById(product.id)
+        const couleurs = []
+        for (const couleur of product1.data.colours) {
+          const couleur1 = await this.couleurService.findOne(couleur.id)
+          console.log("salut")
+          console.log(couleur1.data)
+          const listeimages = couleur1.data.images
+          const listsizes = couleur1.data.sizes
+          console.log(listeimages)
+          console.log(listsizes)
+          const listeimage = []
+          const listsize = []
+          if (listeimages.length > 0) {
+            for (const image of listeimages) {
+              listeimage.push({ urlImage: image.UrlImage, nomCategorie: null, nameCouleur: couleur.nameCouleur })
             }
-            couleurs.push({nameCouleur:couleur.nameCouleur,listeimage:listeimage,listesize:listsize,nameProduct:couleur1.data.product.nameProduct})
+          }
+          if (listsizes.length > 0) {
+            for (const size of listsizes) {
+              listsize.push({ typeSize: size.typeSize, nameCouleur: couleur.nameCouleur })
+            }
+          }
+          couleurs.push({ nameCouleur: couleur.nameCouleur, listeimage: listeimage, listesize: listsize, nameProduct: couleur1.data.product.nameProduct })
         }
-        const supprimer = await this.productService.remove(request,{id:product.id,listeCouleur:couleurs})
+        const supprimer = await this.productService.remove(request, { id: product.id, listeCouleur: couleurs })
         console.log("salut1")
         console.log(supprimer)
-        }
       }
-      if(user.categories.length>0){
-        for(const category of user.categories){
-          const category1 = await this.categoryService.findOne(category.id)
-          if(category1.data.image){
-          await this.categoryService.remove(request,category1.data.id)
-          }
-          else{
-            await this.categoryService.remove(request,category1.data.id)
-          }
-        }
-      }
-        await this.userRepository.remove(user);
-        return await {
-          data: user,
-          message : "user supprime avec succes",
-          statusCode: HttpStatus.OK
-        };
     }
+    if (user.categories.length > 0) {
+      for (const category of user.categories) {
+        const category1 = await this.categoryService.findOne(category.id)
+        if (category1.data.image) {
+          await this.categoryService.remove(request, category1.data.id)
+        }
+        else {
+          await this.categoryService.remove(request, category1.data.id)
+        }
+      }
+    }
+    await this.userRepository.remove(user);
+    return await {
+      data: user,
+      message: "user supprime avec succes",
+      statusCode: HttpStatus.OK
+    };
+  }
+
 }

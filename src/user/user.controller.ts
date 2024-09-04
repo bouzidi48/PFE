@@ -15,11 +15,28 @@ import { UserUpdateDto } from './dto/update-user.dto';
 import { FindByUsernameByEmail } from './dto/find-username-email.dto';
 import { Roles } from 'src/enum/user_enum';
 import { RoleUpdateDto } from './dto/updaterole.dto';
+import { request } from 'http';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+  @Get('nbUserParYear')
+  async nbUserParYear(@Session() request:Record<string,any>) {
+    return await this.userService.nbUserParYear(request);
+  }
+  @Get('nbUser')
+  async nbUser(@Session() request:Record<string,any>) {
+    return await this.userService.nbUser(request);
+  }
+  
+  @Get('nbUserParMonth')
+  async nbUserParMonth(@Session() request:Record<string,any>) {
+    return await this.userService.nbUserParMonth(request);
+  }
+  @Get('nbUserParWeek')
+  async nbUserParWeek(@Session() request:Record<string,any>) {
+    return await this.userService.nbUserParWeek(request);
+  }
   @Post('ancienPassword')
   async ancienPassword(@Session() request: Record<string, any>, @Body() password: AncienPasswordDto) {
     return await this.userService.ancienPassword(request, password);
@@ -92,4 +109,5 @@ export class UserController {
   async remove(@Session() request: Record<string, any>,@Param('id', ParseIntPipe) id: number) {
     return await this.userService.delete(request,id);
   }
+  
 }

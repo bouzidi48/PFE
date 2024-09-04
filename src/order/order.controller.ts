@@ -8,7 +8,38 @@ import { updateOrderStatusDto } from './dto/update-order-status.dto';
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
-
+  @Get('nbOrder')
+  async nbOder(@Session() request: Record<string, any>) {
+    return await this.orderService.nbOrder(request);
+  }
+  @Get('nbOrderParYear')
+  async nbOrderParYear(@Session() request: Record<string, any>) {
+    return await this.orderService.nbOrderParYear(request);
+  }
+  @Get('nbOrderParMonth')
+  async nbOrderParMonth(@Session() request: Record<string, any>) {
+    return await this.orderService.nbOrderParMonth(request);
+  }
+  @Get('nbOrderParWeek')
+  async nbOrderParWeek(@Session() request: Record<string, any>) {
+    return await this.orderService.nbOrderParWeek(request);
+  }
+  @Get('ChiffreAffaire')
+  async ChiffreAffaire(@Session() request: Record<string, any>) {
+    return await this.orderService.ChiffreAffaire(request)
+  }
+  @Get('ChiffreAffaireParYear')
+  async ChiffreAffaireParYear(@Session() request: Record<string, any>) {
+    return await this.orderService.ChiffreAffaireParYear(request)
+  }
+  @Get('ChiffreAffaireParMonth')
+  async ChiffreAffaireParMonth(@Session() request: Record<string, any>) {
+    return await this.orderService.ChiffreAffaireParMonth(request)
+  }
+  @Get('ChiffreAffaireParWeek')
+  async ChiffreAffaireParWeek(@Session() request: Record<string, any>) {
+    return await this.orderService.ChiffreAffaireParWeek(request)
+  }
   @Post('create')
   create(@Session() request:Record<string, any>,@Body() createOrderDto: CreateOrderDto) {
     return this.orderService.create(request,createOrderDto);
@@ -45,4 +76,5 @@ export class OrderController {
   findbyUser(@Param('idUser',ParseIntPipe) id: number) {
     return this.orderService.findbyUser(id);
   }
+  
 }
