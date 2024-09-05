@@ -40,6 +40,14 @@ export class OrderController {
   async ChiffreAffaireParWeek(@Session() request: Record<string, any>) {
     return await this.orderService.ChiffreAffaireParWeek(request)
   }
+  @Get('productsBienVendu')
+  async productsBienVendu(@Session() request: Record<string, any>) {
+    return await this.orderService.productsBienVendu(request)
+  }
+  @Get('productsMoinVendu')
+  async productsMoinVendu(@Session() request: Record<string, any>) {
+    return await this.orderService.productsMoinVendu(request)
+  }
   @Post('create')
   create(@Session() request:Record<string, any>,@Body() createOrderDto: CreateOrderDto) {
     return this.orderService.create(request,createOrderDto);

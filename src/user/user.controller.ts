@@ -20,6 +20,10 @@ import { request } from 'http';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+  @Get('nbUserParMonth')
+  async nbUserParMonth(@Session() request:Record<string,any>) {
+    return await this.userService.nbUserParMonth(request);
+  }
   @Get('nbUserParYear')
   async nbUserParYear(@Session() request:Record<string,any>) {
     return await this.userService.nbUserParYear(request);
@@ -29,10 +33,7 @@ export class UserController {
     return await this.userService.nbUser(request);
   }
   
-  @Get('nbUserParMonth')
-  async nbUserParMonth(@Session() request:Record<string,any>) {
-    return await this.userService.nbUserParMonth(request);
-  }
+  
   @Get('nbUserParWeek')
   async nbUserParWeek(@Session() request:Record<string,any>) {
     return await this.userService.nbUserParWeek(request);

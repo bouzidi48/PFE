@@ -85,14 +85,14 @@ export class UserService {
   async nbUserParYear(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
     console.log(idUser);
-
+  
     if (!idUser) {
       return {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
-
+  
     const user = await this.userRepository.findOne({ where: { id: idUser } });
     console.log(user);
     if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
@@ -101,34 +101,51 @@ export class UserService {
         statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
       };
     }
-
-    // Regrouper les utilisateurs par année de création et les compter
+  
+    const currentYear = new Date().getFullYear();
+    const previousYear = currentYear - 1;
+  
+    // Regrouper les utilisateurs par année de création et les compter pour l'année courante et l'année précédente
     const userCountsByYear = await this.userRepository
       .createQueryBuilder("user")
       .select("EXTRACT(YEAR FROM user.createdate) AS year")
       .addSelect("COUNT(user.id)", "count")
-      .where("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
+      .where("EXTRACT(YEAR FROM user.createdate) IN (:...years)", { years: [currentYear, previousYear] })
+      .andWhere("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
       .groupBy("year")
       .orderBy("year", "ASC")
       .getRawMany();
-
+  
     console.log(userCountsByYear);
+  
+    // Initialiser les résultats avec 0 par défaut
+    const result = {
+      [currentYear]: 0,
+      [previousYear]: 0,
+    };
+  
+    // Remplir les données si elles existent
+    userCountsByYear.forEach((entry) => {
+      result[entry.year] = parseInt(entry.count, 10); // Convertir en nombre
+    });
+  
     return {
-      data: userCountsByYear,
+      data: result,
       statusCode: HttpStatus.OK,
     };
   }
+  
   async nbUserParMonth(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
     console.log(idUser);
-
+  
     if (!idUser) {
       return {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
-
+  
     const user = await this.userRepository.findOne({ where: { id: idUser } });
     console.log(user);
     if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
@@ -137,39 +154,63 @@ export class UserService {
         statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
       };
     }
-
-    // Créer une date spécifique pour tester
-    const testDate = new Date(); // Vous pouvez ajuster cette date selon vos besoins
-    const testYear = testDate.getFullYear(); // Extraire l'année de la date
-
-    // Regrouper les utilisateurs par mois pour l'année spécifiée
+  
+    // Date actuelle (mois courant)
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Les mois en JS commencent à 0, donc on ajoute 1
+  
+    // Date pour 3 mois avant le mois courant
+    const startDate = new Date(currentYear, currentMonth - 4, 1); // Premier jour du mois, 3 mois avant
+  
+    // Regrouper les utilisateurs par mois pour les 3 mois précédents + mois courant
     const userCountsByMonth = await this.userRepository
       .createQueryBuilder("user")
       .select("EXTRACT(MONTH FROM user.createdate) AS month")
+      .addSelect("EXTRACT(YEAR FROM user.createdate) AS year")
       .addSelect("COUNT(user.id)", "count")
-      .where("EXTRACT(YEAR FROM user.createdate) = :year", { year: testYear })
+      .where("user.createdate >= :startDate", { startDate: startDate })
       .andWhere("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
-      .groupBy("month")
-      .orderBy("month", "ASC")
+      .groupBy("year, month")
+      .orderBy("year", "ASC")
+      .addOrderBy("month", "ASC")
       .getRawMany();
-
+  
     console.log(userCountsByMonth);
+  
+    // Initialiser les résultats pour les 3 mois précédents et le mois en cours avec total = 0 par défaut
+    const result = {};
+    for (let i = 3; i >= 0; i--) {
+      const date = new Date(currentYear, currentMonth - i - 1); // Calculer le mois et l'année
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1; // +1 pour que janvier = 1, février = 2, etc.
+      result[`${year}-${month}`] = 0; // Initialiser chaque mois avec 0
+    }
+  
+    // Mettre à jour les résultats avec les données récupérées
+    userCountsByMonth.forEach((entry) => {
+      const key = `${entry.year}-${entry.month}`;
+      result[key] = parseInt(entry.count, 10); // Convertir en nombre
+    });
+  
     return {
-      data: userCountsByMonth,
+      data: result,
       statusCode: HttpStatus.OK,
     };
   }
+  
+  
   async nbUserParWeek(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
     console.log(idUser);
-
+  
     if (!idUser) {
       return {
         data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
-
+  
     const user = await this.userRepository.findOne({ where: { id: idUser } });
     console.log(user);
     if (!user || (user.role !== Roles.ADMIN && user.role !== Roles.SUPERADMIN)) {
@@ -178,18 +219,17 @@ export class UserService {
         statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
       };
     }
-
-    // Créer une nouvelle date et extraire l'année et le mois
+  
+    // Date actuelle
     const currentDate = new Date();
-    console.log(currentDate)
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; // Les mois commencent à 0 en JavaScript
-    console.log(`Current Year: ${currentYear}, Current Month: ${currentMonth}`);
-
-    // Calculer le début du mois en cours et le début des 4 semaines précédentes
-    const startOfLast4Weeks = startOfWeek(subWeeks(currentDate, 4));
-    console.log(startOfLast4Weeks)
-    // Filtrer les utilisateurs créés entre le début des 4 dernières semaines et aujourd'hui
+    console.log(currentDate);
+  
+    // Calculer la date de début (5 jours avant la date actuelle)
+    const startOfLast5Days = new Date();
+    startOfLast5Days.setDate(currentDate.getDate() - 5);
+    console.log(startOfLast5Days);
+  
+    // Filtrer les utilisateurs créés entre le début des 5 derniers jours et aujourd'hui
     const userCountsByDay = await this.userRepository
       .createQueryBuilder("user")
       .select("EXTRACT(YEAR FROM user.createdate) AS year")
@@ -197,7 +237,7 @@ export class UserService {
       .addSelect("EXTRACT(DAY FROM user.createdate) AS day")
       .addSelect("COUNT(user.id)", "count")
       .where("user.createdate BETWEEN :start AND :end", {
-        start: startOfLast4Weeks,
+        start: startOfLast5Days,
         end: currentDate,
       })
       .andWhere("user.role IN (:...roles)", { roles: [Roles.USER, Roles.ADMIN, Roles.SUPERADMIN] })
@@ -206,14 +246,34 @@ export class UserService {
       .addOrderBy("month", "ASC")
       .addOrderBy("day", "ASC")
       .getRawMany();
-
+  
     console.log(userCountsByDay);
+  
+    // Initialiser les résultats avec 0 pour les 5 jours précédents
+    const result = {};
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(currentDate.getDate() - i);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1; // Les mois commencent à 0 en JS
+      const day = date.getDate();
+  
+      result[`${year}-${month}-${day}`] = 0; // Initialiser chaque jour avec 0
+    }
+  
+    // Mettre à jour les résultats avec les données récupérées
+    userCountsByDay.forEach((entry) => {
+      const key = `${entry.year}-${entry.month}-${entry.day}`;
+      result[key] = parseInt(entry.count, 10); // Mettre à jour le total pour chaque jour
+    });
+  
     return {
-      data: userCountsByDay,
+      data: result,
       statusCode: HttpStatus.OK,
     };
   }
-
+  
+  
 
 
 

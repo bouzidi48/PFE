@@ -562,5 +562,5 @@ export class ProductService {
       statusCode: HttpStatus.OK,
     };
   }
-
+  
 }
