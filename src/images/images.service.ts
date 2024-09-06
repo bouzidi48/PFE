@@ -45,7 +45,7 @@ export class ImagesService {
 
       }
     }
-    const image1 = await this.imageRepository.findOne({ where: { UrlImage: createImageDto.UrlImage, couleur: { nameCouleur: createImageDto.nameCouleur } } });
+    const image1 = await this.imageRepository.findOne({ where: { UrlImage: createImageDto.UrlImage, couleur: { nameCouleur: createImageDto.nameCouleur, product:{nameProduct:createImageDto.nameProduct} } } });
     console.log(image1)
     if (image1) {
       return await {

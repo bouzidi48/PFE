@@ -39,7 +39,7 @@ export class SizeService {
 
       }
     }
-    const size1 = await this.sizeRepository.findOne({ where: { typeSize: createSizeDto.typeSize, couleur: { nameCouleur: createSizeDto.nameCouleur } } });
+    const size1 = await this.sizeRepository.findOne({ where: { typeSize: createSizeDto.typeSize, couleur: { nameCouleur: createSizeDto.nameCouleur,product:{nameProduct:createSizeDto.nameProduct} } } });
     console.log(size1)
     if (size1) {
       return await {

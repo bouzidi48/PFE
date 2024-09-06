@@ -578,7 +578,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   }
 
   async findAll() {
-    const order=await this.orderRespoitory.find({relations: ['shipping_address', 'orderItems', 'orderItems.product', 'orderItems.couleur', 'orderItems.size','user']});
+    const order=await this.orderRespoitory.find({relations: ['shipping_address', 'orderItems', 'orderItems.product', 'orderItems.couleur', 'orderItems.size','user','payment']});
     if(!order){
       return await  {
         data : null,
@@ -592,7 +592,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   }
 
  async findOne(findbyid:number) {
-    const orderid = await this.orderRespoitory.findOne({where:{id:findbyid},relations:{shipping_address:true,user:true,orderItems:{product:true},payment:true}})
+  const orderid=await this.orderRespoitory.findOne({where:{id:findbyid},relations: ['shipping_address', 'orderItems', 'orderItems.product', 'orderItems.couleur', 'orderItems.size','user','payment']});
     if(!orderid){
       return await {
         data:null,
@@ -684,8 +684,9 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   order.orderUpdateBy= order.user;
   await this.stockUpdate(order,OrderStatus.SHIPPED)
   order= await this.orderRespoitory.save(order);
+  const order2 = await this.findOne(order.id);
   return await {
-    data:order,
+    data:order2.data,
     statusCode:HttpStatus.OK,
   }
 }
@@ -817,11 +818,12 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
 //La fonction met à jour le statut de la commande à CENCELLED
     order.data.status= OrderStatus.CENCELLED;
     order.data.orderUpdateBy= request.idUser;
+    order.data.updated_at= new Date();
     order.data=await this.orderRespoitory.save(order.data);
 //pour mettre à jour le stock des produits dans la commande + -
-    
+    const order2 = await this.findOne(id);
     return await {
-      data:order,
+      data: order2.data,
       statusCode:HttpStatus.OK,
     }
  }

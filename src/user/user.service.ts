@@ -418,7 +418,7 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { username: find.username } });
     if (!user) {
       return await {
-        message: null,
+        data: null,
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
@@ -439,6 +439,7 @@ export class UserService {
   async createAdmin(createUserAdminDto: UserCreateDto) {
     const user = this.userRepository.create(createUserAdminDto);
     user.role = Roles.ADMIN;
+    user.createdate = new Date();
     this.userRepository.save(user);
   }
 

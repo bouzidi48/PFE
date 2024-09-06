@@ -99,7 +99,7 @@ export class DemandeAdminService {
       }
     }
     const admin = await this.userController.findById(idAdmin);
-    if(!admin || admin.data.role !== Roles.ADMIN) {
+    if(!admin || admin.data.role === Roles.USER) {
       return await {
         message: 'vous devez etre administrateur',
         statusCode:HttpStatus.UNAUTHORIZED
@@ -125,15 +125,16 @@ export class DemandeAdminService {
       }
     }
     const user = await this.userController.findByUsernameAndEmail({username:demande.nom,email:demande.email});
-    if(user) {
+    if(user.data) {
       demande.status = DemandeAdminStatus.ACCEPT;
       await this.demandeAdminRepository.save(demande);
-      await this.userController.updateRole({id:user.data.id,role:Roles.ADMIN});
+      const update = await this.userController.updateRole({id:user.data.id,role:Roles.ADMIN});
+      console.log(update)
       return await this.sendEmailAccepter(demande.email,demande.nom,user.data.password);
     }
     const usernameExist = await this.userController.findByUserName({username:demande.nom});
     const emailExist = await this.userController.findByEmail({email:demande.email});
-    if(usernameExist || emailExist) {
+    if(usernameExist.data || emailExist.data) {
       return await {
         message: 'l\'utilisateur avec ce nom d\'utilisateur ou ce courriel existe',
         statusCode:HttpStatus.NOT_FOUND
@@ -188,7 +189,7 @@ Cordialement,
       }
     }
     const admin = await this.userController.findById(idAdmin);
-    if(!admin || admin.data.role !== Roles.ADMIN) {
+    if(!admin || admin.data.role === Roles.USER) {
       return await {
         message: 'vous devez etre administrateur',
         statusCode:HttpStatus.UNAUTHORIZED
