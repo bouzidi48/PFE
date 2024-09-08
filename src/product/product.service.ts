@@ -47,6 +47,19 @@ export class ProductService {
     @InjectRepository(Product) private readonly productRepository: ProductRepository,
     private readonly productLikeService: ProductLikeService,
   ) { }
+  async listePanier(@Session() request: Record<string, any>) {
+    console.log(request.panier)
+    if (!request.panier) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: request.panier,
+      statusCode: HttpStatus.OK,
+    }
+  }
   async create(@Session() request: Record<string, any>, createProductDto: CreateProductDto) {
     const idAdmin = request.idUser
     console.log(createProductDto)
@@ -308,6 +321,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    
     for (let couleur of removeProductDto.listeCouleur) {
       await this.couleurService.remove(request, couleur)
     }
@@ -404,18 +418,7 @@ export class ProductService {
 
     }
   }
-  async listePanier(@Session() request: Record<string, any>) {
-    if (!request.panier) {
-      return await {
-        data: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-      }
-    }
-    return await {
-      data: request.panier,
-      statusCode: HttpStatus.OK,
-    }
-  }
+  
 
 
   async removePanier(@Session() request: Record<string, any>, removePanierDto: RemovePanierDto) {
@@ -445,14 +448,17 @@ export class ProductService {
       }
     }
     if (status === OrderStatus.SHIPPED && order.status === OrderStatus.PROCESSING) {
-      size.stockQuantity -= quantity
+      console.log("deduct")
+      size.stockQuantity =size.stockQuantity - quantity
       size.updatedate = new Date()
 
     } else if (order.status === OrderStatus.SHIPPED && status === OrderStatus.CENCELLED) {
-      size.stockQuantity += quantity;
+      console.log("restore")
+      size.stockQuantity = size.stockQuantity + quantity;
       size.updatedate = new Date()
     }
-    await this.sizeRepository.save(size);
+    size = await this.sizeRepository.save(size);
+    console.log(size)
 
     return {
       message: 'stock updated successfully',

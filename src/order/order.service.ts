@@ -86,7 +86,7 @@ export class OrderService {
     if (!user || (user.data.role !== Roles.ADMIN && user.data.role !== Roles.SUPERADMIN)) {
       return {
         data: null,
-        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+        statusCode: HttpStatus.FORBIDDEN,
       };
     }
   
@@ -105,25 +105,23 @@ export class OrderService {
       .getRawMany();
   
     // Initialiser les résultats avec un count de 0 pour chaque année
-    const results = [
-      { year: previousYear, count: 0 },
-      { year: currentYear, count: 0 }
-    ];
+    const results = {
+      [previousYear]: 0,
+      [currentYear]: 0
+    };
   
     // Remplir les résultats avec les données réelles si elles existent
     orderCountsByYear.forEach(item => {
       const year = parseInt(item.year);
-      const index = results.findIndex(r => r.year === year);
-      if (index !== -1) {
-        results[index].count = parseInt(item.count);
-      }
+      results[year] = parseInt(item.count);
     });
   
     return {
       data: results,
       statusCode: HttpStatus.OK,
     };
-}
+  }
+  
 
 async nbOrderParMonth(@Session() request: Record<string, any>) {
   const idUser = request.idUser;
@@ -140,14 +138,14 @@ async nbOrderParMonth(@Session() request: Record<string, any>) {
   if (!user || (user.data.role !== Roles.ADMIN && user.data.role !== Roles.SUPERADMIN)) {
     return {
       data: null,
-      statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      statusCode: HttpStatus.FORBIDDEN,
     };
   }
 
   // Créer une nouvelle date
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1; // Les mois en JavaScript sont indexés à partir de 0
+  const currentMonth = currentDate.getMonth() + 1;
 
   // Calculer les mois précédents
   const previousMonths = [];
@@ -185,23 +183,26 @@ async nbOrderParMonth(@Session() request: Record<string, any>) {
     .getRawMany();
 
   // Initialiser les résultats avec 0 pour chaque mois
-  const results = monthYears.map(({ month, year }) => ({ month, year, count: 0 }));
+  const result = {};
+    for (let i = 3; i >= 0; i--) {
+      const date = new Date(currentYear, currentMonth - i - 1); // Calculer le mois et l'année
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1; // +1 pour que janvier = 1, février = 2, etc.
+      result[`${year}-${month}`] = 0; // Initialiser chaque mois avec 0
+    }
 
   // Remplir les résultats avec les données réelles si elles existent
-  orderCountsByMonth.forEach(item => {
-    const month = parseInt(item.month);
-    const year = parseInt(item.year);
-    const index = results.findIndex(r => r.month === month && r.year === year);
-    if (index !== -1) {
-      results[index].count = parseInt(item.count);
-    }
+  orderCountsByMonth.forEach((entry) => {
+    const key = `${entry.year}-${entry.month}`;
+    result[key] = parseInt(entry.count, 10); // Convertir en nombre
   });
 
   return {
-    data: results,
+    data: result,
     statusCode: HttpStatus.OK,
   };
 }
+
 
 async nbOrderParWeek(@Session() request: Record<string, any>) {
   const idUser = request.idUser;
@@ -218,55 +219,53 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   if (!user || (user.data.role !== Roles.ADMIN && user.data.role !== Roles.SUPERADMIN)) {
     return {
       data: null,
-      statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+      statusCode: HttpStatus.FORBIDDEN,
     };
   }
 
-  // Créer une nouvelle date pour le jour actuel
   const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1; // Obtenir le mois actuel (ajouter 1 car les mois sont indexés à partir de 0)
-  const currentDay = currentDate.getDate();
+  const startOfLast5Days = new Date();
+  startOfLast5Days.setDate(currentDate.getDate() - 5);
 
-  // Calculer la date de cinq jours avant
-  const startDate = new Date(currentDate);
-  startDate.setDate(currentDay - 5);
-
-  // Requête pour regrouper les commandes par jour pour les six derniers jours (jour actuel et cinq jours avant)
   const orderCountsByDay = await this.orderRespoitory
     .createQueryBuilder("order")
-    .select("EXTRACT(DAY FROM order.created_at) AS day")
+    .select("EXTRACT(YEAR FROM order.created_at) AS year")
+    .addSelect("EXTRACT(MONTH FROM order.created_at) AS month")
+    .addSelect("EXTRACT(DAY FROM order.created_at) AS day")
     .addSelect("COUNT(order.id)", "count")
-    .where("order.created_at BETWEEN :startDate AND :endDate", {
-      startDate: startDate.toISOString(),
-      endDate: currentDate.toISOString(),
+    .where("order.created_at BETWEEN :start AND :end", {
+      start: startOfLast5Days,
+      end: currentDate,
     })
-    .groupBy("day")
-    .orderBy("day", "ASC")
+    .groupBy("year, month, day")
+    .orderBy("year", "ASC")
+    .addOrderBy("month", "ASC")
+    .addOrderBy("day", "ASC")
     .getRawMany();
 
-  // Initialiser les résultats avec un total de 0 pour chaque jour de la période
-  const results = [];
-  for (let i = -5; i <= 0; i++) {
-    const date = new Date(currentDate);
-    date.setDate(currentDay + i);
-    results.push({ day: date.getDate(), count: 0 });
+  const result = {};
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(currentDate.getDate() - i);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    result[`${year}-${month}-${day}`] = 0;
   }
 
-  // Remplir les résultats avec les données réelles si elles existent
-  orderCountsByDay.forEach(item => {
-    const day = parseInt(item.day);
-    const index = results.findIndex(r => r.day === day);
-    if (index !== -1) {
-      results[index].count = parseInt(item.count);
-    }
+  orderCountsByDay.forEach((entry) => {
+    const key = `${entry.year}-${entry.month}-${entry.day}`;
+    result[key] = parseInt(entry.count, 10);
   });
 
   return {
-    data: results,
+    data: result,
     statusCode: HttpStatus.OK,
   };
-}  
+}
+
+
   
   async ChiffreAffaire(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
@@ -338,18 +337,15 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
       .getRawMany();
   
     // Initialiser les résultats pour les deux années avec un total de 0
-    const results = [
-      { year: previousYear, total: 0 },
-      { year: currentYear, total: 0 }
-    ];
+    const results = {
+      [previousYear]: 0,
+      [currentYear]: 0
+    };
   
     // Remplir les résultats avec les données réelles si elles existent
     chiffreAffaireParAnnee.forEach(item => {
       const year = parseInt(item.year);
-      const index = results.findIndex(r => r.year === year);
-      if (index !== -1) {
-        results[index].total = parseFloat(item.total);
-      }
+      results[year] = parseFloat(item.total);
     });
   
     return {
@@ -357,6 +353,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
       statusCode: HttpStatus.OK,
     };
   }
+  
   async ChiffreAffaireParMonth(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
   
@@ -372,24 +369,24 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
     if (!user || (user.data.role !== Roles.ADMIN && user.data.role !== Roles.SUPERADMIN)) {
       return {
         data: null,
-        statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
+        statusCode: HttpStatus.FORBIDDEN,
       };
     }
   
     // Créer une nouvelle date et extraire l'année et le mois
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; // Les mois en JavaScript sont basés sur 0, donc on ajoute 1
+    const currentMonth = currentDate.getMonth() + 1;
   
     // Calculer les quatre derniers mois
     const months = [];
     const years = [];
   
     for (let i = 0; i < 4; i++) {
-      const month = (currentMonth - i - 1 + 12) % 12 + 1; // Calcul du mois (1-12)
-      const year = currentMonth - i <= 0 ? currentYear - 1 : currentYear; // Ajuster l'année si on est passé à l'année précédente
-      months.unshift(month); // Ajouter au début du tableau pour avoir les mois dans l'ordre
-      years.unshift(year); // Ajouter l'année correspondante
+      const month = (currentMonth - i - 1 + 12) % 12 + 1;
+      const year = currentMonth - i <= 0 ? currentYear - 1 : currentYear;
+      months.unshift(month);
+      years.unshift(year);
     }
   
     // Requête pour récupérer les chiffres d'affaires pour les quatre derniers mois
@@ -411,21 +408,20 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
       .addOrderBy('month', 'ASC')
       .getRawMany();
   
-    console.log(chiffreAffaireParMois);
-  
-    // Initialiser les résultats pour les quatre derniers mois avec un total de 0
-    const results = [];
+    // Initialiser les résultats avec 0 pour chaque mois
+    const results = {};
     for (let i = 0; i < 4; i++) {
-      results.push({ year: years[i], month: months[i], total: 0 });
+      const key = `${years[i]}-${months[i]}`;
+      results[key] = 0;
     }
   
     // Remplir les résultats avec les données réelles si elles existent
     chiffreAffaireParMois.forEach(item => {
       const month = parseInt(item.month);
       const year = parseInt(item.year);
-      const index = results.findIndex(r => r.month === month && r.year === year);
-      if (index !== -1) {
-        results[index].total = parseFloat(item.total);
+      const key = `${year}-${month}`;
+      if (results.hasOwnProperty(key)) {
+        results[key] = parseFloat(item.total);
       }
     });
   
@@ -435,74 +431,71 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
     };
   }
   
+  
   async ChiffreAffaireParWeek(@Session() request: Record<string, any>) {
     const idUser = request.idUser;
-
+  
     if (!idUser) {
-        return {
-            data: null,
-            statusCode: HttpStatus.BAD_REQUEST,
-        };
+      return {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      };
     }
-
+  
     const user = await this.userService.findById(idUser);
-
+  
     if (!user || (user.data.role !== Roles.ADMIN && user.data.role !== Roles.SUPERADMIN)) {
-        return {
-            data: null,
-            statusCode: HttpStatus.FORBIDDEN, // On retourne FORBIDDEN si l'utilisateur n'a pas les droits nécessaires
-        };
+      return {
+        data: null,
+        statusCode: HttpStatus.FORBIDDEN,
+      };
     }
-
-    // Créer une nouvelle date
+  
     const currentDate = new Date();
-    
-    // Calculer les dates de début et de fin pour la période de 5 jours avant la date actuelle
-    const startDate = new Date(currentDate);
-    startDate.setDate(currentDate.getDate() - 5);
-
-    const endDate = new Date(currentDate);
-
-    console.log(`Start Date: ${startDate.toISOString()}, End Date: ${endDate.toISOString()}`);
-
-    // Calculer le chiffre d'affaires par jour pour la période des 5 jours avant la date actuelle
+    const startOfLast5Days = new Date();
+    startOfLast5Days.setDate(currentDate.getDate() - 5);
+  
     const chiffreAffaireParJour = await this.orderRespoitory
-        .createQueryBuilder('order')
-        .innerJoin('order.payment', 'payment')
-        .where('order.status = :status', { status: 'delivered' })
-        .andWhere('payment.payment_status = :paymentStatus', { paymentStatus: 'completed' })
-        .andWhere('order.created_at BETWEEN :startDate AND :endDate', {
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-        })
-        .select('EXTRACT(DAY FROM order.created_at)', 'day')
-        .addSelect('SUM(order.total_amount)', 'total')
-        .groupBy('day')
-        .orderBy('day', 'ASC')
-        .getRawMany();
-
-    // Initialiser les résultats avec un total de 0 pour chaque jour de la période
-    const results = [];
-    for (let i = -5; i <= 0; i++) {
-        const date = new Date(currentDate);
-        date.setDate(currentDate.getDate() + i);
-        results.push({ day: date.getDate(), total: 0 });
+      .createQueryBuilder('order')
+      .innerJoin('order.payment', 'payment')
+      .select("EXTRACT(YEAR FROM order.created_at) AS year")
+      .addSelect("EXTRACT(MONTH FROM order.created_at) AS month")
+      .addSelect("EXTRACT(DAY FROM order.created_at) AS day")
+      .addSelect("SUM(order.total_amount)", "total")
+      .where('order.status = :status', { status: 'delivered' })
+      .andWhere('payment.payment_status = :paymentStatus', { paymentStatus: 'completed' })
+      .andWhere('order.created_at BETWEEN :start AND :end', {
+        start: startOfLast5Days,
+        end: currentDate,
+      })
+      .groupBy("year, month, day")
+      .orderBy("year", "ASC")
+      .addOrderBy("month", "ASC")
+      .addOrderBy("day", "ASC")
+      .getRawMany();
+  
+    const result = {};
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(currentDate.getDate() - i);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+  
+      result[`${year}-${month}-${day}`] = 0;
     }
-
-    // Remplir les résultats avec les données réelles si elles existent
-    chiffreAffaireParJour.forEach(item => {
-        const day = parseInt(item.day);
-        const index = results.findIndex(r => r.day === day);
-        if (index !== -1) {
-            results[index].total = parseFloat(item.total);
-        }
+  
+    chiffreAffaireParJour.forEach((entry) => {
+      const key = `${entry.year}-${entry.month}-${entry.day}`;
+      result[key] = parseFloat(entry.total);
     });
-
+  
     return {
-        data: results,
-        statusCode: HttpStatus.OK,
+      data: result,
+      statusCode: HttpStatus.OK,
     };
-}
+  }
+  
 
 
   
@@ -659,12 +652,12 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   }
 //Si le nouveau statut est SHIPPED, elle met à jour le champ ShippedAt avec la date actuelle.
   if(updateOrderStatusDto.status===OrderStatus.SHIPPED){
-
+    await this.stockUpdate(order,OrderStatus.SHIPPED)
    order.ShippeAt=new Date();
    order.updated_at= new Date();
    order.ShippeAt = new Date();
    order.delivered = new Date(order.ShippeAt.getTime());
-   order.delivered.setDate(order.delivered.getDate()+7);
+   order.delivered.setDate(order.delivered.getDate());
    console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
    console.log(order.payment)
@@ -682,7 +675,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
   
   }
   order.orderUpdateBy= order.user;
-  await this.stockUpdate(order,OrderStatus.SHIPPED)
+  
   order= await this.orderRespoitory.save(order);
   const order2 = await this.findOne(order.id);
   return await {
@@ -701,7 +694,8 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
     console.log(op.product)
     console.log(op.size)
     
-    await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status,order);
+    const stock =await this.productservice.updateStock(op.size.id,op.couleur.id,op.product.id,op.quantity,status,order);
+    console.log(stock)
 
   }
 
@@ -963,7 +957,7 @@ private async checkDeliveredOrders() {
 private async setupScheduledTask() {
   
   const cron = require('node-cron');
-  const task = await cron.schedule('0 10 * * *', async () => {
+  const task = await cron.schedule('5 13 * * *', async () => {
     await this.checkDeliveredOrders();
   });
   if (task) {

@@ -13,7 +13,10 @@ import { Order } from 'src/order/entities/order.entity';
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
-
+  @Get('listePanier')
+  listePanier(@Session() request: Record<string, any>) {
+    return this.productService.listePanier(request);
+  }
   @Post('create')
   create(@Session() request: Record<string, any>, @Body() createProductDto: CreateProductDto) {
     return this.productService.create(request, createProductDto);
@@ -59,17 +62,14 @@ export class ProductController {
     return await this.productService.ajouterPanier(request, createProductDto);
   }
 
-  @Get('listePanier')
-  listePanier(@Session() request: Record<string, any>) {
-    return this.productService.listePanier(request);
-  }
+  
 
   @Delete('deletePanier')
   removePanier(@Session() request: Record<string, any>, @Body() removePanierDto: RemovePanierDto) {
     return this.productService.removePanier(request, removePanierDto);
   }
 
-  @Patch(':id/stock')
+  @Put(':id/stock')
   async updateStock(@Param('id', ParseIntPipe) id: number, @Body() { sizeId, couleurId, productId, stock, status,order }: { sizeId: number, couleurId: number, productId: number, stock: number, status: string,order:Order }) {
     try {
       const updatedProduct = await this.productService.updateStock(sizeId, couleurId, productId, stock, status,order);
