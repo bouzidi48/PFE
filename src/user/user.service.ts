@@ -430,10 +430,13 @@ export class UserService {
 
   async update(user: User, updateUserDto: UserUpdateDto) {
     const user1 = await this.userRepository.findOne({ where: { id: user.id } });
+    console.log("user1",user1)
     user1.password = updateUserDto.password;
     user1.username = updateUserDto.username;
     user1.updatedate = new Date();
-    this.userRepository.save(user1);
+    const user2 = await this.userRepository.save(user1);
+    console.log("user2",user2)
+
   }
 
   async createAdmin(createUserAdminDto: UserCreateDto) {

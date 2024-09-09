@@ -562,7 +562,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
       
      }
      console.log(orders)
-     const orderItem = await this.orderItemsRepository.find({where:{order:orders},relations: ['product', 'couleur', 'size'],})
+     const orderItem = await this.orderItemsRepository.find({where:{order:{id:orders.id}},relations: ['product', 'couleur', 'size'],})
      console.log(orderItem)
     return await {
       data:orders,
@@ -572,6 +572,33 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
 
   async findAll() {
     const order=await this.orderRespoitory.find({relations: ['shipping_address', 'orderItems', 'orderItems.product', 'orderItems.couleur', 'orderItems.size','user','payment']});
+    if(!order){
+      return await  {
+        data : null,
+        statusCode:HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await{
+      data:order,
+      statusCode:HttpStatus.OK,
+    }
+  }
+  async findByIdUser(@Session() request:Record<string, any>) {
+    const idUser=request.idUser
+    if(!idUser){
+      return await {
+        message: 'vous devez vous connecter pour ajouter une commande',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const user = await this.userService.findById(idUser)
+    if(!user.data) {
+      return await {
+        message: 'vous devez vous connecter pour ajouter une commande',
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    const order = await this.orderRespoitory.find({where:{user:{id:idUser}},relations:['shipping_address', 'orderItems', 'orderItems.product']});
     if(!order){
       return await  {
         data : null,
@@ -595,7 +622,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
       }
       return await {
         data:orderid,
-        statusCode:HttpStatus.BAD_REQUEST,
+        statusCode:HttpStatus.OK,
       }
     }
 
@@ -657,7 +684,7 @@ async nbOrderParWeek(@Session() request: Record<string, any>) {
    order.updated_at= new Date();
    order.ShippeAt = new Date();
    order.delivered = new Date(order.ShippeAt.getTime());
-   order.delivered.setDate(order.delivered.getDate());
+   order.delivered.setDate(order.delivered.getDate()+7);
    console.log(order.delivered)
    order.status = OrderStatus.SHIPPED;
    console.log(order.payment)
@@ -957,7 +984,7 @@ private async checkDeliveredOrders() {
 private async setupScheduledTask() {
   
   const cron = require('node-cron');
-  const task = await cron.schedule('5 13 * * *', async () => {
+  const task = await cron.schedule('0 10 * * *', async () => {
     await this.checkDeliveredOrders();
   });
   if (task) {

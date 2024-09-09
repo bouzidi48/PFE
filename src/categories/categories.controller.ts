@@ -21,6 +21,10 @@ export class CategoriesController {
   async create(@Session() request: Record<string, any>, @Body() createCategoryDto: CreateCategoryDto) {
     return await this.categoriesService.create(request, createCategoryDto);
   }
+  @Get("ParentCategories")
+  async ParentCategories() {
+    return await this.categoriesService.findParentCategories();
+  }
 
   @Get('findByIdAndName')
   async findByIdAndName(@Query() findByIdAndNameDto: FindByIdAndNameDto) {
@@ -61,4 +65,5 @@ export class CategoriesController {
   async remove(@Session() request: Record<string, any>, @Param('id', ParseIntPipe) id: number) {
     return await this.categoriesService.remove(request, id);
   }
+  
 }

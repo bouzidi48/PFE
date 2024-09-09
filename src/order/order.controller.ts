@@ -58,6 +58,11 @@ export class OrderController {
     return this.orderService.findAll();
   }
 
+  @Get('listerCommandes')
+  findByIdUser(@Session() request:Record<string, any>) {
+    return this.orderService.findByIdUser(request);
+  }
+
   @Get(':id')
   findOne(@Param('id',ParseIntPipe) id: number) {
     return this.orderService.findOne(id);

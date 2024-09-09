@@ -80,8 +80,8 @@ export class InscriptionService {
 
 
   async verfierInscription(@Session() request:Record<string, any>,codeDto:UserVerifyDto) {
-    
-    if (this.verfierCode(request,codeDto)) {
+    const verifier = await this.verfierCode(request,codeDto)
+    if (verifier === true) {
       const userSignUpDto = request.user
       console.log(userSignUpDto)
       this.userService.create(userSignUpDto);

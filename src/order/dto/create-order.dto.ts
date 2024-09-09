@@ -10,6 +10,5 @@ export class CreateOrderDto {
     
     @IsOptional()
     @IsString({message:'billing_address format should be string '})
-    @IsNotEmpty({message:'billing_address Can not be empty.'})
     billing_address:string;
 }

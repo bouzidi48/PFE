@@ -64,9 +64,16 @@ export class ProductController {
 
   
 
+  @Delete('deletefromPanier')
+  removefromPanier(@Session() request: Record<string, any>, @Query() removePanierDto: RemovePanierDto) {
+    console.log('Received DTO:', removePanierDto);
+    return this.productService.removefromPanier(request, removePanierDto);
+  }
+
   @Delete('deletePanier')
-  removePanier(@Session() request: Record<string, any>, @Body() removePanierDto: RemovePanierDto) {
-    return this.productService.removePanier(request, removePanierDto);
+  removePanier(@Session() request: Record<string, any>) {
+    
+    return this.productService.removePanier(request);
   }
 
   @Put(':id/stock')

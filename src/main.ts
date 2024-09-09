@@ -43,7 +43,7 @@ async function bootstrap() {
   app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
 
   // Start server
-  await app.listen(3002);
+  await app.listen(3000);
 
   // Start scheduled task
   const orderService = app.get(OrderService);

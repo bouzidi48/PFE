@@ -321,7 +321,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    
+
     for (let couleur of removeProductDto.listeCouleur) {
       await this.couleurService.remove(request, couleur)
     }
@@ -346,10 +346,12 @@ export class ProductService {
     }
   }
   async ajouterPanier(@Session() request: Record<string, any>, ajouterPanierDto: AjouetrPanierDto) {
+    console.log(ajouterPanierDto)
     const productId = ajouterPanierDto.productId
     const couleurId = ajouterPanierDto.couleurId
     const sizeId = ajouterPanierDto.sizeId
     const quantity = ajouterPanierDto.quantity
+    console.log("1")
     if (!request.panier) {
       request.panier = {
         list: [],
@@ -357,6 +359,7 @@ export class ProductService {
         totalAvecReduction: 0
       }
     }
+    console.log("2")
     const product = await this.productRepository.findOne({ where: { id: productId } })
     if (!product) {
       return await {
@@ -364,6 +367,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("3")
     const couleur = await this.couleurService.findOne(ajouterPanierDto.couleurId)
     if (!couleur.data) {
       return await {
@@ -371,6 +375,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("4")
     const size = await this.sizeRepository.findOne({ where: { id: sizeId } })
     if (!size) {
       return await {
@@ -378,6 +383,7 @@ export class ProductService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("5")
     for (let i = 0; i < request.panier.list.length; i++) {
       if (request.panier.list[i].productId == productId && request.panier.list[i].couleurId == couleurId && request.panier.list[i].sizeId == sizeId) {
         if (request.panier.list[i].quantity + quantity > size.stockQuantity) {
@@ -388,45 +394,57 @@ export class ProductService {
         }
         request.panier.list[i].quantity = request.panier.list[i].quantity + quantity
         request.panier.total = request.panier.total - request.panier.list[i].price
-        request.panier.list[i].price = request.panier.list[i].quantity * product.price
+        request.panier.list[i].price = product.price
         request.panier.total = request.panier.total + (request.panier.list[i].quantity * product.price)
         if (request.panier.total > 3000) {
           request.panier.totalAvecReduction = request.panier.total * 0.15
         }
+        console.log(request.panier)
         return await {
           data: request.panier,
           statusCode: HttpStatus.OK,
         }
       }
     }
-
+    console.log("6")
     request.panier.list.push({
       productId: productId,
       couleurId: couleurId,
       sizeId: sizeId,
       quantity: quantity,
-      price: quantity * product.price
+      price: (product.price)
     })
     request.panier.total = request.panier.total + (quantity * product.price)
     if (request.panier.total > 3000) {
       request.panier.totalAvecReduction = request.panier.total - request.panier.total * 0.15
     }
+    console.log(request.panier)
     return await {
       data: request.panier,
       statusCode: HttpStatus.OK,
-
-
     }
   }
   
 
+  async removePanier(request: Record<string, any>) {
+    for (let i = 0; i < request.panier.list.length; i++) {
+        request.panier.total = request.panier.total - (request.panier.list[i].price * request.panier.list[i].quantity)
+        request.panier.list.pop(request.panier.list[i])
+    }
+    console.log(request.panier)
+    return await {
+      data: request.panier,
+      statusCode: HttpStatus.OK,
 
-  async removePanier(@Session() request: Record<string, any>, removePanierDto: RemovePanierDto) {
-    for (let i = 0; i < request.panier.length; i++) {
-      if (request.panier[i].productId == removePanierDto.productId && request.panier[i].couleurId == removePanierDto.couleurId && request.panier[i].sizeId == removePanierDto.sizeId) {
-        request.panier.remove(i)
+    }
+  }
+  async removefromPanier(@Session() request: Record<string, any>, removePanierDto: RemovePanierDto) {
+    for (let i = 0; i < request.panier.list.length; i++) {
+      if (request.panier.list[i].productId == removePanierDto.productId && request.panier.list[i].couleurId == removePanierDto.couleurId && request.panier.list[i].sizeId == removePanierDto.sizeId) {
+        request.panier.total = request.panier.total - (request.panier.list[i].price * request.panier.list[i].quantity)
+        request.panier.list.pop(request.panier.list[i])
         return await {
-          message: request.panier,
+          data: request.panier,
           statusCode: HttpStatus.OK,
         }
       }

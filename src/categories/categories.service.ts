@@ -21,6 +21,7 @@ import { ImagesController } from 'src/images/images.controller';
 import { ImagesService } from 'src/images/images.service';
 import { ProductService } from 'src/product/product.service';
 import { RemoveProductDto } from 'src/product/dto/remove-product.dto';
+import { where } from 'sequelize';
 
 
 
@@ -102,7 +103,20 @@ export class CategoriesService {
 
     }
   }
+  async findParentCategories() {
 
+    const parentCategories = await this.categoryRepository.find({ where: { parentCategory:{id:IsNull()} } })
+    if (parentCategories.length === 0) {
+      return await {
+        data: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+      }
+    }
+    return await {
+      data: parentCategories,
+      statusCode: HttpStatus.OK,
+    }
+  }
   async findByIdAndName(createCategoryDto: FindByIdAndNameDto) {
     const user = await this.userService.findById(createCategoryDto.id);
     if (!user) {

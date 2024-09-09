@@ -104,7 +104,7 @@ export class AuthentificationService {
 
   async forgotPassword(@Session() request:Record<string, any>,userPasswordOublierDto: UserPasswordOublierDto) {
     const user = await this.userService.findByEmail({email:userPasswordOublierDto.email});
-    if (!user) {
+    if (!user.data) {
       return await {
         message: 'Email introuvable',
         statusCode: HttpStatus.BAD_REQUEST,
@@ -116,6 +116,7 @@ export class AuthentificationService {
     });
     request.code = codeConfirmation // Utilisez req.session.code pour stocker le code de confirmation
     request.user = user // Utilisez req.session.user pour stocker les données de l'utilisateur
+    console.log(user)
     await this.sendEmail(codeConfirmation, user.data.email);
     return await {
       message: 'le code est envoyer avec succes',
@@ -124,8 +125,8 @@ export class AuthentificationService {
   }
   
   async verifierPasswordOublier(@Session() request:Record<string, any>,codeDto:UserVerifyDto) {
-    
-    if (this.verfierCode(request,codeDto)) {
+    const verifier = await this.verfierCode(request,codeDto)
+    if (verifier === true) {
       return await {
         message: 'Vous pouvez changer le mot de passe',
         statusCode: HttpStatus.OK,
@@ -141,13 +142,14 @@ export class AuthentificationService {
     const password = passDto.password
     const user = request.user
     console.log(user)
-    if(confirmpassword == password) {
+    if(confirmpassword === password) {
       console.log("1")
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(passDto.password, saltRounds);
       const updateUser = { username: user.username, password: hashedPassword };
-      await this.userService.update(user,updateUser)
-      console.log(user)
+      const user2 = await this.userService.update(user.data,updateUser)
+      console.log("user2",user2)
+      console.log("user ",user)
       return await {
         message: 'vous avez bien changer votre mot de passe',
         statusCode: HttpStatus.OK,
