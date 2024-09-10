@@ -14,11 +14,12 @@ export class UpdateSizeDto{
 
 
     @IsOptional()
-    
+    idCouleur:number;
+    @IsOptional()
     @IsString({message:'nameproduct should be string '})
     nameCouleur:string;
+
     @IsOptional()
-    
     @IsString({message:'nameproduct should be string '})
     nameProduct:string;
 

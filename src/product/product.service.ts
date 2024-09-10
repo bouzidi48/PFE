@@ -266,7 +266,6 @@ export class ProductService {
     product.data.price = updateProductDto.price;
     product.data.category = category.data;
     product.data.updatedate = new Date();
-    await this.productRepository.save(product.data)
     console.log("listeCouleur")
     console.log(updateProductDto.listeCouleur)
     for (let couleur of updateProductDto.listeCouleur) {
@@ -284,6 +283,7 @@ export class ProductService {
       const couleur1 = await this.couleurService.remove(request, couleur)
       console.log(couleur1)
     }
+    await this.productRepository.save(product.data)
     const products = await this.productRepository.findOne({where:{id:updateProductDto.id}, relations: ['colours', 'colours.images', 'colours.sizes','category'] });
     console.log(products)
     return await {

@@ -220,6 +220,8 @@ export class CouleurService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("couleur1",couleur1)
+    console.log("nameProduct",updateCouleurDto.nameProduct)
     const couleur = await this.findByNameAndId({ id: idAdmin, nameCouleur: couleur1.nameCouleur,nameProduct:updateCouleurDto.nameProduct })
     if (!couleur.data) {
       return await {
@@ -227,6 +229,7 @@ export class CouleurService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
+    console.log("couleur",couleur)
 
     const product = await this.productService.findByNameAndIdProduct({ id: idAdmin, nameProduct: updateCouleurDto.nameProduct })
     if (!product) {
@@ -236,7 +239,9 @@ export class CouleurService {
       }
     }
     if (updateCouleurDto.nameCouleur) {
-      const col = await this.couleurRepository.findOne({ where: { nameCouleur: updateCouleurDto.nameCouleur } });
+      console.log(updateCouleurDto.nameCouleur)
+      const col = await this.couleurRepository.findOne({ where: { nameCouleur: updateCouleurDto.nameCouleur, product: { nameProduct: updateCouleurDto.nameProduct} } });
+      console.log("col",col)
       if (col) {
         return await {
           message: 'cette couleur existe deja',

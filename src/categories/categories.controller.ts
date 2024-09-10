@@ -31,9 +31,9 @@ export class CategoriesController {
     return await this.categoriesService.findByIdAndName(findByIdAndNameDto);
   }
 
-  @Get('Subcategories')
-  async findSubcategories(@Query() parentCategory: FindByNameParentDto) {
-    return await this.categoriesService.findSubcategories(parentCategory);
+  @Get('Subcategories/:id')
+  async findSubcategories(@Param('id', ParseIntPipe) id: number) {
+    return await this.categoriesService.findSubcategories(id);
   }
 
   @Get('newCat')

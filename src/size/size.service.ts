@@ -40,7 +40,7 @@ export class SizeService {
       }
     }
     const size1 = await this.sizeRepository.findOne({ where: { typeSize: createSizeDto.typeSize, couleur: { nameCouleur: createSizeDto.nameCouleur,product:{nameProduct:createSizeDto.nameProduct} } } });
-    console.log(size1)
+    console.log("size1",size1)
     if (size1) {
       return await {
         message: 'cette size existe deja dans se produit',
@@ -48,6 +48,7 @@ export class SizeService {
       }
     }
     const couleur = await this.couleurService.findByNameAndId({ id: idAdmin, nameCouleur: createSizeDto.nameCouleur, nameProduct: createSizeDto.nameProduct })
+
     if (!couleur.data) {
       return await {
         message: 'cette couleur n\'existe pas ou vous n\'etes pas l\'admin de ce produit',
@@ -131,7 +132,7 @@ export class SizeService {
       }
     }
     if (user.data.role === Roles.SUPERADMIN) {
-      const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize, couleur: { nameCouleur: nameProduct.nameCouleur} } });
+      const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize, couleur: { id: nameProduct.idCouleur} } });
       if (!size) {
         return await {
           data: null,
@@ -143,7 +144,7 @@ export class SizeService {
         statusCode: HttpStatus.OK,
       }
     }
-    const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize, addedBy: { id: nameProduct.id } } });
+    const size = await this.sizeRepository.findOne({ where: { typeSize: nameProduct.typeSize,couleur:{id:nameProduct.idCouleur}, addedBy: { id: nameProduct.id } } });
     if (!size) {
       return await {
         data: null,
@@ -201,13 +202,15 @@ export class SizeService {
       }
     }
     const size1 = await this.sizeRepository.findOne({ where: { id: updateCouleurDto.id } });
-    if (size1) {
+    console.log(size1)
+    if (!size1) {
       return await {
-        message: 'cette size existe deja',
+        message: 'cette size n existe pas',
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, typeSize: size1.typeSize })
+    const size = await this.findByNameAndId({ id: idAdmin, idCouleur: updateCouleurDto.idCouleur, typeSize: size1.typeSize })
+    console.log("size",size)
     if (!size.data) {
       return await {
         message: 'aucun size avec ce nom ou vous n\'etes pas l\'admin de cette size',
@@ -215,6 +218,7 @@ export class SizeService {
       }
     }
     const couleur = await this.couleurService.findByNameAndId({ id: idAdmin, nameCouleur: updateCouleurDto.nameCouleur, nameProduct: updateCouleurDto.nameProduct })
+    console.log("couleur.size",couleur)
     if (!couleur.data) {
       return await {
         message: 'l couleur que vous avez saisi n\'existe pas ou vous n\'etes pas l\'admin de ce couleur',
@@ -222,10 +226,11 @@ export class SizeService {
       }
     }
     if (updateCouleurDto.typeSize) {
-      const siz = await this.sizeRepository.findOne({ where: { typeSize: updateCouleurDto.typeSize } });
+      console.log('idCouelur',updateCouleurDto.idCouleur)
+      const siz = await this.sizeRepository.findOne({ where: { typeSize: updateCouleurDto.typeSize, couleur: { id: updateCouleurDto.idCouleur} } });
       if (siz) {
         return await {
-          message: 'cette couleur existe deja',
+          message: 'cette size existe deja',
           statusCode: HttpStatus.BAD_REQUEST,
         }
       }
@@ -268,7 +273,7 @@ export class SizeService {
         statusCode: HttpStatus.BAD_REQUEST,
       }
     }
-    const size = await this.findByNameAndId({ id: idAdmin, nameCouleur: removeCouleurDto.nameCouleur, typeSize: size1.typeSize })
+    const size = await this.findByNameAndId({ id: idAdmin, idCouleur: removeCouleurDto.idCouleur, typeSize: size1.typeSize })
     if (!size.data) {
       return await {
         message: 'aucune couleur avec ce nom ou vous n\'etes pas l\'admin de ce produit',

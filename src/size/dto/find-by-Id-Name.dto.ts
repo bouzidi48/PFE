@@ -12,8 +12,8 @@ export class FindByIdNameDto {
     id:number;
 
     @IsNotEmpty({message:'namecouleur can not be empty'})
-    @IsString({message:'namecouleur should be string '})
-    nameCouleur:string;
+    
+    idCouleur:number;
 
 
 }

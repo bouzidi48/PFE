@@ -158,8 +158,8 @@ export class CategoriesService {
   }
 
 
-  async findSubcategories(parentCategoryName: FindByNameParentDto) {
-    const category = this.categoryRepository.findOne({ where: { nameCategory: parentCategoryName.nameParentCategory }, relations: ['addedBy', 'image', 'products', 'subcategories'] });
+  async findSubcategories(id: number) {
+    const category = await this.categoryRepository.findOne({ where: { id:id }, relations: ['addedBy', 'image', 'products', 'subcategories'] });
     if (!category) {
       return await {
         data: null,
@@ -168,7 +168,7 @@ export class CategoriesService {
     }
 
 
-    const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } }, relations: ['addedBy', 'image', 'products', 'subcategories'] });
+    const subcategories = await this.categoryRepository.find({ where: { parentCategory: { id: (await category).id } }, relations: ['addedBy', 'image', 'products','products.colours', 'products.colours.images', 'products.colours.sizes', 'subcategories',] });
     if (subcategories.length === 0) {
       return await {
         data: null,
@@ -337,7 +337,7 @@ export class CategoriesService {
     }
 
     // Supprimer les sous-catégories dépendantes
-    const subcategories = await this.findSubcategories({ nameParentCategory: category.data.nameCategory });
+    const subcategories = await this.findSubcategories(category.data.id);
     console.log("subcategories", subcategories)
     if (subcategories.data && subcategories.data.length > 0) {
       for (const subcategory of subcategories.data) {
@@ -373,8 +373,9 @@ export class CategoriesService {
               nameCouleur: couleur.nameCouleur,
             })),
             listesize: couleur.sizes.map(size => ({
+
               id: size.id,
-              nameCouleur: couleur.nameCouleur,
+              idCouleur: couleur.id,
             })),
           })) : [],
         };

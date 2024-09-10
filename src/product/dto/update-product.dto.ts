@@ -19,9 +19,6 @@ export class UpdateProductDto {
     
     price:number;
 
-    @IsOptional()
-    
-    stockQuantity:number;
 
     @IsOptional()
     
